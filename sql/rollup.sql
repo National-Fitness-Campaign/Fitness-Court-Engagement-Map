@@ -144,3 +144,14 @@ grant select, insert, update, delete on public.qr_site_links to service_role;
 --
 -- Full SQL as applied: see the migration in the Supabase dashboard
 -- (Database → Migrations → engagement_map_scan_logs_guard).
+
+-- ── scan_logs is server-only (migration: engagement_map_scan_logs_server_only)
+-- The old policies (allow_read_scan_logs SELECT, allow_service_insert INSERT)
+-- applied to role `public`, so the public anon key could insert fake scans.
+-- Writers/readers are the receive-scan edge function and this app's API, both
+-- service_role (bypasses RLS). Verified after: anon → 42501 on read and insert.
+drop policy if exists allow_read_scan_logs on public.scan_logs;
+drop policy if exists allow_service_insert on public.scan_logs;
+revoke all on public.scan_logs from anon, authenticated;
+alter table public.scan_logs enable row level security;
+revoke all on sequence public.scan_logs_id_seq from anon, authenticated;
