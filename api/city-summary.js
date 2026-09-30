@@ -8,7 +8,7 @@
 
 import { fetchAllQRCodes, supabaseSelect, parseName, laToday, sendError, setCache } from './_lib.js';
 import { PILOTS, parseTrailCode } from './_trail.js';
-import { writeWithAI, storedSummary } from './_ai.js';
+import { writeWithAI, storedSummary, directAI } from './_ai.js';
 
 const SYSTEM =
   'You write short overviews for an internal dashboard of QR-code scans at outdoor fitness sites in one city. '
@@ -100,9 +100,13 @@ export default async function handler(req, res) {
     }
 
     let out = { source: 'computed' };
-    const stored = await storedSummary(`city:${facts.city}`);
-    if (stored?.city) {
-      out = { source: 'ai', city: stored.city, courts: stored.courts || '', trail: stored.trail || '', writtenAt: stored.writtenAt };
+    const fromStore = async () => {
+      const stored = await storedSummary(`city:${facts.city}`);
+      return stored?.city ? { source: 'ai', city: stored.city, courts: stored.courts || '', trail: stored.trail || '', writtenAt: stored.writtenAt } : null;
+    };
+    const stored = directAI() ? null : await fromStore();
+    if (stored) {
+      out = stored;
     } else try {
       const text = await writeWithAI({ system: SYSTEM, facts, maxOutputTokens: 400 });
       const json = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, ''));
@@ -110,8 +114,8 @@ export default async function handler(req, res) {
       out = { source: 'ai', city: clean(json.city), courts: facts.courts ? clean(json.courts) : '', trail: facts.trail ? clean(json.trail) : '' };
       if (!out.city) throw new Error('model reply missing "city"');
     } catch (err) {
-      console.warn('city-summary: using computed overview:', err.message);
-      out = { source: 'computed' };
+      console.warn('city-summary: live AI unavailable:', err.message);
+      out = (directAI() && await fromStore()) || { source: 'computed' };
     }
 
     setCache(res);

@@ -9,6 +9,7 @@
     "sync:locations": "node scripts/sync-salesforce-locations.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.130.0",
     "ai": "^6.0.297"
   }
 }

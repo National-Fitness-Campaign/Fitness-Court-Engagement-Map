@@ -5,7 +5,7 @@
 // bubble falls back to a written-out version of the same facts, so it never
 // breaks. Model output is cached per digest, so refreshes don't re-bill it.
 
-import { writeWithAI, storedSummary } from './_ai.js';
+import { writeWithAI, storedSummary, directAI } from './_ai.js';
 import { buildPilot, digest, PILOTS } from './_trail.js';
 import { sendError, setCache } from './_lib.js';
 
@@ -48,13 +48,17 @@ export default async function handler(req, res) {
     const d = digest(await buildPilot(slug));
 
     let text = null, source = 'computed', writtenAt = null;
-    const stored = await storedSummary(`pilot:${slug}`);
-    if (stored?.text) { text = stored.text; source = 'ai'; writtenAt = stored.writtenAt; }
-    else try {
+    const useStore = async () => {
+      const stored = await storedSummary(`pilot:${slug}`);
+      if (stored?.text) { text = stored.text; source = 'ai'; writtenAt = stored.writtenAt; }
+    };
+    if (!directAI()) await useStore();
+    if (!text) try {
       text = await writeWithAI({ system: SYSTEM, facts: d });
       source = 'ai';
     } catch (err) {
-      console.warn('trail-summary: model unavailable, using computed summary:', err.message);
+      console.warn('trail-summary: live AI unavailable:', err.message);
+      if (directAI()) await useStore();
     }
 
     // Same freshness as /api/trail so the bubble never lags the KPI tiles.
