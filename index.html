@@ -337,7 +337,27 @@ b.xx { color: #b3bccb; letter-spacing: 0.08em; }
 .eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.5; }
 .eng-notes h4 { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); margin-bottom: 6px; }
 .eng-notes li { margin-left: 18px; }
-@media (max-width: 900px) { .eng-total, .eng-pillars { grid-template-columns: 1fr; } }
+.eng-map-card { margin-top: 14px; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.eng-map-head { display: flex; align-items: baseline; gap: 10px; padding: 12px 16px; flex-wrap: wrap; }
+.eng-map-head h4 { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
+.eng-map-head span { font-size: 0.76rem; color: var(--text-3); }
+.eng-map-wrap { position: relative; }
+#eng-map { height: 520px; background: #f2f4f7; }
+.eng-layers { position: absolute; top: 12px; left: 12px; z-index: 500; background: rgba(255,255,255,0.95); border: 1px solid rgba(15,31,61,0.08);
+  border-radius: 10px; box-shadow: 0 2px 12px rgba(15,31,61,0.12); padding: 10px 12px; display: grid; gap: 6px; font-size: 0.78rem; }
+.eng-layers b { font-size: 0.66rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-2); }
+.eng-layers label { display: flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap; }
+.eng-layers input { accent-color: #1e3a8a; }
+.eng-layers i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; flex: none; }
+.eng-legend { position: absolute; left: 12px; bottom: 12px; z-index: 500; background: rgba(255,255,255,0.95); border: 1px solid rgba(15,31,61,0.08);
+  border-radius: 10px; box-shadow: 0 2px 12px rgba(15,31,61,0.12); padding: 10px 12px; display: grid; gap: 5px; font-size: 0.76rem; max-width: calc(100% - 24px); }
+.eng-legend div { display: flex; align-items: center; gap: 8px; }
+.eng-legend i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; flex: none; }
+.eng-legend b { font-weight: 800; }
+.eng-fc { background: #2563eb; border: 2px solid #fff; border-radius: 4px; box-shadow: 0 1px 4px rgba(15,31,61,0.35); }
+.leaflet-tooltip.eng-tip { background: none; border: none; box-shadow: none; padding: 0 4px; font: 700 10.5px 'Inter', sans-serif; color: var(--text); text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff; }
+.leaflet-tooltip.eng-tip::before { display: none; }
+@media (max-width: 900px) { .eng-total, .eng-pillars { grid-template-columns: 1fr; } #eng-map { height: 420px; } }
 .an-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .an-card { padding: 18px 20px; }
 .an-card.wide { grid-column: 1 / -1; }
@@ -1591,7 +1611,10 @@ function renderFooter() {
 
 /* ═════════════════════════════ Analytics ═══════════════════════════════ */
 let charts = {};
-function destroyCharts() { Object.values(charts).forEach((c) => c.destroy()); charts = {}; }
+function destroyCharts() {
+  Object.values(charts).forEach((c) => c.destroy()); charts = {};
+  if (engMap) { engMap.remove(); engMap = null; }
+}
 
 function openCityAnalytics() {
   state.anCity = state.cityPanel || '';
@@ -1840,6 +1863,105 @@ function engagementFigures(city) {
   };
 }
 
+/* ── Accessibility map (Engagement view) ──────────────────────────────────
+   Like the Trail Line concept maps' "system coverage": who lives within reach
+   of the courts (2,414 m) and of the Trail Line (a 402 m walk either side),
+   inside the city limits. Shapes come from scripts/compute-accessibility.mjs. */
+let engMap = null;
+const engLayers = { courtReach: true, trailReach: true, boundary: true, lines: true, courts: true, stations: true };
+const pilotCache = new Map(); // slug -> Promise(/api/trail payload)
+function pilotData(slug) {
+  if (!pilotCache.has(slug)) {
+    pilotCache.set(slug, fetch(`/api/trail?pilot=${encodeURIComponent(slug)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  }
+  return pilotCache.get(slug);
+}
+function engMapCard(F) {
+  const A = F.city && engagementData.areas?.[F.city];
+  if (!F.city) return '';
+  if (!A) return `<div class="eng-map-card"><div class="eng-map-head"><h4>Accessibility map</h4><span>Not drawn for ${esc(F.city)} yet. Run scripts/compute-accessibility.mjs for this city.</span></div></div>`;
+  const row = (key, swatch, label) => `<label><input type="checkbox" data-eng-layer="${key}"${engLayers[key] ? ' checked' : ''}><i style="${swatch}"></i>${label}</label>`;
+  const mi = (m) => (m / 1609.34).toFixed(m < 1609 ? 2 : 1).replace(/\.?0+$/, '');
+  return `<div class="eng-map-card">
+    <div class="eng-map-head"><h4>Accessibility map</h4><span>Residents within reach, 2020 Census, clipped to city limits</span></div>
+    <div class="eng-map-wrap"><div id="eng-map"></div>
+      <div class="eng-layers"><b>Layers</b>
+        ${row('courtReach', 'background:rgba(37,99,235,0.22);border:1.5px solid #2563eb', 'Fitness Court reach')}
+        ${row('trailReach', `background:rgba(195,38,138,0.28);border:1.5px solid ${TL_MAGENTA}`, 'Trail Line walk zone')}
+        ${row('boundary', 'border:2px dashed #0f1f3d;height:0;width:14px;border-radius:0', 'City limits')}
+        ${row('lines', 'background:linear-gradient(90deg,#1fa855,#f2c417,#c3268a,#1ea7e1);height:4px', 'Trail Line')}
+        ${row('courts', 'background:#2563eb;width:10px;height:10px', 'Fitness Courts')}
+        ${row('stations', `background:#fff;border:2.5px solid #1e3a8a;width:10px;height:10px;border-radius:50%`, 'Stations')}
+      </div>
+      <div class="eng-legend">
+        <div><i style="background:rgba(37,99,235,0.22);border:1.5px solid #2563eb"></i><span><b>${F.court.access != null ? F.court.access.toLocaleString() : 'XX'}</b> within ${mi(A.courtRadiusMeters)} mi of a Fitness Court</span></div>
+        ${A.trail ? `<div><i style="background:rgba(195,38,138,0.28);border:1.5px solid ${TL_MAGENTA}"></i><span><b>${F.trail.access != null ? F.trail.access.toLocaleString() : 'XX'}</b> within a 5 minute walk (${mi(A.trailBufferMeters)} mi) of the Trail Line</span></div>` : ''}
+        <div><i style="background:#0f1f3d"></i><span><b>${F.total.access != null ? F.total.access.toLocaleString() : 'XX'}</b> reached in all, nobody counted twice</span></div>
+      </div>
+    </div></div>`;
+}
+async function drawEngMap(F) {
+  const el = document.getElementById('eng-map');
+  const A = F.city && engagementData.areas?.[F.city];
+  if (!el || !A) return;
+  const m = L.map(el, { zoomControl: false, scrollWheelZoom: false, attributionControl: true });
+  L.control.zoom({ position: 'topright' }).addTo(m);
+  engMap = m;
+  if (L.maplibreGL) {
+    L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/positron', interactive: false,
+      attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }).addTo(m);
+  }
+  const groups = {
+    courtReach: L.geoJSON(A.courts, { style: { color: '#2563eb', weight: 1.5, opacity: 0.7, fillColor: '#2563eb', fillOpacity: 0.13 }, interactive: false }),
+    trailReach: L.geoJSON(A.trail, { style: { color: TL_MAGENTA, weight: 1.5, opacity: 0.8, fillColor: TL_MAGENTA, fillOpacity: 0.22 }, interactive: false }),
+    boundary: L.geoJSON(A.boundary, { style: { color: '#0f1f3d', weight: 2, opacity: 0.75, dashArray: '6 5', fill: false }, interactive: false }),
+    lines: L.layerGroup(),
+    courts: L.layerGroup(),
+    stations: L.layerGroup(),
+  };
+  for (const c of F.courtCodes.filter((c) => c.lat != null && c.locationStatus !== 'mobile')) {
+    L.marker([c.lat, c.lon], { icon: L.divIcon({ className: '', html: '<div class="eng-fc" style="width:14px;height:14px"></div>', iconSize: [14, 14], iconAnchor: [7, 7] }), title: c.name })
+      .bindTooltip(esc(displayName(c)), { direction: 'top', offset: [0, -8] }).addTo(groups.courts);
+  }
+  const placed = new Map(); // one dot per station, even with a Map + CTA code
+  for (const c of F.trailCodes.filter((c) => c.lat != null)) {
+    const k = `${c.lat.toFixed(5)},${c.lon.toFixed(5)}`;
+    if (placed.has(k)) continue;
+    placed.set(k, true);
+    L.circleMarker([c.lat, c.lon], { radius: 4.5, color: '#1e3a8a', weight: 2.5, fillColor: '#fff', fillOpacity: 1 })
+      .bindTooltip(esc(displayName(c)), { direction: 'top' }).addTo(groups.stations);
+  }
+  const apply = () => {
+    for (const [k, g] of Object.entries(groups)) {
+      if (engLayers[k] && !m.hasLayer(g)) g.addTo(m);
+      if (!engLayers[k] && m.hasLayer(g)) m.removeLayer(g);
+    }
+  };
+  apply();
+  el.parentElement.querySelector('.eng-layers').addEventListener('change', (ev) => {
+    const key = ev.target.dataset.engLayer;
+    if (!key) return;
+    engLayers[key] = ev.target.checked;
+    apply();
+  });
+  // Frame the reach areas (the city limits reach far into empty desert).
+  const frame = groups.courtReach.getBounds();
+  if (A.trail) frame.extend(groups.trailReach.getBounds());
+  if (frame.isValid()) m.fitBounds(frame, { padding: [30, 30] });
+  // Trail lines come from the pilot's Design Lab layer.
+  const pilot = F.trail.pilot;
+  if (pilot) {
+    const d = await pilotData(pilot.slug);
+    if (engMap !== m || !d?.loops) return;
+    L.geoJSON(d.loops, {
+      style: (f) => ({ color: f.properties.stroke || TL_MAGENTA, weight: /spine/i.test(f.properties.name) ? 5 : 3.5, opacity: 0.9, dashArray: /connector/i.test(f.properties.name) ? '6 6' : null, lineCap: 'round' }),
+      onEachFeature: (f, l) => l.bindTooltip(esc(f.properties.name), { sticky: true }),
+    }).addTo(groups.lines);
+    // Keep stations and courts drawn above the lines.
+    groups.stations.eachLayer((l) => l.bringToFront());
+  }
+}
+
 function renderEngagement(body) {
   if (!engagementData) {
     body.innerHTML = '<div class="an-city-empty">Loading engagement data…</div>';
@@ -1884,6 +2006,7 @@ function renderEngagement(body) {
       <div><span>${kcalLabel}</span>${numOrXX(F.total.kcal)}<p>${totalKcalNote}</p></div>
       <div><span>Engagements · ${esc(range)}</span>${numOrXX(F.total.engagements)}<p>Court scans + public Trail Line scans + app check-ins and new users.</p></div>
     </div>
+    ${engMapCard(F)}
     <div class="eng-pillars">${courtP}${trailP}${digitalP}</div>
     <div class="acb-chart"><h4>Engagements by month · ${where}</h4><canvas id="chart-eng" height="80"></canvas></div>
     <div class="eng-notes"><h4>How these are counted</h4><ul>
@@ -1892,6 +2015,8 @@ function renderEngagement(body) {
       <li><b>Digital</b>: from the NFC app, ${esc(engagementData.app.monthsFrom)} to ${esc(engagementData.app.monthsThrough)} (snapshot ${esc(engagementData.app.takenAt)}). A court counts when an app court sits within ${engagementData.app.matchRadiusMeters} m of its QR sign. New app users are people whose first ever check-in was at that court, our stand-in for downloads it drove.</li>
       <li>Internal view: these are raw figures, not the city-facing report.</li>
     </ul></div>`;
+
+  drawEngMap(F);
 
   // Monthly engagements, stacked by pillar. QR history is complete from Apr 7, 2026.
   const E = engagementData, today = laToday();

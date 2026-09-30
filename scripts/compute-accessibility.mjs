@@ -3,7 +3,8 @@
 // within reach of a city's Fitness Courts and of its Trail Line.
 //
 //   node scripts/compute-accessibility.mjs --census-env=/path/to/portal/.env.local \
-//        [--pilot=las-vegas] [--boundary=/path/city-limits.geojson] [--base=https://…]
+//        [--pilot=las-vegas] [--boundary=data/boundaries/las-vegas.geojson] [--base=https://…]
+//        [--areas-only]   redraw the map shapes, keep the saved population numbers
 //
 // Method (same as the PD portal's computeBlockPointReach, the number NFC uses
 // on real projects):
@@ -16,7 +17,9 @@
 //      Each is clipped to the city boundary when one is given.
 //   2. Take every 2020 Census block whose internal point falls inside the area
 //      and sum its 2020 Decennial population (P1_001N).
-// Output: api/_data/accessibility.json, read by /api/engagement.
+// Output: api/_data/accessibility.json (numbers) and api/_data/accessibility-areas.json
+// (the simplified shapes for the Engagement view's accessibility map), both read
+// by /api/engagement.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -36,8 +39,9 @@ function readKey(file) {
   const line = fs.readFileSync(file, 'utf8').split('\n').find((l) => l.startsWith('CENSUS_API_KEY='));
   return line ? line.slice('CENSUS_API_KEY='.length).trim().replace(/^"|"$/g, '') : null;
 }
+const AREAS_ONLY = Boolean(args['areas-only']);
 const censusKey = readKey(args['census-env']);
-if (!censusKey) throw new Error('Need CENSUS_API_KEY (pass --census-env=<portal .env.local>)');
+if (!censusKey && !AREAS_ONLY) throw new Error('Need CENSUS_API_KEY (pass --census-env=<portal .env.local>)');
 
 const get = async (url) => {
   const r = await fetch(url, { signal: AbortSignal.timeout(60000) });
@@ -67,6 +71,22 @@ const courtArea = clip(unionAll(courts.map((c) => turf.buffer(turf.point([c.lon,
 const trailArea = lines.length ? clip(unionAll(lines.map((f) => turf.buffer(f, TRAIL_BUFFER_M, { units: 'meters' }))), boundary) : null;
 const combinedArea = unionAll([courtArea, trailArea].filter(Boolean));
 const trailMiles = lines.reduce((t, f) => t + turf.length(f, { units: 'miles' }), 0);
+
+// ── Map shapes: simplified (~30 m) and rounded so the page loads them fast ──
+const slim = (f) => {
+  if (!f) return null;
+  const g = turf.truncate(turf.simplify(f, { tolerance: 0.0003, highQuality: true }), { precision: 5 });
+  return { type: 'Feature', properties: {}, geometry: g.geometry };
+};
+const areasOut = path.join(ROOT, 'api', '_data', 'accessibility-areas.json');
+const areas = fs.existsSync(areasOut) ? JSON.parse(fs.readFileSync(areasOut, 'utf8')) : {};
+areas[`${pilot.pilot.name}, ${pilot.pilot.state}`] = {
+  boundary: slim(boundary), courts: slim(courtArea), trail: slim(trailArea),
+  courtRadiusMeters: COURT_RADIUS_M, trailBufferMeters: TRAIL_BUFFER_M,
+};
+fs.writeFileSync(areasOut, JSON.stringify(areas) + '\n');
+console.log(`areas → ${path.relative(ROOT, areasOut)} (${Math.round(fs.statSync(areasOut).size / 1024)} KB)`);
+if (AREAS_ONLY) process.exit(0);
 
 // ── Census 2020 blocks (internal points) + population ───────────────────
 const [minX, minY, maxX, maxY] = turf.bbox(combinedArea);

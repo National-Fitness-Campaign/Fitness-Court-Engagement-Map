@@ -5,6 +5,8 @@
 //   - app: monthly app check-ins and first check-ins (the download proxy) per
 //     QR court, from a snapshot of the NFC app backend
 //     (api/_data/app-engagement.json, from sql/app-engagement-snapshot.sql)
+//   - areas: the reach shapes + city limits for the accessibility map
+//     (api/_data/accessibility-areas.json, same script)
 //   - pilots: Trail Line pilot cities and their public start dates
 //   - benchmarks: the NFC per-court health figures the portal uses
 // Swapping the snapshot for a live read of the app database only changes this
@@ -27,6 +29,7 @@ function build() {
   if (cached) return cached;
   const access = readJSON('accessibility.json');
   const app = readJSON('app-engagement.json');
+  const areas = readJSON('accessibility-areas.json');
 
   const byCode = {};
   for (const [qr, appCourt, dist] of app.map) byCode[qr] = { appCourt, dist, m: {} };
@@ -45,6 +48,7 @@ function build() {
 
   cached = {
     accessibility,
+    areas,
     app: {
       takenAt: app.takenAt,
       monthsFrom: app.monthsFrom,
