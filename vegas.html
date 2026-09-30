@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trail Line Pilot — Las Vegas</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #eef1f7;
+  --card: #ffffff;
+  --border: #e3e8f0;
+  --text: #0f1f3d;
+  --text-2: #5a6a85;
+  --text-3: #8b97ad;
+  --blue: #2563eb;
+  --green: #16a34a;
+  --amber: #d97706;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(15,31,61,0.04), 0 4px 14px rgba(15,31,61,0.05);
+  /* Trail Line brand bars */
+  --tl-green: #1fa855; --tl-yellow: #f2c417; --tl-magenta: #c3268a; --tl-cyan: #1ea7e1;
+  /* Station tiers */
+  --gateway: #1e3a8a; --midway: #2563eb; --marker: #0ea5e9;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+header {
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 14px 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 14px; margin-right: auto; }
+.bars { display: grid; gap: 3px; width: 44px; }
+.bars i { display: block; height: 5px; border-radius: 3px; }
+.bars i:nth-child(1) { width: 55%; background: var(--tl-green); }
+.bars i:nth-child(2) { width: 70%; background: var(--tl-yellow); }
+.bars i:nth-child(3) { width: 85%; background: var(--tl-magenta); }
+.bars i:nth-child(4) { width: 100%; background: var(--tl-cyan); }
+.brand-eyebrow { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; color: var(--blue); text-transform: uppercase; }
+.brand-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }
+.hbtn {
+  display: flex; align-items: center; gap: 8px; background: var(--card); text-decoration: none;
+  border: 1px solid var(--border); border-radius: 10px; padding: 9px 15px;
+  font: inherit; font-weight: 600; color: var(--text); cursor: pointer;
+}
+.hbtn:hover { border-color: #c8d2e4; background: #f8fafd; }
+.hbtn:disabled { opacity: 0.6; cursor: wait; }
+
+main { padding: 20px 28px 40px; display: grid; gap: 16px; max-width: 1500px; margin: 0 auto; }
+
+.pulse { padding: 16px 20px; display: flex; gap: 14px; align-items: flex-start; }
+.pulse-icon { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--tl-cyan), var(--tl-magenta)); color: #fff; font-weight: 800; }
+.pulse-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.pulse-text { font-size: 0.98rem; line-height: 1.5; margin-top: 3px; }
+.pulse-text.loading { color: var(--text-3); }
+
+.banner { padding: 11px 16px; border-radius: 10px; background: #fff7e6; border: 1px solid #fde2a8; color: #7a4b00; font-size: 0.85rem; }
+.banner b { font-weight: 700; }
+
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kpi { padding: 16px 18px; }
+.kpi-val { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.kpi-lbl { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); margin-top: 4px; }
+.kpi-sub { font-size: 0.78rem; color: var(--text-3); margin-top: 3px; }
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; }
+.map-card { position: relative; overflow: hidden; }
+#map { height: 560px; }
+.legend { position: absolute; left: 12px; bottom: 12px; z-index: 500; background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; font-size: 0.75rem; box-shadow: var(--shadow); display: grid; gap: 5px; }
+.legend-row { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
+.legend-dot { border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(15,31,61,0.25); }
+
+.panel { display: flex; flex-direction: column; max-height: 560px; }
+.panel h2 { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 14px 16px 10px; }
+.stations { overflow-y: auto; padding: 0 8px 10px; }
+.tier-head { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); padding: 10px 8px 4px; }
+.st { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: 8px; border-radius: 9px; cursor: pointer; }
+.st:hover, .st.active { background: #f3f6fb; }
+.st-badge { height: 30px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 0.8rem; }
+.st-line { font-size: 0.82rem; font-weight: 600; }
+.st-codes { font-size: 0.72rem; color: var(--text-3); margin-top: 1px; }
+.st-n { font-size: 1.1rem; font-weight: 800; text-align: right; }
+.st-n.zero { color: var(--text-3); }
+.st-last { font-size: 0.68rem; color: var(--text-3); text-align: right; }
+
+.chart-card { padding: 16px 18px; }
+.chart-card h2 { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
+.chart-wrap { height: 220px; }
+
+.popup h3 { font-size: 0.95rem; font-weight: 800; }
+.popup .sub { font-size: 0.74rem; color: var(--text-2); margin-bottom: 8px; }
+.popup table { border-collapse: collapse; font-size: 0.78rem; width: 100%; }
+.popup td { padding: 3px 0; }
+.popup td:last-child { text-align: right; font-weight: 700; }
+.popup a { color: var(--blue); }
+
+/* Permanent station ID labels on the map */
+.leaflet-tooltip.st-tip { background: none; border: none; box-shadow: none; padding: 0 4px; font: 800 11px 'Inter', sans-serif; color: var(--text); text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff; }
+.leaflet-tooltip.st-tip::before { display: none; }
+
+.error { padding: 14px 16px; border-radius: 10px; background: #fee2e2; color: #991b1b; display: none; }
+
+@media (max-width: 1100px) {
+  .split { grid-template-columns: 1fr; }
+  .panel { max-height: none; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  header, main { padding-left: 16px; padding-right: 16px; }
+  .kpis { grid-template-columns: 1fr 1fr; gap: 10px; }
+  #map { height: 420px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="bars"><i></i><i></i><i></i><i></i></div>
+    <div>
+      <div class="brand-eyebrow">Trail Line Pilot</div>
+      <div class="brand-title" id="title">Las Vegas</div>
+    </div>
+  </div>
+  <a class="hbtn" href="/">← All Fitness Courts</a>
+  <button class="hbtn" id="refresh-btn" onclick="load(true)">↻ Refresh</button>
+</header>
+
+<main>
+  <div class="error" id="error"></div>
+
+  <div class="card pulse">
+    <div class="pulse-icon">✦</div>
+    <div>
+      <div class="pulse-label" id="pulse-label">This week</div>
+      <div class="pulse-text loading" id="pulse-text">Reading the latest scans…</div>
+    </div>
+  </div>
+
+  <div class="banner" id="launch-banner" style="display:none"></div>
+
+  <div class="kpis">
+    <div class="card kpi"><div class="kpi-val" id="k-scans">–</div><div class="kpi-lbl">Scans</div><div class="kpi-sub" id="k-scans-sub"></div></div>
+    <div class="card kpi"><div class="kpi-val" id="k-stations">–</div><div class="kpi-lbl">Stations scanned</div><div class="kpi-sub" id="k-stations-sub"></div></div>
+    <div class="card kpi"><div class="kpi-val" id="k-purpose">–</div><div class="kpi-lbl">Map vs CTA</div><div class="kpi-sub">City map code vs app code, Gateways</div></div>
+    <div class="card kpi"><div class="kpi-val" id="k-week">–</div><div class="kpi-lbl">This week</div><div class="kpi-sub" id="k-week-sub"></div></div>
+  </div>
+
+  <div class="split">
+    <div class="card map-card">
+      <div id="map"></div>
+      <div class="legend">
+        <div class="legend-row"><span class="legend-dot" style="width:18px;height:18px;background:var(--gateway)"></span>Gateway station</div>
+        <div class="legend-row"><span class="legend-dot" style="width:13px;height:13px;background:var(--midway)"></span>Midway station</div>
+        <div class="legend-row"><span class="legend-dot" style="width:13px;height:13px;background:#fff;box-shadow:0 0 0 2px #94a3b8"></span>No scans yet</div>
+      </div>
+    </div>
+    <div class="card panel">
+      <h2>Stations</h2>
+      <div class="stations" id="stations"></div>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <h2>Daily scans</h2>
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+  </div>
+</main>
+
+<script>
+const PILOT = new URLSearchParams(location.search).get('pilot') || 'las-vegas';
+const TIER_LABEL = { gateway: 'Gateway', midway: 'Midway', marker: 'Trail Marker' };
+const TIER_COLOR = { gateway: '#1e3a8a', midway: '#2563eb', marker: '#0ea5e9' };
+const TIER_R = { gateway: 11, midway: 8, marker: 6 };
+let data = null, chart = null, activeId = null;
+const markers = new Map();
+
+const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const total = (s) => s.publicScans + s.testScans;
+const fmtDate = (d) => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+
+/* ── Map ─────────────────────────────────────────────────────────────── */
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
+const map = L.map('map', { zoomControl: true, scrollWheelZoom: true });
+L.tileLayer(`${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
+  attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors', maxNativeZoom: 16, maxZoom: 19,
+}).addTo(map);
+map.createPane('labels');
+map.getPane('labels').style.zIndex = 350;
+map.getPane('labels').style.pointerEvents = 'none';
+L.tileLayer(`${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 16, maxZoom: 19, pane: 'labels' }).addTo(map);
+const loopLayer = L.layerGroup().addTo(map);
+const stationLayer = L.layerGroup().addTo(map);
+
+function drawLoops(fc) {
+  loopLayer.clearLayers();
+  L.geoJSON(fc, {
+    style: (f) => {
+      const spine = /spine/i.test(f.properties.name);
+      const connector = /connector/i.test(f.properties.name);
+      return { color: f.properties.stroke, weight: spine ? 6 : 4, opacity: 0.85, dashArray: connector ? '6 6' : null, lineCap: 'round' };
+    },
+    onEachFeature: (f, l) => l.bindTooltip(esc(f.properties.name), { sticky: true }),
+  }).addTo(loopLayer);
+}
+
+function drawStations() {
+  stationLayer.clearLayers();
+  markers.clear();
+  const max = Math.max(1, ...data.stations.map(total));
+  for (const s of data.stations) {
+    const n = total(s);
+    const r = TIER_R[s.tier] + (n ? Math.round(8 * Math.sqrt(n / max)) : 0);
+    const m = L.circleMarker([s.lat, s.lon], {
+      radius: r,
+      color: n ? '#fff' : '#94a3b8',
+      weight: n ? 2.5 : 2,
+      fillColor: n ? TIER_COLOR[s.tier] : '#fff',
+      fillOpacity: 1,
+    }).addTo(stationLayer);
+    // Stations cluster at trailheads (B5/L1, B6/BL1, PL1/L2): flip a label to
+    // the left when a neighbour sits just to its east, so the pair doesn't collide.
+    const crowded = data.stations.some((o) => o !== s && o.lon > s.lon && map.distance([s.lat, s.lon], [o.lat, o.lon]) < 180);
+    m.bindTooltip(esc(s.id), { permanent: true, direction: crowded ? 'left' : 'right', offset: [crowded ? -r : r, 0], className: 'st-tip' });
+    m.bindPopup(popup(s));
+    m.on('click', () => select(s.id, false));
+    markers.set(s.id, m);
+  }
+}
+
+function popup(s) {
+  const rows = s.codes.map((c) => `<tr><td>${esc(c.purpose || 'Station')} code${c.url ? ` · <a href="${esc(c.url)}" target="_blank" rel="noopener">link</a>` : ''}</td><td>${c.publicScans + c.testScans}</td></tr>`).join('');
+  return `<div class="popup"><h3>${esc(s.id)} · ${TIER_LABEL[s.tier]}</h3>
+    <div class="sub">${esc(s.line || '')}${s.lastScan ? ` · last scan ${fmtDate(s.lastScan)}` : ' · no scans yet'}</div>
+    <table>${rows}</table></div>`;
+}
+
+/* ── Station list ────────────────────────────────────────────────────── */
+function renderList() {
+  const el = document.getElementById('stations');
+  const groups = ['gateway', 'midway', 'marker'];
+  let html = '';
+  for (const t of groups) {
+    const list = data.stations.filter((s) => s.tier === t);
+    const loose = data.unplaced.filter((u) => u.tier === t);
+    if (!list.length && !loose.length) continue;
+    html += `<div class="tier-head">${TIER_LABEL[t]} · ${list.length + loose.length}</div>`;
+    for (const s of list) {
+      const n = total(s);
+      const codes = s.codes.map((c) => `${c.purpose || 'Station'} ${c.publicScans + c.testScans}`).join(' · ');
+      html += `<div class="st${s.id === activeId ? ' active' : ''}" data-id="${esc(s.id)}" onclick="select('${esc(s.id)}', true)">
+        <div class="st-badge" style="background:${TIER_COLOR[s.tier]}">${esc(s.id)}</div>
+        <div><div class="st-line">${esc(s.line || '')}</div><div class="st-codes">${esc(codes)}</div></div>
+        <div><div class="st-n${n ? '' : ' zero'}">${n}</div><div class="st-last">${s.lastScan ? fmtDate(s.lastScan) : 'none yet'}</div></div>
+      </div>`;
+    }
+    for (const u of loose) {
+      const n = u.publicScans + u.testScans;
+      html += `<div class="st" title="Not on the map: the code name has no station ID">
+        <div class="st-badge" style="background:#94a3b8">?</div>
+        <div><div class="st-line">${esc(u.name.replace(/^TL-[A-Z]{2}-[A-Za-z]+-/, ''))}</div><div class="st-codes">Unplaced — add a station ID to the code name</div></div>
+        <div><div class="st-n${n ? '' : ' zero'}">${n}</div><div class="st-last">${u.lastScan ? fmtDate(u.lastScan) : 'none yet'}</div></div>
+      </div>`;
+    }
+  }
+  el.innerHTML = html;
+}
+
+function select(id, fromList) {
+  activeId = id;
+  document.querySelectorAll('.st').forEach((r) => r.classList.toggle('active', r.dataset.id === id));
+  const m = markers.get(id);
+  if (m && fromList) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 16)); m.openPopup(); }
+  if (!fromList) document.querySelector(`.st[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+/* ── KPIs + chart ────────────────────────────────────────────────────── */
+function allCodes() { return [...data.stations.flatMap((s) => s.codes.map((c) => ({ ...c, tier: s.tier }))), ...data.unplaced]; }
+
+function renderKpis(d) {
+  const t = d.publicScans + d.testScans;
+  document.getElementById('k-scans').textContent = t.toLocaleString();
+  document.getElementById('k-scans-sub').textContent = d.launchDate
+    ? `${d.publicScans} public · ${d.testScans} before launch`
+    : `across ${d.codes} codes · all pre-launch`;
+  document.getElementById('k-stations').textContent = `${d.stationsWithScans} / ${d.stations}`;
+  document.getElementById('k-stations-sub').textContent = d.silentStations.length ? `${d.silentStations.length} with no scans yet` : 'every station has scans';
+  document.getElementById('k-purpose').textContent = `${d.mapScans} : ${d.ctaScans}`;
+  document.getElementById('k-week').textContent = d.thisWeek;
+  const delta = d.thisWeek - d.lastWeek;
+  document.getElementById('k-week-sub').textContent = `${delta === 0 ? 'same as' : delta > 0 ? `+${delta} vs` : `${delta} vs`} last week (${d.lastWeek})`;
+}
+
+function renderChart() {
+  const start = (data.firstCodeCreated || new Date().toISOString()).slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  const labels = [];
+  for (let t = Date.parse(start); t <= Date.parse(today); t += 864e5) labels.push(new Date(t).toISOString().slice(0, 10));
+  const codes = allCodes();
+  const series = (tier) => labels.map((d) => codes.filter((c) => c.tier === tier).reduce((n, c) => n + (c.days[d] || 0), 0));
+  const datasets = ['gateway', 'midway', 'marker'].map((t) => ({ label: TIER_LABEL[t], data: series(t), backgroundColor: TIER_COLOR[t], borderRadius: 3, maxBarThickness: 26 }));
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: { labels: labels.map(fmtDate), datasets },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, font: { family: 'Inter', size: 11 } } } },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 }, color: '#8b97ad' } },
+        y: { stacked: true, beginAtZero: true, ticks: { precision: 0, font: { family: 'Inter', size: 11 }, color: '#8b97ad' }, grid: { color: '#eef1f7' } },
+      },
+    },
+  });
+}
+
+/* ── Load ────────────────────────────────────────────────────────────── */
+async function load(refresh) {
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled = true;
+  document.getElementById('error').style.display = 'none';
+  const bust = refresh ? `&t=${Date.now()}` : '';
+  try {
+    const resp = await fetch(`/api/trail?pilot=${PILOT}${bust}`);
+    if (!resp.ok) throw new Error(`trail API ${resp.status}`);
+    data = await resp.json();
+    document.getElementById('title').textContent = `${data.pilot.name}, ${data.pilot.state}`;
+    document.title = `Trail Line Pilot — ${data.pilot.name}`;
+
+    const banner = document.getElementById('launch-banner');
+    banner.style.display = data.pilot.launchDate ? 'none' : 'block';
+    banner.innerHTML = '<b>Launch date not set.</b> Every scan is counted as a pre-launch check until the install date is added — then the view splits public scans from test scans.';
+
+    drawLoops(data.loops);
+    drawStations();
+    const pts = data.stations.map((s) => [s.lat, s.lon]);
+    if (!refresh) pts.length ? map.fitBounds(pts, { padding: [40, 40], maxZoom: 16 }) : map.setView(data.pilot.center, 14);
+    renderList();
+    renderChart();
+    if (data.digest) renderKpis(data.digest);
+  } catch (err) {
+    const e = document.getElementById('error');
+    e.textContent = `Couldn't load the pilot: ${err.message}`;
+    e.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+  }
+
+  // The summary is slower (it may call a model); it fills in on its own.
+  try {
+    const s = await (await fetch(`/api/trail-summary?pilot=${PILOT}${bust}`)).json();
+    if (s.error) throw new Error(s.error);
+    const el = document.getElementById('pulse-text');
+    el.textContent = s.text;
+    el.classList.remove('loading');
+    document.getElementById('pulse-label').textContent = s.source === 'ai' ? 'This week · AI summary' : 'This week';
+    if (!data?.digest && s.digest) renderKpis(s.digest);
+  } catch (err) {
+    document.getElementById('pulse-text').textContent = 'Summary unavailable right now.';
+  }
+}
+load(false);
+</script>
+</body>
+</html>
