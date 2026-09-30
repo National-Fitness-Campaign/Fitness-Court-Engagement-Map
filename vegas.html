@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"/>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -193,13 +196,13 @@ const fmtDate = (d) => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US',
 /* ── Map ─────────────────────────────────────────────────────────────── */
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
 const map = L.map('map', { zoomControl: true, scrollWheelZoom: true });
-L.tileLayer(`${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
-  attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors', maxNativeZoom: 16, maxZoom: 19,
-}).addTo(map);
-map.createPane('labels');
-map.getPane('labels').style.zIndex = 350;
-map.getPane('labels').style.pointerEvents = 'none';
-L.tileLayer(`${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 16, maxZoom: 19, pane: 'labels' }).addTo(map);
+// Same clean basemap as the main map (OpenFreeMap Positron — free, no key).
+if (L.maplibreGL) {
+  L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/positron', interactive: false,
+    attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }).addTo(map);
+} else {
+  L.tileLayer(`${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, { attribution: 'Tiles &copy; Esri', maxNativeZoom: 16, maxZoom: 19 }).addTo(map);
+}
 const loopLayer = L.layerGroup().addTo(map);
 const stationLayer = L.layerGroup().addTo(map);
 
