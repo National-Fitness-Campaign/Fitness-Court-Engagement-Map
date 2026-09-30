@@ -459,28 +459,34 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .eng-mode .eq-stat b { font-size: 3.2rem; letter-spacing: -0.04em; color: var(--c); }
 .eng-mode .eq-stat .eq-lbl { color: var(--c); font-size: 0.78rem; }
 .eng-mode .ep-big b { font-size: 3.6rem; letter-spacing: -0.045em; }
-.eng-mode .ep-big span { color: var(--pc); opacity: 0.85; }
-.eng-mode .ep-name { font-size: 1.1rem; color: var(--pc); }
+.eng-mode .ep-big span { color: var(--softer); }
+.eng-mode .ep-name { font-size: 1.1rem; color: #334155; }
 .eng-mode .eq-row { gap: 12px; }
 .eng-mode .eq-tile { padding: 18px 16px 14px; }
-/* 2. Each card washed in its own color */
-.eng-mode .eq-tile { background: color-mix(in srgb, var(--c) 9%, white); border-color: color-mix(in srgb, var(--c) 28%, white); }
-.eng-mode .eq-total { background: #2563eb; box-shadow: 0 6px 20px rgba(37,99,235,0.28); }
-.eng-mode .eq-total .eq-lbl { color: #fff; }
-.eng-mode .eq-total .eq-sub { color: rgba(255,255,255,0.82); }
-.eng-mode .eq-stat { background: color-mix(in srgb, var(--c) 7%, white); border-color: color-mix(in srgb, var(--c) 25%, white); }
-.eng-mode .eng-pillar { background: color-mix(in srgb, var(--pc) 7%, white); border-color: color-mix(in srgb, var(--pc) 25%, white); }
-.eng-mode .eng-pillar::before { height: 5px; }
-.eng-mode .ep-cell { background: #fff; border: 1px solid color-mix(in srgb, var(--pc) 18%, white); }
+/* 2. White cards; color only on the top bar and the number */
+.eng-mode .eq-tile { background: #fff; border-color: var(--border); overflow: hidden; }
+.eng-mode .eq-tile::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--c); }
+.eng-mode .eq-dot { display: none; }
+.eng-mode .eq-lbl { color: #334155; }
+.eng-mode .eq-total { background: #fff; color: #334155; border: 2px solid #334155; box-shadow: none; }
+.eng-mode .eq-total b { color: #1e293b; }
+.eng-mode .eq-total .eq-lbl { color: #334155; }
+.eng-mode .eq-total .eq-sub { color: var(--softer); }
+.eng-mode .eq-stat { background: #fff; border-color: var(--border); }
+.eng-mode .eq-stat b { color: #1e293b; }
+.eng-mode .eq-stat .eq-lbl { color: #64748b; }
+.eng-mode .eng-pillar { background: #fff; border-color: var(--border); }
+.eng-mode .eng-pillar::before { height: 4px; }
+.eng-mode .ep-cell { background: #f6f8fb; border: none; }
 .eng-mode .ep-cell b { color: var(--pc); }
 .eng-mode .ep-cell span { color: var(--softer); }
 .eng-mode .acb-bar .nm { color: var(--soft); }
 .eng-mode .acb-bar .n { color: #334155; }
-.eng-mode .acb-bar .track { background: color-mix(in srgb, var(--pc, #94a3b8) 12%, white); }
+.eng-mode .acb-bar .track { background: #eef1f6; }
 .eng-mode .acb-table td { color: var(--soft); }
 .eng-mode .acb-table td b { color: #334155; }
 .eng-mode .rw-ai-body, .eng-mode .rw-ai-body p { color: var(--soft); }
-.eng-mode .rw-ai-body b { color: #1d4ed8; }
+.eng-mode .rw-ai-body b { color: #1e293b; }
 .eng-mode .eng-chip b { color: #334155; }
 .eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.55; }
 .eng-notes summary { cursor: pointer; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
@@ -886,7 +892,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
     </ul>
     <h3>Locations</h3>
     <ul>
-      <li><b>Fitness Courts</b> are placed from <b>Salesforce</b> (each court's Site geo location). A few Salesforce doesn't have are placed by hand from NFC's planning maps.</li>
+      <li><b>Fitness Courts</b> are placed from <b>Salesforce</b> (each Fitness Court's Site geo location). A few Salesforce doesn't have are placed by hand from NFC's planning maps.</li>
       <li><b>Trail Line signs</b> are placed from the <b>Design Lab</b> station layer, matched by the station ID in the code's name.</li>
       <li>Codes with no known location aren't guessed onto the map; they're listed under <b>Needs Location Verification</b> in the rankings panel.</li>
     </ul>
@@ -1503,7 +1509,7 @@ function displayName(c) {
 function codeCountLabel(list) {
   const courts = list.filter((c) => c.kind !== 'trail').length;
   const trail = list.length - courts;
-  return [courts && `${courts} court${courts > 1 ? 's' : ''}`, trail && `${trail} trail`].filter(Boolean).join(' · ');
+  return [courts && `${courts} Fitness Court${courts > 1 ? 's' : ''}`, trail && `${trail} Trail Line`].filter(Boolean).join(' · ');
 }
 
 function openCityPanel(key) {
@@ -2164,9 +2170,9 @@ function engMapCard(F) {
   if (!A) return `<div class="eng-map-card"><div class="eng-map-head"><h4>Accessibility map</h4><span>Not drawn for ${esc(F.city)} yet. Run scripts/compute-accessibility.mjs for this city.</span></div></div>`;
   const row = (key, swatch, label) => `<label><input type="checkbox" data-eng-layer="${key}"${engLayers[key] ? ' checked' : ''}><i style="${swatch}"></i>${label}</label>`;
   return `<div class="eng-map-card">
-    <div class="eng-map-head"><h4>Who lives within a 10 minute walk</h4><span>shaded = everywhere you can walk to a court or the Trail Line in 10 minutes along real streets · 2020 Census · inside city limits</span>
+    <div class="eng-map-head"><h4>Who lives within a 10 minute walk</h4><span>shaded = everywhere you can walk to a Fitness Court or the Trail Line in 10 minutes along real streets · 2020 Census · inside city limits</span>
       <div class="eng-chips">
-        <span class="eng-chip"><i style="background:rgba(37,99,235,0.3);border:1.5px solid #2563eb"></i>Courts <b>${F.court.access != null ? F.court.access.toLocaleString() : 'XX'}</b></span>
+        <span class="eng-chip"><i style="background:rgba(37,99,235,0.3);border:1.5px solid #2563eb"></i>Fitness Courts <b>${F.court.access != null ? F.court.access.toLocaleString() : 'XX'}</b></span>
         ${A.trail ? `<span class="eng-chip"><i style="background:rgba(195,38,138,0.3);border:1.5px solid ${TL_MAGENTA}"></i>Trail Line <b>${F.trail.access != null ? F.trail.access.toLocaleString() : 'XX'}</b></span>` : ''}
         <span class="eng-chip"><i style="background:#0f1f3d"></i>Together <b>${F.total.access != null ? F.total.access.toLocaleString() : 'XX'}</b></span>
       </div></div>
@@ -2260,7 +2266,7 @@ function countUp(root) {
     requestAnimationFrame(step);
   });
 }
-const NEON = { court: '#3b82f6', trail: '#ec4899', app: '#8b5cf6', dl: '#c084fc' };
+const NEON = { court: '#2563eb', trail: '#db2777', app: '#7c3aed', dl: '#7c3aed' };
 function renderEngagement(body) {
   if (!engagementData) {
     body.innerHTML = '<div class="an-city-empty">Loading engagement data…</div>';
@@ -2370,11 +2376,11 @@ function renderEngagement(body) {
     </div>`;
   const kcalLabel = perYear ? 'Calories burned / year' : `Calories burned · ${rangeLc}`;
   const bots = state.includeBots ? 'Bot scans included (Settings).' : 'Human scans only.';
-  const courtP = pillar('court', 'Fitness Court', NEON.court, `The physical courts · ${F.installed} in ${all ? 'the network' : place}`,
-    F.court.engagements, `= QR scans on the court signs ${info(bots)}`,
-    cell('People within a 10 min walk', F.court.access, F.court.access != null ? `Residents who can walk to a court in 10 minutes along the street network (2020 Census, inside city limits).` : noAcc)
-    + cell(kcalLabel, F.court.kcal, `NFC estimate: ${F.installed} courts × 1.3M calories per court per year${perYear ? '' : `, prorated to ${F.days} days`}.`),
-    courtSeries, courtRows.length ? bars('Top courts · QR scans', [...courtRows].sort((x, y) => y.qr - x.qr), NEON.court, (r) => r.qr) : '');
+  const courtP = pillar('court', 'Fitness Court', NEON.court, `${F.installed} Fitness Court${F.installed === 1 ? '' : 's'} in ${all ? 'the network' : place}`,
+    F.court.engagements, `= QR scans on the Fitness Court signs ${info(bots)}`,
+    cell('People within a 10 min walk', F.court.access, F.court.access != null ? `Residents who can walk to a Fitness Court in 10 minutes along the street network (2020 Census, inside city limits).` : noAcc)
+    + cell(kcalLabel, F.court.kcal, `NFC estimate: ${F.installed} Fitness Courts × 1.3M calories per Fitness Court per year${perYear ? '' : `, prorated to ${F.days} days`}.`),
+    courtSeries, courtRows.length ? bars('Top Fitness Courts · QR scans', [...courtRows].sort((x, y) => y.qr - x.qr), NEON.court, (r) => r.qr) : '');
   const trailList = !F.trailCodes.length ? `<div class="ep-foot">No Trail Line ${all ? 'yet' : 'in ' + place + ' yet'}.</div>`
     : trailRows[0]?.qr ? bars('Top signs · public QR scans', trailRows, NEON.trail, (r) => r.qr)
     : `<div class="ep-empty">${pilot && today < pilot.launchDate ? `Public counting starts <b>${fmtD(pilot.launchDate)}</b>. The ${F.trailCodes.length} sign codes will rank here once people start scanning.` : 'No public scans in this range yet.'}</div>`;
@@ -2382,10 +2388,10 @@ function renderEngagement(body) {
     F.trailCodes.length ? F.trail.engagements : null, F.trailCodes.length ? `= public QR scans on the trail signs${pilot ? `, counted from ${fmtD(pilot.launchDate)}` : ''}` : '',
     cell('People within a 10 min walk', F.trailCodes.length ? F.trail.access : null, F.trail.access != null ? 'Residents who can walk to the Trail Line in 10 minutes along the street network (2020 Census, inside city limits).' : noAcc)
     + cell(kcalLabel, null, TBD), trailSeries, trailList);
-  const digitalP = pillar('digital', 'Digital', NEON.app, `The NFC app · at ${F.matched} of ${F.courtCodes.length} courts`,
-    F.digital.engagements, `= ${F.digital.checkins.toLocaleString()} app check-ins + ${F.digital.newUsers.toLocaleString()} app downloads ${info(`App downloads: people whose first ever app check-in was at one of these courts. The app doesn't record where it was downloaded, so this is our stand-in.${F.digital.prorated ? ' Monthly totals, prorated to the range.' : ''}${F.bounds ? '' : ' App data starts Jan 2026.'}${F.bounds && F.bounds[1] > E.app.takenAt ? ` App data runs through ${E.app.takenAt}.` : ''} Nationally: ${F.digital.natUsers.toLocaleString()} new app accounts in this period.`)}`,
+  const digitalP = pillar('digital', 'Digital', NEON.app, `The NFC app · at ${F.matched} of ${F.courtCodes.length} Fitness Courts`,
+    F.digital.engagements, `= ${F.digital.checkins.toLocaleString()} app check-ins + ${F.digital.newUsers.toLocaleString()} app downloads ${info(`App downloads: people whose first ever app check-in was at one of these Fitness Courts. The app doesn't record where it was downloaded, so this is our stand-in.${F.digital.prorated ? ' Monthly totals, prorated to the range.' : ''}${F.bounds ? '' : ' App data starts Jan 2026.'}${F.bounds && F.bounds[1] > E.app.takenAt ? ` App data runs through ${E.app.takenAt}.` : ''} Nationally: ${F.digital.natUsers.toLocaleString()} new app accounts in this period.`)}`,
     cell('People within reach', null, TBD) + cell(kcalLabel, null, TBD),
-    digitalSeries, courtRows.some((r) => r.app) ? bars('Top courts · app activity', [...courtRows].filter((r) => r.app).sort((x, y) => y.app - x.app), NEON.app, (r) => r.app, (r) => `${r.ci} check-ins · ${r.nu} downloads`) : '<div class="ep-empty">No app activity at these courts in this range.</div>');
+    digitalSeries, courtRows.some((r) => r.app) ? bars('Top Fitness Courts · app activity', [...courtRows].filter((r) => r.app).sort((x, y) => y.app - x.app), NEON.app, (r) => r.app, (r) => `${r.ci} check-ins · ${r.nu} downloads`) : '<div class="ep-empty">No app activity at these Fitness Courts in this range.</div>');
 
   // ── Sources breakdown ─────────────────────────────────────────────────
   const SRC = [
@@ -2413,11 +2419,11 @@ function renderEngagement(body) {
     <div class="eq-card">
       <div class="eq-head"><h3>Total engagements <span>${perYear ? 'all time' : rangeLc}</span></h3><p>Every way someone used a Fitness Court, the Trail Line or the NFC app, added up.</p></div>
       <div class="eq-row">
-        ${eqTile(NEON.court, F.court.engagements, 'Fitness Court QR scans', 'scans of the codes on the court signs')}
+        ${eqTile(NEON.court, F.court.engagements, 'Fitness Court QR scans', 'scans of the codes on the Fitness Court signs')}
         <div class="eq-op">+</div>
         ${eqTile(NEON.trail, F.trail.engagements || 0, 'Trail Line QR scans', pilot && today < pilot.launchDate ? `public scans only, counting starts ${fmtD(pilot.launchDate)}` : 'public scans on the trail signs')}
         <div class="eq-op">+</div>
-        ${eqTile(NEON.app, F.digital.checkins, 'App check-ins', 'workouts logged in the NFC app at these courts')}
+        ${eqTile(NEON.app, F.digital.checkins, 'App check-ins', 'workouts logged in the NFC app at these Fitness Courts')}
         <div class="eq-op">+</div>
         ${eqTile(NEON.dl, F.digital.newUsers, 'App downloads', 'people whose first ever app check-in was here')}
         <div class="eq-op">=</div>
@@ -2425,10 +2431,10 @@ function renderEngagement(body) {
       </div>
     </div>
     <div class="eq-pair">
-      <div class="eq-stat" style="--c:#0d9488"><div class="eq-lbl">People within a 10 minute walk</div>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}
+      <div class="eq-stat"><div class="eq-lbl">People within a 10 minute walk</div>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}
         <div class="eq-sub">${F.total.access != null ? `residents near a Fitness Court (${F.court.access.toLocaleString()}) or the Trail Line (${(F.trail.access || 0).toLocaleString()}), each counted once · 2020 Census` : noAcc}</div></div>
-      <div class="eq-stat" style="--c:#ea580c"><div class="eq-lbl">${kcalLabel}</div>${F.total.kcal == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(F.total.kcal)}</b>`}
-        <div class="eq-sub">NFC estimate for the Fitness Courts (1.3M per court per year) · Trail Line and app: XX until the formula is set</div></div>
+      <div class="eq-stat"><div class="eq-lbl">${kcalLabel}</div>${F.total.kcal == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(F.total.kcal)}</b>`}
+        <div class="eq-sub">NFC estimate for the Fitness Courts (1.3M per Fitness Court per year) · Trail Line and app: XX until the formula is set</div></div>
     </div>
     ${engMapCard(F)}
     <div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="rw-ai-body"><div class="cp-label">Overview · ${perYear ? 'all time' : rangeLc}</div><p>${lines.join(' ')}</p></div></div>
@@ -2441,15 +2447,15 @@ function renderEngagement(body) {
           <span class="track"><i style="width:${Math.max(x[2] ? 2 : 0, Math.round((x[2] / srcMax) * 100))}%;background:${x[1]}"></i></span></div>`).join('')}</div>
         <div class="ep-foot" style="margin-top:12px">Added together, these are the ${T.toLocaleString()} engagements.</div></div>
     </div>
-    ${all ? '' : `<div class="acb-table"><h4>Every court and sign <span class="rw-tod-note">engagements ${rangeLc}, click a row to see it on the map</span></h4><table>
+    ${all ? '' : `<div class="acb-table"><h4>Every Fitness Court and Trail Line sign <span class="rw-tod-note">engagements ${rangeLc}, click a row to see it on the map</span></h4><table>
       <thead><tr><th>Name</th><th>Type</th><th class="n">QR scans</th><th class="n">App check-ins</th><th class="n">App downloads</th><th class="n">Total engagements</th><th class="n">Share</th></tr></thead>
       <tbody>${tableRows}</tbody></table></div>`}
     <details class="eng-notes"><summary>How these are counted</summary><ul>
-      <li><b>Engagement</b>: one QR scan on a court or trail sign, one app check-in, or one app download. Added up, that's the total.</li>
-      <li><b>People within a 10 minute walk</b>: 2020 Census block population inside a real 10 minute walking isochrone (Mapbox, along the street network) from each court, and from points every 150 m along the Trail Line, clipped to city limits. The total counts each person once.</li>
+      <li><b>Engagement</b>: one QR scan on a Fitness Court or Trail Line sign, one app check-in, or one app download. Added up, that's the total.</li>
+      <li><b>People within a 10 minute walk</b>: 2020 Census block population inside a real 10 minute walking isochrone (Mapbox, along the street network) from each Fitness Court, and from points every 150 m along the Trail Line, clipped to city limits. The total counts each person once.</li>
       <li><b>Calories</b>: NFC's estimate of 1.3M calories per Fitness Court per year. Trail Line and app calories show XX until the formula workshop sets them.</li>
       <li><b>Trail Line</b>: only public scans count, from the pilot's launch date. Test and install scans before that are left out.</li>
-      <li><b>App data</b>: ${esc(E.app.monthsFrom)} to ${esc(E.app.monthsThrough)} (snapshot ${esc(E.app.takenAt)}), monthly totals. A court counts when an app court sits within ${E.app.matchRadiusMeters} m of its QR sign. App downloads are people whose first ever check-in was at that court (the app doesn't record where it was downloaded).</li>
+      <li><b>App data</b>: ${esc(E.app.monthsFrom)} to ${esc(E.app.monthsThrough)} (snapshot ${esc(E.app.takenAt)}), monthly totals. A Fitness Court counts when its listing in the app sits within ${E.app.matchRadiusMeters} m of its QR sign. App downloads are people whose first ever check-in was at that Fitness Court (the app doesn't record where it was downloaded).</li>
       <li>Internal view: raw figures, not the city-facing report.</li>
     </ul></details>`;
 
