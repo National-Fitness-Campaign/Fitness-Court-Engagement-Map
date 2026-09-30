@@ -1,4 +1,7 @@
-// GET /api/city-summary?city=Las%20Vegas&state=NV — AI overview for the city panel.
+// GET /api/city-summary?city=Las%20Vegas&state=NV[&from=YYYY-MM-DD&to=YYYY-MM-DD]
+// AI overview for the city panel and the Analytics city breakdown. With a
+// range, the facts (and so the words) describe that period and compare it
+// with the period of the same length just before it.
 //
 // Three short overviews: the city as a whole, its Fitness Courts, and its
 // Trail Line signs. Every number is computed here from Uniqode (all-time) and
@@ -19,11 +22,12 @@ const SYSTEM =
   + '"city": the total picture and whether this week is up or down vs last week. '
   + '"courts": the trend, the busiest and the lowest court, and any that went quiet. '
   + '"trail": the trend, which stations are being scanned, Map vs CTA. If the pilot has not launched (today before launchDate), say scans so far are test/install scans and when public counting starts. '
+  + 'If facts.range is present, lead with that period: scans in the range, the change versus the previous period of the same length (prevScans), and the top and lowest codes in the range. Describe the range in words (e.g. "in the last 30 days", "since January 1"). '
   + 'If a side has no codes, its value is an empty string. If there is too little data to call a trend, say so plainly.';
 
 const shift = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 864e5).toISOString().slice(0, 10);
 
-function sideFacts(list, daysById, today) {
+function sideFacts(list, daysById, today, range) {
   if (!list.length) return null;
   const sumRange = (c, from, to) => {
     let n = 0;
@@ -44,6 +48,22 @@ function sideFacts(list, daysById, today) {
     lowest: withScans.length > 1 ? { name: withScans.at(-1).label, allTime: withScans.at(-1).allTime } : null,
     bestThisWeek: thisWeekBy[0]?.n ? thisWeekBy[0] : null,
     quietLast28Days: list.filter((c) => sumRange(c, shift(today, -27), today) === 0).map((c) => c.label).slice(0, 6),
+    ...(range ? rangeFacts(list, sumRange, range) : {}),
+  };
+}
+
+// The selected period vs. the period of the same length right before it.
+function rangeFacts(list, sumRange, { from, to }) {
+  const days = Math.round((Date.parse(to) - Date.parse(from)) / 864e5) + 1;
+  const pTo = shift(from, -1), pFrom = shift(from, -days);
+  const inRange = list.map((c) => ({ name: c.label, n: sumRange(c, from, to), prev: sumRange(c, pFrom, pTo) })).sort((a, b) => b.n - a.n);
+  const scanned = inRange.filter((c) => c.n > 0);
+  return {
+    rangeScans: inRange.reduce((t, c) => t + c.n, 0),
+    prevScans: inRange.reduce((t, c) => t + c.prev, 0),
+    rangeTop: scanned.slice(0, 3).map(({ name, n }) => ({ name, scans: n })),
+    rangeLowest: scanned.length > 1 ? { name: scanned.at(-1).name, scans: scanned.at(-1).n } : null,
+    noScansInRange: inRange.filter((c) => c.n === 0).map((c) => c.name).slice(0, 6),
   };
 }
 
@@ -51,6 +71,9 @@ export default async function handler(req, res) {
   try {
     const city = String(req.query?.city || '').trim();
     const state = String(req.query?.state || '').trim().toUpperCase();
+    const D = /^\d{4}-\d{2}-\d{2}$/;
+    const from = String(req.query?.from || ''), to = String(req.query?.to || '');
+    const range = D.test(from) && D.test(to) && from <= to ? { from, to } : null;
     if (!city || city.length > 80 || !/^[A-Z]{2}$/.test(state)) {
       res.status(400).json({ error: 'Pass ?city=<name>&state=<two-letter code>' });
       return;
@@ -89,8 +112,9 @@ export default async function handler(req, res) {
     const facts = {
       city: `${codes[0].parsed.city}, ${state}`,
       today,
-      courts: sideFacts(courts, daysById, today),
-      trail: sideFacts(trail, daysById, today),
+      ...(range ? { range: { ...range, days: Math.round((Date.parse(range.to) - Date.parse(range.from)) / 864e5) + 1 } } : {}),
+      courts: sideFacts(courts, daysById, today, range),
+      trail: sideFacts(trail, daysById, today, range),
     };
     if (facts.trail) {
       facts.trail.stationsScanned = new Set(trail.filter((c) => c.allTime > 0).map((c) => c.station)).size;
@@ -105,7 +129,7 @@ export default async function handler(req, res) {
       const stored = await storedSummary(`city:${facts.city}`);
       return stored?.city ? { source: 'ai', city: stored.city, courts: stored.courts || '', trail: stored.trail || '', writtenAt: stored.writtenAt } : null;
     };
-    const stored = directAI() ? null : await fromStore();
+    const stored = directAI() || range ? null : await fromStore();
     if (stored) {
       out = stored;
     } else try {
@@ -116,7 +140,7 @@ export default async function handler(req, res) {
       if (!out.city) throw new Error('model reply missing "city"');
     } catch (err) {
       console.warn('city-summary: live AI unavailable:', err.message);
-      out = (directAI() && await fromStore()) || { source: 'computed' };
+      out = (directAI() && !range && await fromStore()) || { source: 'computed' };
     }
 
     setCache(res);

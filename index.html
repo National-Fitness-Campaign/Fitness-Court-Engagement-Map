@@ -142,6 +142,46 @@ header {
 .cp-mini:hover .cp-mini-chev { color: var(--blue); }
 .cp-mini-clear { border: none; background: none; color: var(--text-3); font-size: 0.8rem; cursor: pointer; padding: 6px; border-radius: 6px; flex: none; }
 .cp-mini-clear:hover { color: var(--text); background: #f3f6fb; }
+.an-city { padding: 20px 22px; margin-bottom: 16px; }
+.an-city-head { display: flex; align-items: flex-end; gap: 16px; }
+.an-city-head h2 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.01em; }
+.an-city-pick { margin-left: auto; display: flex; flex-direction: column; gap: 5px; font-size: 0.72rem; font-weight: 700; }
+.an-city-pick select { font: inherit; font-size: 0.9rem; font-weight: 600; padding: 8px 12px; border: 1px solid var(--border); border-radius: 9px; min-width: 240px; background: var(--card); color: var(--text); }
+.an-city-empty { margin-top: 12px; font-size: 0.9rem; color: var(--text-2); }
+.acb-overview { margin-top: 16px; }
+.acb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.acb-side { border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.acb-side h4 { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; display: flex; align-items: center; gap: 7px; }
+.acb-side h4 i { width: 9px; height: 9px; border-radius: 50%; }
+.acb-kpis { display: flex; gap: 22px; margin-top: 10px; }
+.acb-kpis b { display: block; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.acb-kpis span { font-size: 0.72rem; color: var(--text-3); font-weight: 600; }
+.acb-bars { margin-top: 12px; display: grid; gap: 7px; }
+.acb-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; font-size: 0.8rem; cursor: pointer; }
+.acb-bar:hover .nm { color: var(--blue); }
+.acb-bar .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acb-bar .n { font-weight: 700; }
+.acb-bar .track { grid-column: 1 / -1; height: 6px; border-radius: 4px; background: #eef1f6; overflow: hidden; }
+.acb-bar .track i { display: block; height: 100%; border-radius: 4px; }
+.acb-chart { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.acb-chart h4, .acb-table h4 { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; }
+.acb-row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+.acb-dow { display: grid; gap: 7px; }
+.acb-dow div { display: grid; grid-template-columns: 34px 1fr 36px; gap: 8px; align-items: center; font-size: 0.78rem; }
+.acb-dow .track { height: 9px; border-radius: 5px; background: #eef1f6; overflow: hidden; }
+.acb-dow .track i { display: block; height: 100%; background: var(--blue); border-radius: 5px; }
+.acb-dow span:last-child { text-align: right; color: var(--text-3); }
+.acb-table { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-x: auto; }
+.acb-table table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.acb-table th { text-align: left; font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); padding: 0 8px 8px; border-bottom: 1px solid var(--border); }
+.acb-table td { padding: 8px; border-bottom: 1px solid #f0f3f8; }
+.acb-table td.n, .acb-table th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.acb-table tr { cursor: pointer; } .acb-table tbody tr:hover { background: #f6f9fd; }
+.ch-up { color: var(--green); font-weight: 700; } .ch-down { color: var(--red); font-weight: 700; } .ch-flat { color: var(--text-3); }
+.cp-more { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; width: 100%; padding: 10px; border-radius: 10px; border: none;
+  background: var(--blue); color: #fff; font: 700 0.84rem 'Inter', sans-serif; cursor: pointer; }
+.cp-more:hover { filter: brightness(1.08); }
+@media (max-width: 900px) { .acb-grid, .acb-row2 { grid-template-columns: 1fr; } .an-city-head { flex-wrap: wrap; } .an-city-pick { margin-left: 0; } }
 .cp-head { display: flex; align-items: flex-start; gap: 10px; }
 .cp-eyebrow { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
 .cp-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; }
@@ -570,6 +610,15 @@ header {
 
   <!-- ANALYTICS VIEW -->
   <div id="view-analytics" style="display:none">
+    <div class="card an-city">
+      <div class="an-city-head">
+        <div><div class="cp-eyebrow">City breakdown</div><h2 id="an-city-title">All cities</h2></div>
+        <label class="an-city-pick">City
+          <select id="an-city-select" onchange="setAnCity(this.value)"></select>
+        </label>
+      </div>
+      <div id="an-city-body"></div>
+    </div>
     <div class="an-grid">
       <div class="card an-card wide">
         <h3>Daily Scans</h3>
@@ -671,6 +720,7 @@ const state = {
   kind: 'all',           // 'all' | 'court' | 'trail'
   cityPanel: null,       // "City, ST" when the city panel is open
   cityHidden: false,     // panel tucked away into a tab (still selected)
+  anCity: '',            // Analytics city breakdown ('' = all cities)
   openCities: new Set(),
   sortKey: 'scans', sortDir: -1,
 };
@@ -1188,7 +1238,21 @@ function sideStats(list) {
   const lastWeek = sum(shiftDate(today, -13), shiftDate(today, -7));
   const spark = [];
   for (let i = 27; i >= 0; i--) { const d = shiftDate(today, -i); spark.push(sum(d, d)); }
-  return { ranked, total: ranked.reduce((t, r) => t + r.n, 0), thisWeek, lastWeek, spark };
+  // Same-length period right before the selected range (none for all time).
+  let prev = null;
+  if (bounds) {
+    const len = Math.round((Date.parse(bounds[1]) - Date.parse(bounds[0])) / 864e5) + 1;
+    prev = sum(shiftDate(bounds[0], -len), shiftDate(bounds[0], -1));
+  }
+  return { ranked, total: ranked.reduce((t, r) => t + r.n, 0), thisWeek, lastWeek, spark, prev };
+}
+const pctChange = (a, b) => (b ? Math.round(((a - b) / b) * 100) : null);
+function changeWords(a, b) {
+  const p = pctChange(a, b);
+  if (b == null) return '';
+  if (!a && !b) return 'no scans in either period';
+  if (p == null) return `up from none the period before`;
+  return p === 0 ? `flat on the period before (${b.toLocaleString()})` : `${p > 0 ? 'up' : 'down'} ${Math.abs(p)}% on the period before (${b.toLocaleString()})`;
 }
 
 function sparkSVG(vals, color) {
@@ -1218,7 +1282,13 @@ function cityOverview(key, courts, trail) {
   const total = courts.total + trail.total;
   const tw = courts.thisWeek + trail.thisWeek, lw = courts.lastWeek + trail.lastWeek;
   const dir = tw === lw ? 'flat on' : tw > lw ? 'up from' : 'down from';
-  out.push(`<b>${escapeAttr(key)}</b> has ${total.toLocaleString()} scans (${range}), with ${tw} this week, ${dir} ${lw} last week.`);
+  if (rangeBounds()) {
+    const prev = (courts.prev || 0) + (trail.prev || 0);
+    const when = { today: 'today', yesterday: 'yesterday', '7days': 'in the last 7 days', '30days': 'in the last 30 days', year: 'so far this year', custom: 'in the selected range' }[state.range];
+    out.push(`<b>${escapeAttr(key)}</b>: ${total.toLocaleString()} scans ${when}, ${changeWords(total, prev)}.`);
+  } else {
+    out.push(`<b>${escapeAttr(key)}</b> has ${total.toLocaleString()} scans (${range}), with ${tw} this week, ${dir} ${lw} last week.`);
+  }
   if (courts.ranked.length) {
     const top = courts.ranked[0];
     const quiet = courts.ranked.filter((r) => r.n === 0).map((r) => r.c.location);
@@ -1240,7 +1310,7 @@ function sideHTML(title, color, st, emptyText) {
     return `<div class="cp-side"><h3><i style="background:${color}"></i>${title}</h3><div class="cp-empty">${emptyText}</div></div>`;
   }
   const t = trendLine(st);
-  const shown = st.ranked.slice(0, 12);
+  const shown = st.ranked.slice(0, 5);
   return `<div class="cp-side">
     <h3><i style="background:${color}"></i>${title}</h3>
     <div class="cp-num">${st.total.toLocaleString()}</div>
@@ -1251,7 +1321,7 @@ function sideHTML(title, color, st, emptyText) {
       <div class="cp-item${r.n ? '' : ' zero'}" onclick="focusCourt(${r.c.id})" title="${escapeAttr(r.c.name)}">
         <span class="nm">${escapeAttr(displayName(r.c))}</span><span class="n">${r.n.toLocaleString()}</span>
       </div>`).join('')}
-      ${st.ranked.length > shown.length ? `<div class="cp-sub">+ ${st.ranked.length - shown.length} more</div>` : ''}
+      ${st.ranked.length > shown.length ? `<div class="cp-sub">+ ${st.ranked.length - shown.length} more in Analytics</div>` : ''}
     </div>
   </div>`;
 }
@@ -1290,28 +1360,34 @@ function renderCityPanel() {
       ${sideHTML('Fitness Courts', 'var(--blue)', courts, 'No Fitness Court codes in this city.')}
       ${sideHTML('Trail Lines', TL_MAGENTA, trail, 'No Trail Line here yet.')}
     </div>
+    <button type="button" class="cp-more" onclick="openCityAnalytics()">See full analytics →</button>
     ${trail.ranked.length && /^Las Vegas, NV$/.test(state.cityPanel) ? '<a class="cp-link" href="/vegas">Open the Las Vegas Trail Line pilot view →</a>' : ''}`;
   el.style.display = 'block';
   if (callout) callout.style.display = 'none';
   loadCityAI(state.cityPanel);
 }
 
-// Swap in the AI-written overview when the server has one. Until AI Gateway
-// is enabled it answers { source: 'computed' } and the overview above stays.
-const cityAI = new Map(); // "City, ST" -> Promise<summary|null>
-function loadCityAI(key) {
+// Swap in the AI-written overview when the server has one. The request
+// carries the selected date range, so the words describe that period; with
+// no AI available the server answers { source: 'computed' } and the computed
+// overview stays.
+const cityAI = new Map(); // "City, ST|from|to" -> Promise<summary|null>
+function loadCityAI(key, boxId = 'cp-overview', stillWanted = () => state.cityPanel === key) {
   const m = key.match(/^(.*),\s*([A-Z]{2})$/);
   if (!m) return;
-  if (!cityAI.has(key)) {
-    cityAI.set(key, fetch(`/api/city-summary?city=${encodeURIComponent(m[1])}&state=${m[2]}`)
-      .then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  const b = rangeBounds();
+  const cacheKey = `${key}|${b ? b.join('|') : 'all'}`;
+  if (!cityAI.has(cacheKey)) {
+    const q = `city=${encodeURIComponent(m[1])}&state=${m[2]}` + (b ? `&from=${b[0]}&to=${b[1]}` : '');
+    cityAI.set(cacheKey, fetch(`/api/city-summary?${q}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
   }
-  cityAI.get(key).then((s) => {
-    const box = document.getElementById('cp-overview');
-    if (!s || s.source !== 'ai' || state.cityPanel !== key || !box) return;
+  cityAI.get(cacheKey).then((s) => {
+    const box = document.getElementById(boxId);
+    const nowKey = `${key}|${(rangeBounds() || ['all']).join('|')}`;
+    if (!s || s.source !== 'ai' || !stillWanted() || !box || nowKey !== cacheKey) return;
     const part = (label, text) => (text ? `<p><b>${label}:</b> ${esc(text)}</p>` : '');
     const when = s.writtenAt ? ' · ' + new Date(s.writtenAt).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : '';
-    box.innerHTML = `<div class="cp-label">Overview · AI summary${esc(when)}</div><p>${esc(s.city)}</p>`
+    box.innerHTML = `<div class="cp-label">Overview · AI summary · ${esc(RANGE_LABELS[state.range])}${esc(when)}</div><p>${esc(s.city)}</p>`
       + part('Fitness Courts', s.courts) + part('Trail Line', s.trail);
   });
 }
@@ -1473,10 +1549,121 @@ function renderFooter() {
 let charts = {};
 function destroyCharts() { Object.values(charts).forEach((c) => c.destroy()); charts = {}; }
 
+function openCityAnalytics() {
+  state.anCity = state.cityPanel || '';
+  setView('analytics');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function setAnCity(key) { state.anCity = key; renderAnalytics(); }
+
+function renderCityBreakdown() {
+  const sel = document.getElementById('an-city-select');
+  const totals = new Map();
+  for (const c of state.courts) totals.set(cityKey(c), (totals.get(cityKey(c)) || 0) + (c.officialScans || 0));
+  const cities = [...totals.entries()].filter(([k]) => /, [A-Z]{2}$/.test(k)).sort((a, b) => b[1] - a[1]);
+  sel.innerHTML = '<option value="">All cities</option>' + cities.map(([k]) => `<option value="${esc(k)}"${k === state.anCity ? ' selected' : ''}>${esc(k)}</option>`).join('');
+  const body = document.getElementById('an-city-body');
+  document.getElementById('an-city-title').textContent = state.anCity || 'All cities';
+  if (!state.anCity) {
+    body.innerHTML = '<div class="an-city-empty">Pick a city for its full breakdown: an overview, Fitness Courts and Trail Lines side by side, trends, day-of-week pattern and every code. Or click a city on the map and choose "See full analytics".</div>';
+    return;
+  }
+  const inCity = state.courts.filter((c) => cityKey(c) === state.anCity);
+  const courts = sideStats(inCity.filter((c) => c.kind !== 'trail'));
+  const trail = sideStats(inCity.filter((c) => c.kind === 'trail'));
+  const bounds = rangeBounds();
+  const chip = (a, b) => {
+    const p = pctChange(a, b);
+    if (b == null) return '';
+    if (!a && !b) return '<span class="ch-flat">no change</span>';
+    if (p == null) return '<span class="ch-up">new</span>';
+    return `<span class="${p > 0 ? 'ch-up' : p < 0 ? 'ch-down' : 'ch-flat'}">${p > 0 ? '▲' : p < 0 ? '▼' : ''} ${Math.abs(p)}%</span>`;
+  };
+  const side = (title, color, st) => {
+    if (!st.ranked.length) return `<div class="acb-side"><h4><i style="background:${color}"></i>${title}</h4><div class="an-city-empty">None in this city.</div></div>`;
+    const max = Math.max(1, ...st.ranked.map((r) => r.n));
+    return `<div class="acb-side"><h4><i style="background:${color}"></i>${title}</h4>
+      <div class="acb-kpis">
+        <div><b>${st.total.toLocaleString()}</b><span>${esc(RANGE_LABELS[state.range])}</span></div>
+        ${bounds ? `<div><b>${chip(st.total, st.prev) || 'n/a'}</b><span>vs. prior period (${(st.prev || 0).toLocaleString()})</span></div>` : ''}
+        <div><b>${st.thisWeek.toLocaleString()}</b><span>last 7 days</span></div>
+        <div><b>${st.ranked.length}</b><span>codes</span></div>
+      </div>
+      <div class="acb-bars">${st.ranked.slice(0, 10).map((r) => `
+        <div class="acb-bar" onclick="setView('map'); focusCourt(${Number(r.c.id)})" title="${esc(r.c.name)}">
+          <span class="nm">${esc(displayName(r.c))}</span><span class="n">${r.n.toLocaleString()}</span>
+          <span class="track"><i style="width:${Math.max(2, Math.round((r.n / max) * 100))}%;background:${color}"></i></span>
+        </div>`).join('')}${st.ranked.length > 10 ? `<div class="cp-sub">+ ${st.ranked.length - 10} more in the table below</div>` : ''}</div></div>`;
+  };
+  // Day of week across the city, within the range (or since complete tracking began).
+  const dowNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dow = Array(7).fill(0);
+  const from = bounds ? bounds[0] : '2026-04-07', to = bounds ? bounds[1] : laToday();
+  for (const c of inCity) {
+    const days = state.daily.get(String(c.id));
+    if (!days) continue;
+    for (const [d, v] of days) if (d >= from && d <= to) dow[new Date(d + 'T12:00:00Z').getUTCDay()] += v.human + (state.includeBots ? v.bot : 0);
+  }
+  const dowMax = Math.max(1, ...dow), dowSum = dow.reduce((a, b) => a + b, 0) || 1;
+  // Every code, with the prior-period comparison.
+  const len = bounds ? Math.round((Date.parse(bounds[1]) - Date.parse(bounds[0])) / 864e5) + 1 : 0;
+  const prevB = bounds ? [shiftDate(bounds[0], -len), shiftDate(bounds[0], -1)] : null;
+  const cityTotal = courts.total + trail.total;
+  const rows = [...courts.ranked, ...trail.ranked].sort((a, b) => b.n - a.n).map((r) => {
+    const prev = prevB ? countFor(r.c, prevB) : null;
+    const days = state.daily.get(String(r.c.id));
+    const last = days ? [...days.keys()].filter((d) => { const v = days.get(d); return v.human + (state.includeBots ? v.bot : 0) > 0; }).sort().at(-1) : null;
+    return `<tr onclick="setView('map'); focusCourt(${Number(r.c.id)})">
+      <td><b>${esc(displayName(r.c))}</b></td><td>${r.c.kind === 'trail' ? '<span class="type-badge trail">Trail Line</span>' : '<span class="type-badge court">Fitness Court</span>'}</td>
+      <td class="n"><b>${r.n.toLocaleString()}</b></td>${bounds ? `<td class="n">${(prev || 0).toLocaleString()}</td><td class="n">${chip(r.n, prev)}</td>` : ''}
+      <td class="n">${cityTotal ? Math.round((r.n / cityTotal) * 100) : 0}%</td><td class="n">${(r.c.officialScans || 0).toLocaleString()}</td>
+      <td>${last ? new Date(last + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : 'None yet'}</td></tr>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="cp-overview acb-overview" id="an-overview"><div class="cp-label">Overview</div>${cityOverview(state.anCity, courts, trail)}</div>
+    <div class="acb-grid">${side('Fitness Courts', 'var(--blue)', courts)}${side('Trail Lines', TL_MAGENTA, trail)}</div>
+    <div class="acb-row2">
+      <div class="acb-chart"><h4>Daily scans · ${esc(RANGE_LABELS[state.range])}</h4><canvas id="chart-city" height="90"></canvas></div>
+      <div class="acb-chart"><h4>By day of week</h4><div class="acb-dow">${[1, 2, 3, 4, 5, 6, 0].map((i) => `
+        <div><b>${dowNames[i]}</b><span class="track"><i style="width:${Math.round((dow[i] / dowMax) * 100)}%"></i></span><span>${Math.round((dow[i] / dowSum) * 100)}%</span></div>`).join('')}</div></div>
+    </div>
+    <div class="acb-table"><h4>Every code</h4><table>
+      <thead><tr><th>Name</th><th>Type</th><th class="n">${esc(RANGE_LABELS[state.range])}</th>${bounds ? '<th class="n">Prior period</th><th class="n">Change</th>' : ''}<th class="n">Share</th><th class="n">All time</th><th>Last scan</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+
+  // Stacked daily chart: courts vs trail lines.
+  const series = new Map();
+  for (const c of inCity) {
+    const days = state.daily.get(String(c.id));
+    if (!days) continue;
+    for (const [d, v] of days) {
+      if (d < from || d > to) continue;
+      const e = series.get(d) || { court: 0, trail: 0 };
+      e[c.kind === 'trail' ? 'trail' : 'court'] += v.human + (state.includeBots ? v.bot : 0);
+      series.set(d, e);
+    }
+  }
+  const labels = [];
+  for (let d = from; d <= to; d = shiftDate(d, 1)) labels.push(d);
+  charts.city = new Chart(document.getElementById('chart-city'), {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label: 'Fitness Courts', data: labels.map((d) => series.get(d)?.court || 0), backgroundColor: '#2563eb', borderRadius: 3, stack: 's' },
+      { label: 'Trail Lines', data: labels.map((d) => series.get(d)?.trail || 0), backgroundColor: TL_MAGENTA, borderRadius: 3, stack: 's' },
+    ] },
+    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
+      scales: { x: { stacked: true, ticks: { maxTicksLimit: 10 } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
+  });
+  loadCityAI(state.anCity, 'an-overview', () => state.view === 'analytics' && !!state.anCity);
+}
+
 function renderAnalytics() {
   destroyCharts();
+  renderCityBreakdown();
   const bounds = rangeBounds();
-  const courts = visibleCourts();
+  // With a city picked, the network charts below scope to it too.
+  const courts = state.anCity ? visibleCourts().filter((c) => cityKey(c) === state.anCity) : visibleCourts();
   const ids = new Set(courts.map((c) => String(c.id)));
 
   // Daily totals across visible courts
@@ -1543,6 +1730,7 @@ function renderAnalytics() {
 
 /* ═════════════════════════════ Interactions ════════════════════════════ */
 function setView(v) {
+  if (v === 'analytics' && state.view !== 'analytics' && state.cityPanel && !state.anCity) state.anCity = state.cityPanel;
   state.view = v;
   for (const t of ['map', 'list', 'analytics']) {
     document.getElementById('tab-' + t).classList.toggle('active', v === t);
