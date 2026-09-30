@@ -445,6 +445,43 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 @media (max-width: 1100px) { .eq-row { grid-template-columns: 1fr 1fr; } .eq-op { display: none; } .eq-total { grid-column: 1 / -1; } }
 @media (max-width: 700px) { .eq-row, .eq-pair { grid-template-columns: 1fr; } }
 
+
+/* ── Engagement: big type, color-washed cards, softer text ─────────────── */
+.eng-mode { --soft: #475569; --softer: #7c8aa0; color: var(--soft); }
+.eng-mode .an-city-head h2 { color: #334155; }
+.eng-mode .eq-head h3, .eng-mode .eng-sec h3 { font-size: 1.25rem; color: #334155; }
+.eng-mode .eq-head p, .eng-mode .eq-sub, .eng-mode .ep-sub, .eng-mode .ep-foot, .eng-mode .eng-sec span, .eng-mode .rw-tod-note, .eng-mode .eng-map-head span, .eng-mode .bar-sub { color: var(--softer); }
+.eng-mode .acb-chart h4, .eng-mode .acb-table h4, .eng-mode .eng-map-head h4, .eng-mode .ep-list-h, .eng-mode .eng-notes summary { color: #64748b; }
+/* 1. Bigger, bolder numbers */
+.eng-mode .eq-tile b { font-size: 3rem; letter-spacing: -0.04em; }
+.eng-mode .eq-total b { font-size: 3.6rem; letter-spacing: -0.04em; }
+.eng-mode .eq-lbl { font-size: 0.9rem; color: var(--c, #334155); }
+.eng-mode .eq-stat b { font-size: 3.2rem; letter-spacing: -0.04em; color: var(--c); }
+.eng-mode .eq-stat .eq-lbl { color: var(--c); font-size: 0.78rem; }
+.eng-mode .ep-big b { font-size: 3.6rem; letter-spacing: -0.045em; }
+.eng-mode .ep-big span { color: var(--pc); opacity: 0.85; }
+.eng-mode .ep-name { font-size: 1.1rem; color: var(--pc); }
+.eng-mode .eq-row { gap: 12px; }
+.eng-mode .eq-tile { padding: 18px 16px 14px; }
+/* 2. Each card washed in its own color */
+.eng-mode .eq-tile { background: color-mix(in srgb, var(--c) 9%, white); border-color: color-mix(in srgb, var(--c) 28%, white); }
+.eng-mode .eq-total { background: #2563eb; box-shadow: 0 6px 20px rgba(37,99,235,0.28); }
+.eng-mode .eq-total .eq-lbl { color: #fff; }
+.eng-mode .eq-total .eq-sub { color: rgba(255,255,255,0.82); }
+.eng-mode .eq-stat { background: color-mix(in srgb, var(--c) 7%, white); border-color: color-mix(in srgb, var(--c) 25%, white); }
+.eng-mode .eng-pillar { background: color-mix(in srgb, var(--pc) 7%, white); border-color: color-mix(in srgb, var(--pc) 25%, white); }
+.eng-mode .eng-pillar::before { height: 5px; }
+.eng-mode .ep-cell { background: #fff; border: 1px solid color-mix(in srgb, var(--pc) 18%, white); }
+.eng-mode .ep-cell b { color: var(--pc); }
+.eng-mode .ep-cell span { color: var(--softer); }
+.eng-mode .acb-bar .nm { color: var(--soft); }
+.eng-mode .acb-bar .n { color: #334155; }
+.eng-mode .acb-bar .track { background: color-mix(in srgb, var(--pc, #94a3b8) 12%, white); }
+.eng-mode .acb-table td { color: var(--soft); }
+.eng-mode .acb-table td b { color: #334155; }
+.eng-mode .rw-ai-body, .eng-mode .rw-ai-body p { color: var(--soft); }
+.eng-mode .rw-ai-body b { color: #1d4ed8; }
+.eng-mode .eng-chip b { color: #334155; }
 .eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.55; }
 .eng-notes summary { cursor: pointer; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
 .eng-notes ul { margin-top: 8px; }
@@ -2388,9 +2425,9 @@ function renderEngagement(body) {
       </div>
     </div>
     <div class="eq-pair">
-      <div class="eq-stat"><div class="eq-lbl">People within a 10 minute walk</div>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}
+      <div class="eq-stat" style="--c:#0d9488"><div class="eq-lbl">People within a 10 minute walk</div>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}
         <div class="eq-sub">${F.total.access != null ? `residents near a Fitness Court (${F.court.access.toLocaleString()}) or the Trail Line (${(F.trail.access || 0).toLocaleString()}), each counted once · 2020 Census` : noAcc}</div></div>
-      <div class="eq-stat"><div class="eq-lbl">${kcalLabel}</div>${F.total.kcal == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(F.total.kcal)}</b>`}
+      <div class="eq-stat" style="--c:#ea580c"><div class="eq-lbl">${kcalLabel}</div>${F.total.kcal == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(F.total.kcal)}</b>`}
         <div class="eq-sub">NFC estimate for the Fitness Courts (1.3M per court per year) · Trail Line and app: XX until the formula is set</div></div>
     </div>
     ${engMapCard(F)}
@@ -2478,6 +2515,7 @@ function renderAnalytics() {
   });
   document.getElementById('an-city-eyebrow').textContent = eng ? 'Engagement' : 'City breakdown';
   document.getElementById('an-raw-extra').style.display = eng ? 'none' : '';
+  document.querySelector('.an-city').classList.toggle('eng-mode', eng);
   renderCityBreakdown();
   if (eng) return;
   renderPilotSection();
