@@ -14,7 +14,22 @@ import {
   sendError,
   setCache,
 } from './_lib.js';
+import fs from 'node:fs';
 import { trailStationPositions, placeTrailCodes } from './_trail.js';
+
+// Court configuration from Salesforce (scripts/sync-configurations.mjs).
+let courtConfig = {};
+try { courtConfig = JSON.parse(fs.readFileSync(new URL('./_data/court-config.json', import.meta.url), 'utf8')); } catch {}
+const CONFIG_LABEL = { 'Fitness Court': 'Fitness Court', 'Fitness Court Studio': 'Studio', 'Fitness Court Studio +': 'Studio +' };
+const TRAIL_SIZE = { L: 'Large', M: 'Medium', S: 'Small' };
+function configurationOf(c) {
+  if (c.name.startsWith('TL-')) {
+    const m = c.name.match(/^TL-[A-Za-z]{2}-[^-]+-([LMS])(?:-|$)/i);
+    return m ? TRAIL_SIZE[m[1].toUpperCase()] : null;
+  }
+  const v = courtConfig[String(c.id)];
+  return v ? CONFIG_LABEL[v] || v : null;
+}
 
 const RECONCILE_TOLERANCE = 2; // R11: delta ≤ 2 = matches Uniqode
 // Complete per-scan history starts when the receive-scan webhook went live
@@ -84,6 +99,7 @@ export default async function handler(req, res) {
           id: c.id,
           name: c.name,
           kind: c.name.startsWith('TL-') ? 'trail' : 'court',
+          configuration: configurationOf(c),
           state: named.state,
           city: named.city,
           location: named.location,

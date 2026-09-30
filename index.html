@@ -132,6 +132,14 @@ header {
 .citypanel { top: 18px; right: 18px; bottom: 18px; width: 440px; max-width: calc(100% - 36px); overflow-y: auto; padding: 18px 18px 20px; z-index: 950; }
 .cp-mini { top: 18px; right: 18px; width: 440px; max-width: calc(100% - 36px); z-index: 950; display: flex; align-items: center; gap: 14px;
   padding: 12px 12px 12px 18px; cursor: pointer; transition: box-shadow 0.15s ease; }
+/* Collapsed: a compact pill, not a card. */
+.cp-mini { width: auto; padding: 7px 8px 7px 14px; gap: 10px; border-radius: 99px; }
+.cp-mini .cp-eyebrow { display: none; }
+.cp-mini-title { font-size: 0.86rem; }
+.cp-mini-stats { font-size: 0.8rem; gap: 9px; }
+.cp-mini-chev { width: 24px; height: 24px; border-radius: 99px; }
+a.tab { text-decoration: none; display: inline-flex; align-items: center; }
+.back-btn { padding: 8px 12px; }
 .cp-mini:hover { box-shadow: 0 4px 18px rgba(15,31,61,0.14); }
 .cp-mini:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .cp-mini-text { min-width: 0; }
@@ -392,6 +400,13 @@ header {
 .eng-notes ul { margin-top: 8px; }
 .eng-notes li { margin-left: 18px; }
 @media (max-width: 900px) { .eng-pillars, .eh-stats { grid-template-columns: 1fr; } .eh-stat { padding: 14px 0 0; border-left: none; border-top: 1px solid rgba(255,255,255,0.16); margin-top: 14px; } .eh-stat:first-child { border-top: none; margin-top: 0; padding-top: 0; } .eh-stat b { font-size: 2.5rem; } #eng-map { height: 420px; } }
+.list-tools { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.list-tools-sp { flex: 1; }
+.list-chip { border: 1px solid var(--border); background: var(--card); border-radius: 99px; padding: 7px 13px; font: 600 0.8rem 'Inter', sans-serif; color: var(--text-2); cursor: pointer; }
+.list-chip b { color: var(--red); margin-left: 3px; }
+.list-chip.on { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+.cfg { font-size: 0.74rem; font-weight: 700; background: #f1f4f9; color: var(--text-2); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+.cfg.none { background: none; color: var(--text-3); }
 .an-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .an-card { padding: 18px 20px; }
 .an-card.wide { grid-column: 1 / -1; }
@@ -514,10 +529,12 @@ header {
       <div class="brand-title">FC+TL QR Code Tracking</div>
     </div>
   </a>
+  <button class="hbtn back-btn" id="back-btn" onclick="history.back()" title="Back" style="display:none">← Back</button>
   <nav class="tabs">
     <button class="tab active" id="tab-map" onclick="setView('map')">Map</button>
     <button class="tab" id="tab-list" onclick="setView('list')">List</button>
     <button class="tab" id="tab-analytics" onclick="setView('analytics')">Analytics</button>
+    <a class="tab" id="tab-report" href="/report?pilot=las-vegas" title="Las Vegas report (internal only: raw numbers)">Report</a>
   </nav>
   <div class="hbtn" style="cursor:default">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -599,13 +616,13 @@ header {
         <div class="kpi-icon" style="background:#e7f6ec;color:var(--green)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg>
         </div>
-        <div><div class="kpi-num" style="color:var(--green)" id="kpi-active">—</div><div class="kpi-label">With Scans</div><div class="kpi-sub" id="kpi-active-sub">—</div></div>
+        <div><div class="kpi-num" style="color:var(--green)" id="kpi-active">—</div><div class="kpi-label">QR Codes Scanned</div><div class="kpi-sub" id="kpi-active-sub">—</div></div>
       </div>
       <div class="kpi">
         <div class="kpi-icon" style="background:#efeafb;color:var(--purple)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21v-6M9 21V9M15 21v-9M21 21V3"/></svg>
         </div>
-        <div><div class="kpi-num" style="color:var(--purple)" id="kpi-scans">—</div><div class="kpi-label">Total Scans</div><div class="kpi-sub" id="kpi-scans-sub">All Time</div></div>
+        <div><div class="kpi-num" style="color:var(--purple)" id="kpi-scans">—</div><div class="kpi-label">Total QR Scans</div><div class="kpi-sub" id="kpi-scans-sub">All Time</div></div>
       </div>
       <div class="kpi">
         <div class="kpi-icon" style="background:#e8effc;color:var(--blue)">
@@ -613,7 +630,7 @@ header {
         </div>
         <div style="flex:1">
           <div class="kpi-num" style="color:var(--blue)" id="kpi-visible">—</div>
-          <div class="kpi-label">Visible</div>
+          <div class="kpi-label">QR Codes Shown</div>
           <div class="kpi-sub">On the map</div>
         </div>
       </div>
@@ -676,12 +693,18 @@ header {
 
   <!-- LIST VIEW -->
   <div id="view-list" style="display:none">
+    <div class="list-tools">
+      <button class="list-chip" id="never-chip" onclick="toggleNeverScanned()" title="Fitness Court codes live for 2+ weeks with no scans at all. Usually a sign that isn't up yet or a code that doesn't work.">⚠ Never scanned <b id="never-n">0</b></button>
+      <span class="list-tools-sp"></span>
+      <button class="hbtn" onclick="exportListCSV()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Export CSV</button>
+    </div>
     <div class="card list-card">
       <table class="list-table">
         <thead>
           <tr>
             <th onclick="setSort('location')">Name <span class="arrow" id="ar-location"></span></th>
             <th onclick="setSort('kind')">Type <span class="arrow" id="ar-kind"></span></th>
+            <th onclick="setSort('configuration')">Configuration <span class="arrow" id="ar-configuration"></span></th>
             <th onclick="setSort('city')">City <span class="arrow" id="ar-city"></span></th>
             <th onclick="setSort('state')">State <span class="arrow" id="ar-state"></span></th>
             <th onclick="setSort('scans')" style="text-align:right">Scans <span class="arrow" id="ar-scans"></span></th>
@@ -809,7 +832,9 @@ const state = {
   customFrom: null, customTo: null,
   base: 'light',          // light | dark | satellite
   showPins: true,         // scan-sized court markers
-  showHeat: false,        // scan heat overlay
+  showHeat: false,        // scan heat overlay (pins OR heat, never both)
+  showParks: false,       // basemap parks tinted green
+  showLabels: true,       // basemap place labels
   view: 'map',
   search: '',
   stateFilter: '',
@@ -821,6 +846,7 @@ const state = {
   anMode: 'raw',         // Analytics: 'raw' QR scans | 'engagement'
   openCities: new Set(),
   sortKey: 'scans', sortDir: -1,
+  neverOnly: false,      // List: only codes that have never been scanned
 };
 
 /* ═════════════════════════════ Date helpers ════════════════════════════ */
@@ -959,6 +985,35 @@ function setBasemap(type) {
     if (t.labels) labelLayer = L.tileLayer(t.labels, { maxNativeZoom: t.native, maxZoom: 19, pane: 'labels' }).addTo(map);
   }
   document.getElementById('map').classList.toggle('dark-base', isDark);
+  applyBaseOptions();
+}
+// Basemap extras: place labels on/off, and parks tinted green.
+function applyBaseOptions() {
+  if (labelLayer) labelLayer.setOpacity(state.showLabels ? 1 : 0);
+  const gl = tileLayer && tileLayer.getMaplibreMap && tileLayer.getMaplibreMap();
+  if (!gl) return;
+  const run = () => {
+    for (const l of gl.getStyle().layers) {
+      if (l.type === 'symbol') gl.setLayoutProperty(l.id, 'visibility', state.showLabels ? 'visible' : 'none');
+    }
+    const src = Object.keys(gl.getStyle().sources).find((k) => gl.getStyle().sources[k].type === 'vector');
+    // City parks sit in landcover (park, garden, recreation ground) and
+    // landuse (pitch, playground); large public land is the `park` layer.
+    const PARK_LAYERS = [
+      ['nfc-parks', 'park', null],
+      ['nfc-parks-lc', 'landcover', ['in', ['get', 'subclass'], ['literal', ['park', 'garden', 'recreation_ground', 'village_green']]]],
+      ['nfc-parks-lu', 'landuse', ['in', ['get', 'class'], ['literal', ['pitch', 'playground']]]],
+    ];
+    if (src && !gl.getLayer('nfc-parks')) {
+      const firstSymbol = gl.getStyle().layers.find((l) => l.type === 'symbol')?.id;
+      for (const [id, layer, filter] of PARK_LAYERS) {
+        gl.addLayer({ id, type: 'fill', source: src, 'source-layer': layer, ...(filter ? { filter } : {}),
+          paint: { 'fill-color': isDark ? '#2f6b3f' : '#7cc98c', 'fill-opacity': isDark ? 0.55 : 0.55 } }, firstSymbol);
+      }
+    }
+    for (const [id] of PARK_LAYERS) if (gl.getLayer(id)) gl.setLayoutProperty(id, 'visibility', state.showParks ? 'visible' : 'none');
+  };
+  if (gl.isStyleLoaded()) run(); else gl.once('load', run);
 }
 setBasemap(state.base);
 map.on('zoomend', () => { if (state.showHeat) renderMap(); });
@@ -977,7 +1032,12 @@ const LayersControl = L.Control.extend({
           `<button type="button" data-base="${k}" class="${state.base === k ? 'on' : ''}" aria-pressed="${state.base === k}">${t.label}</button>`).join('')}
       </div>
       <div class="lc-sep"></div>
-      ${chip('pins', 'Pins', state.showPins)}${chip('heat', 'Heat', state.showHeat)}`;
+      <div class="lc-seg" role="group" aria-label="Scans shown as">
+        <button type="button" data-view="pins" class="${state.showPins ? 'on' : ''}" aria-pressed="${state.showPins}">Pins</button>
+        <button type="button" data-view="heat" class="${state.showHeat ? 'on' : ''}" aria-pressed="${state.showHeat}">Heat</button>
+      </div>
+      <div class="lc-sep"></div>
+      ${chip('parks', 'Parks', state.showParks)}${chip('labels', 'Labels', state.showLabels)}`;
     el.addEventListener('click', (ev) => {
       const b = ev.target.closest('button');
       if (!b) return;
@@ -986,12 +1046,19 @@ const LayersControl = L.Control.extend({
         el.querySelectorAll('[data-base]').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
         setBasemap(state.base);
         renderMap();
+      } else if (b.dataset.view) {
+        // Pins or heat, one at a time.
+        state.showPins = b.dataset.view === 'pins';
+        state.showHeat = !state.showPins;
+        el.querySelectorAll('[data-view]').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+        renderMap(); renderLegend();
       } else if (b.dataset.layer) {
-        const key = b.dataset.layer === 'pins' ? 'showPins' : 'showHeat';
+        const key = b.dataset.layer === 'parks' ? 'showParks' : 'showLabels';
         state[key] = !state[key];
         b.classList.toggle('on', state[key]);
         b.setAttribute('aria-pressed', state[key]);
-        renderMap(); renderLegend();
+        applyBaseOptions();
+        if (key === 'showLabels' && state.showHeat) renderMap();
       }
     });
     return el;
@@ -1013,8 +1080,8 @@ function bucketFor(n) { return BUCKETS.find((b) => n <= b.max); }
 /* ══════════════════════════════ Rendering ══════════════════════════════ */
 const KIND_TEXT = {
   all:   { total: 'QR Codes',          sub: 'Fitness Courts + Trail Lines', top: 'Top 3' },
-  court: { total: 'Fitness Courts',    sub: 'Total Unique QR Codes Printed', top: 'Top 3 Fitness Courts' },
-  trail: { total: 'Trail Line Codes',  sub: 'QR codes on Trail Line signs',  top: 'Top 3 Trail Line Codes' },
+  court: { total: 'Fitness Court QR Codes',    sub: 'Total Unique QR Codes Printed', top: 'Top 3 Fitness Courts' },
+  trail: { total: 'Trail Line QR Codes',  sub: 'QR codes on Trail Line signs',  top: 'Top 3 Trail Line Codes' },
 };
 function setKind(k) {
   state.kind = k;
@@ -1177,7 +1244,7 @@ function renderMap() {
       }).addTo(map));
     }
     // Names on the hot spots when zoomed in and pins are off.
-    if (!state.showPins && zoom >= 7) {
+    if (!state.showPins && state.showLabels && zoom >= 7) {
       heatLabels = L.layerGroup().addTo(map);
       courts.forEach((c, i) => {
         if (!counts[i]) return;
@@ -1217,6 +1284,52 @@ function focusCourt(id) {
   const m = openMarkers.get(id);
   if (m) setTimeout(() => m.openPopup(), 250);
 }
+
+// One code's overview: the city panel shows it while that court's popup is
+// open (Trent: the overview should follow a clicked court, not just a city).
+function courtOverview(c) {
+  const today = laToday();
+  const sum = (a, b) => countFor(c, [shiftDate(today, -a), shiftDate(today, -b)]);
+  const tw = sum(6, 0), lw = sum(13, 7);
+  const recent = sum(55, 0), before = sum(111, 56); // last 8 weeks vs the 8 before
+  const all = countFor(c, null);
+  const days = state.daily.get(String(c.id));
+  const active = days ? [...days.entries()].filter(([, v]) => v.human + (state.includeBots ? v.bot : 0) > 0).map(([d]) => d).sort() : [];
+  const last = active.at(-1);
+  const dow = Array(7).fill(0);
+  for (const [d, v] of days || []) if (d >= '2026-04-07') dow[new Date(d + 'T12:00:00Z').getUTCDay()] += v.human + (state.includeBots ? v.bot : 0);
+  const peak = Math.max(...dow);
+  const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const peers = state.courts.filter((x) => cityKey(x) === cityKey(c) && x.kind === c.kind).sort((a, b) => (b.officialScans || 0) - (a.officialScans || 0));
+  const rank = peers.findIndex((x) => x.id === c.id) + 1;
+  const out = [];
+  out.push(`<b>${esc(displayName(c))}</b> has ${all.toLocaleString()} scans all time${peers.length > 1 ? `, #${rank} of ${peers.length} ${c.kind === 'trail' ? 'Trail Line codes' : 'Fitness Courts'} in ${esc(c.city || 'the city')}` : ''}.`);
+  out.push(tw === lw ? `This week is level with last week (${tw}).` : `This week ${tw > lw ? 'is up' : 'is down'} to ${tw} from ${lw} last week.`);
+  if (recent + before >= 8) {
+    const p = pctChange(recent, before);
+    out.push(p == null ? 'Scans have picked up over the last 8 weeks after a quiet stretch.'
+      : Math.abs(p) < 10 ? `Over the last 16 weeks it's holding steady (${recent} in the latest 8 weeks vs ${before} in the 8 before).`
+      : `Over the last 16 weeks it's trending ${p > 0 ? 'up' : 'down'} ${Math.abs(p)}% (${recent} in the latest 8 weeks vs ${before} before).`);
+  }
+  if (peak > 0) out.push(`Busiest day: ${names[dow.indexOf(peak)]}.`);
+  if (!all) out.push(c.kind === 'trail' ? 'No scans yet.' : 'Never scanned. Worth checking the sign and the code.');
+  else if (last && Date.parse(today) - Date.parse(last) > 28 * 864e5) out.push(`Last scan ${new Date(last + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}, over four weeks ago. Worth checking the sign and the code.`);
+  return out.join(' ');
+}
+let courtFocus = null;
+map.on('popupopen', (ev) => {
+  const id = [...openMarkers.entries()].find(([, m]) => m.getPopup && m.getPopup() === ev.popup)?.[0];
+  const c = id != null && state.courts.find((x) => x.id === id);
+  const box = document.getElementById('cp-overview');
+  if (!c || !box || cityKey(c) !== state.cityPanel) return;
+  courtFocus = c.id;
+  box.innerHTML = `<div class="cp-label">Overview · ${esc(displayName(c))} · <a href="#" onclick="map.closePopup(); return false">back to city</a></div><p>${courtOverview(c)}</p>`;
+});
+map.on('popupclose', () => {
+  if (courtFocus == null) return;
+  courtFocus = null;
+  if (state.cityPanel) renderCityPanel();
+});
 
 function renderLegend() {
   const el = document.getElementById('legend');
@@ -1311,6 +1424,7 @@ function openCityPanel(key) {
   state.cityHidden = false;
   if (state.view !== 'map') setView('map');
   renderCityPanel();
+  pushRoute();
   const pts = state.courts.filter((c) => cityKey(c) === key && plottable(c));
   if (pts.length) {
     // Leave room on the right for the panel itself.
@@ -1323,6 +1437,7 @@ function closeCityPanel() {
   state.cityPanel = null;
   state.cityHidden = false;
   renderCityPanel();
+  pushRoute();
 }
 function hideCityPanel() { state.cityHidden = true; renderCityPanel(); }
 function showCityPanel() { state.cityHidden = false; renderCityPanel(); }
@@ -1424,7 +1539,28 @@ function sideHTML(title, color, st, emptyText) {
   </div>`;
 }
 
+// City-limits outline on the map while a city is open (Census TIGERweb).
+let boundaryLayer = null, boundaryKey = null;
+const boundaryCache = new Map();
+function syncCityBoundary() {
+  const key = state.cityPanel;
+  if (key === boundaryKey) return;
+  boundaryKey = key;
+  if (boundaryLayer) { map.removeLayer(boundaryLayer); boundaryLayer = null; }
+  const m = key && key.match(/^(.*),\s*([A-Z]{2})$/);
+  if (!m) return;
+  if (!boundaryCache.has(key)) {
+    boundaryCache.set(key, fetch(`/api/boundary?city=${encodeURIComponent(m[1])}&state=${m[2]}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  }
+  boundaryCache.get(key).then((fc) => {
+    if (boundaryKey !== key || !fc?.features?.length) return;
+    boundaryLayer = L.geoJSON(fc, { interactive: false,
+      style: () => ({ color: isDark ? '#e2e8f0' : '#0f1f3d', weight: 2, opacity: 0.7, dashArray: '6 5', fillColor: '#2563eb', fillOpacity: 0.035 }) }).addTo(map);
+    boundaryLayer.bringToBack();
+  });
+}
 function renderCityPanel() {
+  syncCityBoundary();
   const el = document.getElementById('citypanel');
   const callout = document.querySelector('.callout');
   const mini = document.getElementById('cp-mini');
@@ -1655,7 +1791,7 @@ function openCityAnalytics() {
   setView('analytics');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function setAnCity(key) { state.anCity = key; renderAnalytics(); }
+function setAnCity(key) { state.anCity = key; renderAnalytics(); pushRoute(); }
 
 function renderCityBreakdown() {
   const sel = document.getElementById('an-city-select');
@@ -2220,6 +2356,35 @@ function renderAnalytics() {
 }
 
 /* ═════════════════════════════ Interactions ════════════════════════════ */
+/* ── History: tabs and cities are Back-able ─────────────────────────────── */
+let applyingRoute = false, navDepth = 0;
+function routeHash() {
+  const city = state.view === 'analytics' ? state.anCity : state.view === 'map' ? state.cityPanel : '';
+  return '#' + state.view + (city ? ':' + encodeURIComponent(city) : '');
+}
+function pushRoute() {
+  if (applyingRoute) return;
+  const h = routeHash();
+  if (location.hash === h || (!location.hash && h === '#map')) return;
+  history.pushState({ nfc: ++navDepth }, '', h);
+  document.getElementById('back-btn').style.display = '';
+}
+function applyRoute() {
+  applyingRoute = true;
+  try {
+    const [v, c] = location.hash.slice(1).split(':');
+    const view = ['map', 'list', 'analytics'].includes(v) ? v : 'map';
+    const city = c ? decodeURIComponent(c) : '';
+    if (view === 'analytics') { state.anCity = city; state.cityPanel = null; renderCityPanel(); }
+    if (view === 'map') { if (city) openCityPanel(city); else closeCityPanel(); }
+    setView(view);
+  } finally { applyingRoute = false; }
+}
+addEventListener('popstate', (ev) => {
+  navDepth = ev.state?.nfc || 0;
+  document.getElementById('back-btn').style.display = navDepth > 0 ? '' : 'none';
+  applyRoute();
+});
 function setView(v) {
   if (v === 'analytics' && state.view !== 'analytics' && state.cityPanel && !state.anCity) state.anCity = state.cityPanel;
   state.view = v;
@@ -2230,19 +2395,21 @@ function setView(v) {
   if (v === 'map') { map.invalidateSize(); renderMap(); }
   else if (v === 'list') renderList();
   else renderAnalytics();
+  pushRoute();
 }
 
 /* ── List view ── */
-function setSort(key) {
-  if (state.sortKey === key) state.sortDir = -state.sortDir;
-  else { state.sortKey = key; state.sortDir = key === 'scans' ? -1 : 1; }
-  renderList();
+// A Fitness Court code that's been live two weeks with no scans at all is
+// usually a sign that isn't up or a code that doesn't work (Allison's check).
+function neverScanned(c) {
+  return c.kind !== 'trail' && c.locationStatus !== 'mobile' && !(c.officialScans || 0)
+    && c.created && Date.now() - Date.parse(c.created) > 14 * 864e5;
 }
-function renderList() {
+function toggleNeverScanned() { state.neverOnly = !state.neverOnly; renderList(); }
+function listRows() {
   const bounds = rangeBounds();
-  const rows = visibleCourts().map((c) => ({
-    c, scans: countFor(c, bounds), status: c.locationStatus,
-  }));
+  let rows = visibleCourts().map((c) => ({ c, scans: countFor(c, bounds), status: c.locationStatus }));
+  if (state.neverOnly) rows = rows.filter((r) => neverScanned(r.c));
   const k = state.sortKey, dir = state.sortDir;
   const ord = { verified: 0, approx: 1, missing: 2 };
   rows.sort((a, b) => {
@@ -2252,7 +2419,30 @@ function renderList() {
     else { va = (a.c[k] || '').toLowerCase(); vb = (b.c[k] || '').toLowerCase(); }
     return (va < vb ? -1 : va > vb ? 1 : 0) * dir;
   });
-  for (const col of ['location', 'kind', 'city', 'state', 'scans', 'status']) {
+  return rows;
+}
+function exportListCSV() {
+  const cell = (v) => { const t = String(v ?? ''); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const head = ['Name', 'Type', 'Configuration', 'City', 'State', `Scans (${RANGE_LABELS[state.range]})`, 'All-time scans', 'Location', 'Never scanned', 'Created', 'QR code ID', 'QR URL'];
+  const lines = listRows().map((r) => [displayName(r.c), r.c.kind === 'trail' ? 'Trail Line' : 'Fitness Court', r.c.configuration || '', r.c.city || '', r.c.state || '',
+    r.scans, r.c.officialScans || 0, r.status, neverScanned(r.c) ? 'yes' : '', (r.c.created || '').slice(0, 10), r.c.id, r.c.url || ''].map(cell).join(','));
+  const blob = new Blob([[head.map(cell).join(','), ...lines].join('\n') + '\n'], { type: 'text/csv' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `fc-tl-qr-codes-${laToday()}.csv` });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function setSort(key) {
+  if (state.sortKey === key) state.sortDir = -state.sortDir;
+  else { state.sortKey = key; state.sortDir = key === 'scans' ? -1 : 1; }
+  renderList();
+}
+function renderList() {
+  const rows = listRows();
+  const k = state.sortKey, dir = state.sortDir;
+  const never = visibleCourts().filter(neverScanned).length;
+  document.getElementById('never-n').textContent = never;
+  document.getElementById('never-chip').classList.toggle('on', !!state.neverOnly);
+  for (const col of ['location', 'kind', 'configuration', 'city', 'state', 'scans', 'status']) {
     document.getElementById('ar-' + col).textContent = k === col ? (dir === 1 ? '▲' : '▼') : '';
   }
   const badge = { verified: '<span class="loc-badge verified">✓ Verified</span>',
@@ -2265,8 +2455,9 @@ function renderList() {
   const totalScans = rows.reduce((s, r) => s + r.scans, 0);
   document.getElementById('list-body').innerHTML = rows.map((r) => `
     <tr onclick="focusCourt(${r.c.id})">
-      <td><b>${esc(displayName(r.c))}</b></td>
+      <td><b>${esc(displayName(r.c))}</b>${neverScanned(r.c) ? ' <span class="loc-badge missing" title="Live 2+ weeks, no scans: check the sign and code">Never scanned</span>' : ''}</td>
       <td>${type(r.c)}</td>
+      <td>${r.c.configuration ? `<span class="cfg">${esc(r.c.configuration)}</span>` : '<span class="cfg none">—</span>'}</td>
       <td>${esc(r.c.city || '—')}</td>
       <td>${esc(r.c.state || '—')}</td>
       <td class="num">${r.scans.toLocaleString()}</td>
@@ -2275,6 +2466,7 @@ function renderList() {
     <tr class="total-row">
       <td>Total</td>
       <td>${codeCountLabel(rows.map((r) => r.c))}</td>
+      <td></td>
       <td>${rows.length} codes</td>
       <td>${esc(state.stateFilter || 'All states')}</td>
       <td class="num">${totalScans.toLocaleString()}</td>
@@ -2331,7 +2523,6 @@ function goHome() {
   document.getElementById('f-search').value = '';
   document.getElementById('f-range').value = 'all';
   document.getElementById('custom-range').style.display = 'none';
-  history.replaceState(null, '', location.pathname);
   map.closePopup();
   setKind('all');          // also repopulates the State select and re-renders
   document.getElementById('f-state').value = '';
@@ -2347,8 +2538,9 @@ function openAbout() { document.getElementById('about-bg').style.display = 'flex
 /* ═══════════════════════════════ Boot ══════════════════════════════════ */
 document.getElementById('header-date').textContent =
   new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-if (['#list', '#analytics'].includes(location.hash)) setView(location.hash.slice(1));
-loadData(false);
+// Deep links (#analytics:Las%20Vegas%2C%20NV) apply once the codes are loaded.
+{ const v = location.hash.slice(1).split(':')[0]; if (['list', 'analytics'].includes(v)) { applyingRoute = true; setView(v); applyingRoute = false; } }
+loadData(false).then(() => { if (location.hash.includes(':')) applyRoute(); });
 </script>
 </body>
 </html>
