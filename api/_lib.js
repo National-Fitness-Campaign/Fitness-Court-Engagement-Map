@@ -89,7 +89,18 @@ export function parseLocation(metadata) {
 // Best-effort display parsing of the QR-{ST}-{City}-{Location} naming convention.
 // Regional batches like QR-TX-DFW-GrandPrairie-Tyre are split to their real
 // city (Grand Prairie) so each site ranks and plots individually.
+// QR-name "states" that aren't the court's state: QR-SF-SanFranciscoCA-* is San Francisco, CA.
+const STATE_ALIAS = { SF: 'CA' };
+
 export function parseName(name) {
+  const r = parseNameRaw(name);
+  const state = STATE_ALIAS[r.state] || r.state;
+  // "San Francisco CA" (state baked into the city segment) → "San Francisco".
+  const city = state ? r.city.replace(new RegExp('\\s+' + state + '$'), '') : r.city;
+  return { ...r, state, city };
+}
+
+function parseNameRaw(name) {
   const spaced = (s) =>
     s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim();
   const parts = name.split('-');
