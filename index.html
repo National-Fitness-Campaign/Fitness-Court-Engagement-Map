@@ -366,39 +366,6 @@ header {
     <button onclick="loadData(true)">Retry</button>
   </div>
 
-  <!-- KPI cards -->
-  <div class="kpis">
-    <div class="card kpi">
-      <div class="kpi-icon" style="background:#e8effc;color:var(--blue)">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1v1h-1zM14 20h1v1h-1zM18 18h3v3h-3z"/></svg>
-      </div>
-      <div><div class="kpi-num" style="color:var(--blue)" id="kpi-total">—</div><div class="kpi-label" id="kpi-total-label">QR Codes</div><div class="kpi-sub" id="kpi-total-sub">Fitness Courts + Trail Lines</div></div>
-    </div>
-    <div class="card kpi">
-      <div class="kpi-icon" style="background:#e7f6ec;color:var(--green)">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg>
-      </div>
-      <div><div class="kpi-num" style="color:var(--green)" id="kpi-active">—</div><div class="kpi-label">With Scans</div><div class="kpi-sub" id="kpi-active-sub">—</div></div>
-    </div>
-    <div class="card kpi">
-      <div class="kpi-icon" style="background:#efeafb;color:var(--purple)">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21v-6M9 21V9M15 21v-9M21 21V3"/></svg>
-      </div>
-      <div><div class="kpi-num" style="color:var(--purple)" id="kpi-scans">—</div><div class="kpi-label">Total Scans</div><div class="kpi-sub" id="kpi-scans-sub">All Time</div></div>
-    </div>
-    <div class="card kpi">
-      <div class="kpi-icon" style="background:#e8effc;color:var(--blue)">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      </div>
-      <div style="flex:1">
-        <div class="kpi-num" style="color:var(--blue)" id="kpi-visible">—</div>
-        <div class="kpi-label">Visible</div>
-        <div class="kpi-sub">Courts On Map</div>
-        <button class="unmapped-btn" id="unmapped-btn" onclick="openUnmapped()" style="display:none">⚠ <span id="unmapped-count">0</span> unmapped — verify</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Filter bar -->
   <div class="card filterbar">
     <div class="field">
@@ -441,6 +408,39 @@ header {
     <div class="bots-pill on" id="bots-pill" onclick="toggleBots()" title="Bot scans are identified by Uniqode (isBotScan). Including them matches the Uniqode dashboard totals exactly; excluding them shows real human engagement only.">
       <span class="dot"></span>
       <span id="bots-label">Bot scans: Included (matches Uniqode)</span>
+    </div>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpis">
+    <div class="card kpi">
+      <div class="kpi-icon" style="background:#e8effc;color:var(--blue)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1v1h-1zM14 20h1v1h-1zM18 18h3v3h-3z"/></svg>
+      </div>
+      <div><div class="kpi-num" style="color:var(--blue)" id="kpi-total">—</div><div class="kpi-label" id="kpi-total-label">QR Codes</div><div class="kpi-sub" id="kpi-total-sub">Fitness Courts + Trail Lines</div></div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-icon" style="background:#e7f6ec;color:var(--green)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg>
+      </div>
+      <div><div class="kpi-num" style="color:var(--green)" id="kpi-active">—</div><div class="kpi-label">With Scans</div><div class="kpi-sub" id="kpi-active-sub">—</div></div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-icon" style="background:#efeafb;color:var(--purple)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21v-6M9 21V9M15 21v-9M21 21V3"/></svg>
+      </div>
+      <div><div class="kpi-num" style="color:var(--purple)" id="kpi-scans">—</div><div class="kpi-label">Total Scans</div><div class="kpi-sub" id="kpi-scans-sub">All Time</div></div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-icon" style="background:#e8effc;color:var(--blue)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div style="flex:1">
+        <div class="kpi-num" style="color:var(--blue)" id="kpi-visible">—</div>
+        <div class="kpi-label">Visible</div>
+        <div class="kpi-sub">Courts On Map</div>
+        <button class="unmapped-btn" id="unmapped-btn" onclick="openUnmapped()" style="display:none">⚠ <span id="unmapped-count">0</span> unmapped — verify</button>
+      </div>
     </div>
   </div>
 
@@ -831,7 +831,8 @@ function populateStateFilter() {
   const sel = document.getElementById('f-state');
   const current = state.stateFilter;
   const pool = state.kind === 'all' ? state.courts : state.courts.filter((c) => c.kind === state.kind);
-  const states = [...new Set(pool.map((c) => c.state).filter(Boolean))].sort();
+  const NOT_STATES = new Set(['PH', 'SF']);
+  const states = [...new Set(pool.map((c) => c.state).filter((st) => /^[A-Z]{2}$/.test(st || '') && !NOT_STATES.has(st)))].sort();
   sel.innerHTML = '<option value="">All States</option>' +
     states.map((s) => {
       const n = pool.filter((c) => c.state === s).length;
