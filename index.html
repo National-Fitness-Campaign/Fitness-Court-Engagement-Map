@@ -184,6 +184,7 @@ header {
 .list-table .num { font-weight: 800; text-align: right; }
 .loc-badge { font-size: 0.66rem; font-weight: 700; border-radius: 99px; padding: 3px 9px; white-space: nowrap; }
 .loc-badge.verified { background: #e7f6ec; color: #15803d; }
+.loc-source { font-size: 0.72rem; color: var(--green); font-weight: 600; margin-top: 6px; }
 .loc-badge.approx { background: #fef3c7; color: #92400e; }
 .loc-badge.missing { background: #fee2e2; color: #991b1b; }
 
@@ -588,6 +589,8 @@ function countFor(court, bounds) {
   return sum;
 }
 
+const escapeAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
 /* ═════════════════════════════ Data loading ════════════════════════════ */
 async function loadData(isRefresh) {
   const btn = document.getElementById('refresh-btn');
@@ -764,7 +767,11 @@ function popupHTML(court, count) {
       <input id="pc-addr-${court.id}" placeholder="…or street address">
       <button onclick="confirmFromPopup(${court.id})">Save exact location</button>
     </div>`;
-  const approxBlock = court.locationStatus === 'approx'
+  // Salesforce-sourced pins are corrected in Salesforce, not here — an edit
+  // written to Uniqode would be overridden on the next sync.
+  const approxBlock = court.locationSource === 'salesforce'
+    ? `<div class="loc-source" title="${escapeAttr(court.sfSiteName || '')}">✓ Location from Salesforce</div>`
+    : court.locationStatus === 'approx'
     ? `<div><span class="recon warn">≈ Approximate</span>
        <button class="popup-toggle" onclick="togglePopupForm(${court.id})">Confirm location ▾</button></div>${form}`
     : `<div><button class="popup-toggle subtle" onclick="togglePopupForm(${court.id})">✎ edit location</button></div>${form}`;

@@ -29,14 +29,17 @@ export default async function handler(req, res) {
     // so the map still loads instead of 502ing.
     const warnings = [];
     const soft = (p, label) => p.catch((err) => { warnings.push(`${label}: ${err.message}`); return null; });
-    const [codes, totalsRows, suggestionRows] = await Promise.all([
+    const [codes, totalsRows, suggestionRows, linkRows] = await Promise.all([
       fetchAllQRCodes(),
       soft(supabaseSelect('scan_totals?select=qr_id,human_scans,bot_scans'), 'scan_totals'),
       soft(supabaseSelect('qr_location_suggestions?select=qr_id,lat,lon,source'), 'suggestions'),
+      // Salesforce Site__c coordinates, synced by scripts/sync-salesforce-locations.mjs.
+      soft(supabaseSelect('qr_site_links?select=qr_id,sf_site_id,sf_site_name,lat,lon&lat=not.is.null'), 'qr_site_links'),
     ]);
     const archiveOk = totalsRows !== null;
     const totals = totalsRows || [];
     const suggestions = suggestionRows || [];
+    const siteById = new Map((linkRows || []).map((l) => [String(l.qr_id), l]));
 
     const totalsById = new Map(totals.map((t) => [String(t.qr_id), t]));
     const suggestionById = new Map(suggestions.map((s) => [String(s.qr_id), s]));
@@ -52,13 +55,17 @@ export default async function handler(req, res) {
         const official = c.scans ?? 0;
         const delta = official - computedAll;
         const preArchive = (c.created || '').slice(0, 10) < ARCHIVE_START;
-        // verified = exact coords from Uniqode metadata (human-confirmed);
-        // approx   = geocoded from the code's name, awaiting confirmation;
-        // missing  = no usable position at all.
+        // Location precedence:
+        //   salesforce = the court's Site__c geo location (source of truth)
+        //   uniqode    = exact coords hand-entered in Uniqode metadata
+        //   geocoded   = guessed from the code's name, awaiting confirmation
+        // locationStatus keeps the UI's three states: verified | approx | missing.
+        const site = siteById.get(String(c.id));
         const suggestion = suggestionById.get(String(c.id));
-        const locationStatus = loc.hasLocation ? 'verified' : suggestion ? 'approx' : 'missing';
-        const lat = loc.hasLocation ? loc.lat : suggestion ? suggestion.lat : null;
-        const lon = loc.hasLocation ? loc.lon : suggestion ? suggestion.lon : null;
+        const locationSource = site ? 'salesforce' : loc.hasLocation ? 'uniqode' : suggestion ? 'geocoded' : null;
+        const locationStatus = locationSource === 'geocoded' ? 'approx' : locationSource ? 'verified' : 'missing';
+        const lat = site ? site.lat : loc.hasLocation ? loc.lat : suggestion ? suggestion.lat : null;
+        const lon = site ? site.lon : loc.hasLocation ? loc.lon : suggestion ? suggestion.lon : null;
         return {
           id: c.id,
           name: c.name,
@@ -71,8 +78,11 @@ export default async function handler(req, res) {
           lat,
           lon,
           address: loc.address,
-          hasLocation: loc.hasLocation,
+          hasLocation: locationStatus === 'verified',
           locationStatus,
+          locationSource,
+          sfSiteId: site?.sf_site_id ?? null,
+          sfSiteName: site?.sf_site_name ?? null,
           officialScans: official,
           humanScans: t.human_scans,
           botScans: t.bot_scans,

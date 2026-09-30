@@ -3,8 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "NFC Fitness Court Tracking — exact QR scan data from Uniqode",
+  "description": "NFC Fitness Court Tracking \u2014 exact QR scan data from Uniqode",
   "scripts": {
-    "test:api": "node scripts/test-api.js"
+    "test:api": "node scripts/test-api.js",
+    "sync:locations": "node scripts/sync-salesforce-locations.mjs"
   }
 }

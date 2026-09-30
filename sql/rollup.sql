@@ -102,3 +102,22 @@ grant select on public.scan_daily to service_role;
 -- scan_events_clean is kept as the slow, from-scratch reference. To audit:
 --   select * from scan_daily_rollup except select qr_id, scan_date_la, is_bot, count(*)::int
 --   from scan_events_clean group by 1,2,3;   -- expect 0 rows
+
+-- ── qr_site_links (migration: engagement_map_qr_site_links) ────────────────
+-- Uniqode QR code -> Salesforce Site__c + court coordinates, written by
+-- scripts/sync-salesforce-locations.mjs, read by /api/courts.
+create table if not exists public.qr_site_links (
+  qr_id        text primary key,
+  qr_name      text not null,
+  sf_site_id   text,
+  sf_site_name text,
+  match        text not null check (match in ('exact','likely','override','none')),
+  score        real,
+  lat          double precision,
+  lon          double precision,
+  coord_note   text,
+  synced_at    timestamptz not null default now()
+);
+alter table public.qr_site_links enable row level security;
+revoke all on public.qr_site_links from anon, authenticated;
+grant select, insert, update, delete on public.qr_site_links to service_role;
