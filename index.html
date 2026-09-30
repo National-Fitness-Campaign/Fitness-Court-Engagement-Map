@@ -128,13 +128,19 @@ header {
 
 /* City panel (opens over the map) */
 .citypanel { top: 18px; right: 18px; bottom: 18px; width: 440px; max-width: calc(100% - 36px); overflow-y: auto; padding: 18px 18px 20px; z-index: 950; }
-.cp-tab { position: absolute; top: 64px; right: 0; z-index: 950; display: flex; align-items: stretch; background: var(--card);
-  border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; box-shadow: var(--shadow); overflow: hidden; }
-.cp-tab-open { display: flex; align-items: center; gap: 6px; border: none; background: none; font: 700 0.8rem 'Inter', sans-serif; color: var(--text);
-  padding: 9px 10px 9px 12px; cursor: pointer; }
-.cp-tab-open:hover { background: #f3f6fb; color: var(--blue); }
-.cp-tab-close { border: none; border-left: 1px solid var(--border); background: none; color: var(--text-3); padding: 0 10px; cursor: pointer; font-size: 0.8rem; }
-.cp-tab-close:hover { color: var(--text); background: #f3f6fb; }
+.cp-mini { top: 18px; right: 18px; width: 440px; max-width: calc(100% - 36px); z-index: 950; display: flex; align-items: center; gap: 14px;
+  padding: 12px 12px 12px 18px; cursor: pointer; transition: box-shadow 0.15s ease; }
+.cp-mini:hover { box-shadow: 0 4px 18px rgba(15,31,61,0.14); }
+.cp-mini:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.cp-mini-text { min-width: 0; }
+.cp-mini-title { font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-mini-stats { margin-left: auto; display: flex; gap: 12px; font-weight: 800; font-size: 0.9rem; }
+.cp-mini-stats span { display: flex; align-items: center; gap: 6px; }
+.cp-mini-stats i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.cp-mini-chev { width: 30px; height: 30px; border-radius: 8px; background: #f1f4f9; display: grid; place-items: center; color: var(--text-2); flex: none; }
+.cp-mini:hover .cp-mini-chev { color: var(--blue); }
+.cp-mini-clear { border: none; background: none; color: var(--text-3); font-size: 0.8rem; cursor: pointer; padding: 6px; border-radius: 6px; flex: none; }
+.cp-mini-clear:hover { color: var(--text); background: #f3f6fb; }
 .cp-head { display: flex; align-items: flex-start; gap: 10px; }
 .cp-eyebrow { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
 .cp-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; }
@@ -515,12 +521,17 @@ header {
         <div id="map"></div>
         <div class="map-card legend" id="legend"></div>
         <div class="map-card citypanel" id="citypanel" style="display:none" aria-live="polite"></div>
-        <div class="cp-tab" id="cp-tab" style="display:none">
-          <button type="button" class="cp-tab-open" onclick="showCityPanel()" aria-label="Show city breakdown">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
-            <span id="cp-tab-name"></span>
-          </button>
-          <button type="button" class="cp-tab-close" onclick="closeCityPanel()" aria-label="Close city breakdown" title="Close">✕</button>
+        <div class="map-card cp-mini" id="cp-mini" style="display:none" role="button" tabindex="0"
+             onclick="if (!event.target.closest('.cp-mini-clear')) showCityPanel()"
+             onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showCityPanel(); }"
+             aria-label="Expand city breakdown">
+          <div class="cp-mini-text">
+            <div class="cp-eyebrow">City breakdown</div>
+            <div class="cp-mini-title" id="cp-mini-title"></div>
+          </div>
+          <div class="cp-mini-stats" id="cp-mini-stats"></div>
+          <span class="cp-mini-chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></span>
+          <button type="button" class="cp-mini-clear" onclick="closeCityPanel()" aria-label="Close city breakdown" title="Close">✕</button>
         </div>
       </div>
       <div class="refreshed">
@@ -651,7 +662,7 @@ const state = {
   includeBots: true,     // DEFAULT: include bots so totals match the Uniqode dashboard
   range: 'all',
   customFrom: null, customTo: null,
-  base: 'light',          // light | streets | dark | satellite
+  base: 'light',          // light | dark | satellite
   showPins: true,         // scan-sized court markers
   showHeat: false,        // scan heat overlay
   view: 'map',
@@ -770,13 +781,12 @@ async function loadData(isRefresh) {
 // Carto basemaps now require an API key, so light/dark use Esri's keyless
 // canvas tiles (same provider as aerial), with a separate labels overlay.
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
-// Basemaps. Light/Streets/Dark are OpenFreeMap vector styles (free, no key,
+// Basemaps. Light/Dark are OpenFreeMap vector styles (free, no key,
 // crisp at every zoom); Satellite is Esri imagery with a light labels layer.
 const OFM = 'https://tiles.openfreemap.org/styles';
 const OFM_ATTR = '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
 const TILES = {
   light:     { label: 'Light',     style: `${OFM}/positron`, dark: false, attr: OFM_ATTR },
-  streets:   { label: 'Streets',   style: `${OFM}/liberty`,  dark: false, attr: OFM_ATTR },
   dark:      { label: 'Dark',      style: `${OFM}/dark`,     dark: true,  attr: OFM_ATTR },
   satellite: { label: 'Satellite', url: `${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`, labels: `${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`, native: 19, dark: true, attr: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics' },
 };
@@ -1250,11 +1260,21 @@ function sideHTML(title, color, st, emptyText) {
 function renderCityPanel() {
   const el = document.getElementById('citypanel');
   const callout = document.querySelector('.callout');
-  const tab = document.getElementById('cp-tab');
+  const mini = document.getElementById('cp-mini');
   const open = !!state.cityPanel && !state.cityHidden;
-  el.parentElement.classList.toggle('cp-open', open);
-  tab.style.display = state.cityPanel && state.cityHidden ? 'flex' : 'none';
-  if (state.cityPanel) document.getElementById('cp-tab-name').textContent = state.cityPanel;
+  const collapsed = !!state.cityPanel && state.cityHidden;
+  el.parentElement.classList.toggle('cp-open', !!state.cityPanel);
+  mini.style.display = collapsed ? 'flex' : 'none';
+  if (collapsed) {
+    const inCity = state.courts.filter((c) => cityKey(c) === state.cityPanel);
+    const bounds = rangeBounds();
+    const sum = (list) => list.reduce((t, c) => t + countFor(c, bounds), 0);
+    const courts = inCity.filter((c) => c.kind !== 'trail'), trail = inCity.filter((c) => c.kind === 'trail');
+    document.getElementById('cp-mini-title').textContent = state.cityPanel;
+    document.getElementById('cp-mini-stats').innerHTML =
+      (courts.length ? `<span><i style="background:var(--blue)"></i>${sum(courts).toLocaleString()}</span>` : '')
+      + (trail.length ? `<span><i style="background:${TL_MAGENTA}"></i>${sum(trail).toLocaleString()}</span>` : '');
+  }
   if (!open) { el.style.display = 'none'; if (callout) callout.style.display = ''; return; }
   const inCity = state.courts.filter((c) => cityKey(c) === state.cityPanel);
   const courts = sideStats(inCity.filter((c) => c.kind !== 'trail'));
@@ -1262,8 +1282,8 @@ function renderCityPanel() {
   el.innerHTML = `
     <div class="cp-head">
       <div><div class="cp-eyebrow">City breakdown</div><div class="cp-title">${escapeAttr(state.cityPanel)}</div></div>
-      <button class="cp-close" onclick="hideCityPanel()" aria-label="Hide city breakdown" title="Hide (click the tab to reopen)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+      <button class="cp-close" onclick="hideCityPanel()" aria-label="Hide city breakdown" title="Collapse">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m18 15-6-6-6 6"/></svg>
       </button>
     </div>
     <div class="cp-overview" id="cp-overview"><div class="cp-label">Overview</div>${cityOverview(state.cityPanel, courts, trail)}</div>
