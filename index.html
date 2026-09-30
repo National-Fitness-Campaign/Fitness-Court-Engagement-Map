@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"/>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -90,6 +93,44 @@ header {
 .bots-pill .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
 .bots-pill.on .dot { background: var(--amber); }
 
+/* Court / trail line filter */
+.seg { display: flex; background: #f1f4f9; border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { border: none; background: none; font: inherit; font-weight: 600; font-size: 0.82rem; color: var(--text-2);
+  padding: 6px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.seg button:hover { color: var(--text); }
+.seg button.on { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(15,31,61,0.12); }
+.seg button .sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+/* City panel (opens over the map) */
+.citypanel { top: 18px; right: 18px; bottom: 18px; width: 440px; max-width: calc(100% - 36px); overflow-y: auto; padding: 18px 18px 20px; z-index: 950; }
+.cp-head { display: flex; align-items: flex-start; gap: 10px; }
+.cp-eyebrow { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.cp-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; }
+.cp-close { margin-left: auto; border: none; background: #f1f4f9; border-radius: 8px; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; flex: none; }
+.cp-overview { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: linear-gradient(135deg, #eef4ff, #f7f0fb); font-size: 0.84rem; line-height: 1.5; }
+.cp-overview p + p { margin-top: 6px; }
+.cp-overview b { font-weight: 700; }
+.cp-label { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
+.cp-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.cp-side { border: 1px solid var(--border); border-radius: 10px; padding: 12px; min-width: 0; }
+.cp-side h3 { font-size: 0.74rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+.cp-side h3 i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.cp-num { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; line-height: 1; }
+.cp-sub { font-size: 0.72rem; color: var(--text-3); margin-top: 3px; }
+.cp-trend { font-size: 0.74rem; font-weight: 600; margin-top: 8px; }
+.cp-trend.up { color: var(--green); } .cp-trend.down { color: var(--red); } .cp-trend.flat { color: var(--text-2); }
+.cp-spark { display: block; width: 100%; height: 34px; margin-top: 6px; }
+.cp-list { margin-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.cp-item { display: flex; gap: 8px; align-items: baseline; font-size: 0.78rem; padding: 4px 6px; margin: 0 -6px; border-radius: 6px; cursor: pointer; }
+.cp-item:hover { background: #f3f6fb; }
+.cp-item .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cp-item .n { margin-left: auto; font-weight: 700; flex: none; }
+.cp-item.zero .n, .cp-item.zero .nm { color: var(--text-3); }
+.cp-empty { font-size: 0.78rem; color: var(--text-3); margin-top: 10px; }
+.cp-link { display: inline-block; margin-top: 14px; font-weight: 700; font-size: 0.82rem; color: var(--blue); text-decoration: none; }
+.city-row .cname.clickable:hover { color: var(--blue); text-decoration: underline; }
+.cc-tl { font-size: 0.6rem; font-weight: 800; color: #c3268a; margin-left: 4px; letter-spacing: 0.04em; }
+
 /* ── Main grid ──────────────────────────────────────── */
 .main { display: grid; grid-template-columns: 350px 1fr; gap: 16px; align-items: start; }
 
@@ -131,6 +172,26 @@ header {
 #map { height: 660px; border-radius: var(--radius); }
 .map-card { position: absolute; z-index: 900; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
 .legend { left: 18px; bottom: 18px; padding: 14px 16px; }
+.leaflet-top.leaflet-right { transition: right 0.2s ease; }
+.map-wrap.cp-open .leaflet-top.leaflet-right { right: 458px; }
+.layers-ctl { display: flex; align-items: center; gap: 6px; margin: 14px 14px 0 0 !important; padding: 5px;
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(15,31,61,0.08); border-radius: 12px; box-shadow: 0 2px 12px rgba(15,31,61,0.12); font: 600 0.76rem 'Inter', sans-serif; }
+.lc-seg { display: flex; background: #eef1f6; border-radius: 8px; padding: 2px; }
+.lc-seg button, .lc-chip { border: none; background: none; font: inherit; color: var(--text-2); cursor: pointer; border-radius: 7px; padding: 5px 10px; white-space: nowrap; }
+.lc-seg button:hover, .lc-chip:hover { color: var(--text); }
+.lc-seg button.on { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(15,31,61,0.15); }
+.lc-sep { width: 1px; height: 20px; background: var(--border); }
+.lc-chip { display: flex; align-items: center; gap: 6px; }
+.lc-chip i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #9aa6bb; }
+.lc-chip.on { color: var(--text); background: #eef4ff; }
+.lc-chip.on i { background: var(--blue); border-color: var(--blue); }
+.lc-chip[data-layer="heat"].on i { background: #e31a1c; border-color: #e31a1c; }
+.leaflet-control-attribution { font-size: 9px !important; background: rgba(255,255,255,0.7) !important; }
+@media (max-width: 700px) {
+  .map-wrap.cp-open .leaflet-top.leaflet-right { right: 0; }
+  .layers-ctl { flex-wrap: wrap; justify-content: flex-end; max-width: 250px; }
+}
 .legend h4 { font-size: 0.78rem; font-weight: 800; margin-bottom: 10px; }
 .legend h4 span { font-weight: 600; color: var(--text-3); font-size: 0.7rem; }
 .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; }
@@ -184,6 +245,7 @@ header {
 .list-table .num { font-weight: 800; text-align: right; }
 .loc-badge { font-size: 0.66rem; font-weight: 700; border-radius: 99px; padding: 3px 9px; white-space: nowrap; }
 .loc-badge.verified { background: #e7f6ec; color: #15803d; }
+.loc-source { font-size: 0.72rem; color: var(--green); font-weight: 600; margin-top: 6px; }
 .loc-badge.approx { background: #fef3c7; color: #92400e; }
 .loc-badge.missing { background: #fee2e2; color: #991b1b; }
 
@@ -236,6 +298,8 @@ header {
 @keyframes spin { to { transform: rotate(360deg); } }
 .overlay-text { font-weight: 700; color: var(--text-2); }
 .error-banner { display: none; align-items: center; gap: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: var(--radius); padding: 13px 18px; margin-bottom: 16px; font-weight: 600; }
+.warn-banner { display: none; background: #fff7e6; border: 1px solid #fde2a8; color: #7a4b00; border-radius: var(--radius); padding: 11px 18px; margin-bottom: 16px; font-size: 0.85rem; }
+.warn-banner b { font-weight: 700; }
 .error-banner button { margin-left: auto; font: inherit; font-weight: 700; border: 1px solid #fca5a5; background: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; color: #991b1b; }
 
 /* Modal */
@@ -253,6 +317,11 @@ header {
   .main { grid-template-columns: 1fr; }
   .an-grid { grid-template-columns: 1fr; }
   #map { height: 520px; }
+}
+@media (max-width: 700px) {
+  .citypanel { position: static; width: auto; max-width: none; margin-top: 12px; }
+  .cp-sides { grid-template-columns: 1fr; }
+  .map-wrap.cp-open .legend { display: none; }
 }
 </style>
 </head>
@@ -277,7 +346,8 @@ header {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     <span id="header-date"></span>
   </div>
-  <button class="hbtn" id="refresh-btn" onclick="loadData(true)">
+  <a class="hbtn" href="/vegas" title="Las Vegas Trail Line pilot">▤ Las Vegas Trail Line</a>
+    <button class="hbtn" id="refresh-btn" onclick="loadData(true)">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
     Refresh Scans
   </button>
@@ -287,6 +357,7 @@ header {
 </header>
 
 <div class="page">
+  <div class="warn-banner" id="warn-banner" role="status"></div>
   <div class="error-banner" id="error-banner">
     <span id="error-text">Could not load data.</span>
     <button onclick="loadData(true)">Retry</button>
@@ -298,7 +369,7 @@ header {
       <div class="kpi-icon" style="background:#e8effc;color:var(--blue)">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1v1h-1zM14 20h1v1h-1zM18 18h3v3h-3z"/></svg>
       </div>
-      <div><div class="kpi-num" style="color:var(--blue)" id="kpi-total">—</div><div class="kpi-label">Fitness Courts</div><div class="kpi-sub">Total Unique QR Codes Printed</div></div>
+      <div><div class="kpi-num" style="color:var(--blue)" id="kpi-total">—</div><div class="kpi-label" id="kpi-total-label">QR Codes</div><div class="kpi-sub" id="kpi-total-sub">Fitness Courts + Trail Lines</div></div>
     </div>
     <div class="card kpi">
       <div class="kpi-icon" style="background:#e7f6ec;color:var(--green)">
@@ -328,23 +399,16 @@ header {
   <!-- Filter bar -->
   <div class="card filterbar">
     <div class="field">
+      <label>Show</label>
+      <div class="seg" id="f-kind" role="group" aria-label="Show fitness courts, trail lines, or both">
+        <button data-kind="all" class="on" onclick="setKind('all')">All</button>
+        <button data-kind="court" onclick="setKind('court')"><span class="sw" style="background:var(--blue)"></span>Fitness Courts</button>
+        <button data-kind="trail" onclick="setKind('trail')"><span class="sw" style="background:#c3268a"></span>Trail Lines</button>
+      </div>
+    </div>
+    <div class="field">
       <label for="f-search">Search City</label>
       <input type="text" id="f-search" placeholder="Search city..." oninput="onSearch(this.value)">
-    </div>
-    <div class="field" id="field-viz">
-      <label for="f-viz">Visualization</label>
-      <select id="f-viz" onchange="state.viz=this.value; renderAll()">
-        <option value="bubble">Bubble Map</option>
-        <option value="heat">Heatmap</option>
-      </select>
-    </div>
-    <div class="field" id="field-basemap">
-      <label for="f-basemap">Basemap</label>
-      <select id="f-basemap" onchange="setBasemap(this.value)">
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="aerial">Aerial</option>
-      </select>
     </div>
     <div class="field">
       <label for="f-state">State</label>
@@ -385,9 +449,9 @@ header {
         <h2>RANKINGS</h2>
         <button class="panel-link" onclick="toggleAllRankings()" id="rankings-link">View All Rankings →</button>
       </div>
-      <div class="panel-section-title">Top 3 Fitness Courts</div>
+      <div class="panel-section-title" id="top3-title">Top 3</div>
       <div class="top3" id="top3"></div>
-      <div class="panel-section-title" id="bycity-title">All Fitness Courts by City</div>
+      <div class="panel-section-title" id="bycity-title">By City · click a city for its breakdown</div>
       <div class="citylist" id="citylist"></div>
       <details class="needs-panel" id="needs-panel">
         <summary>
@@ -406,15 +470,7 @@ header {
       <div class="map-wrap">
         <div id="map"></div>
         <div class="map-card legend" id="legend"></div>
-        <div class="map-card callout">
-          <div class="callout-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="8" height="8" rx="1.5"/></svg>
-          </div>
-          <div>
-            <b>Track. Engage. Grow.</b>
-            <p>See how communities are using their Fitness Courts.</p>
-          </div>
-        </div>
+        <div class="map-card citypanel" id="citypanel" style="display:none" aria-live="polite"></div>
       </div>
       <div class="refreshed">
         <span id="mode-line">Humans only — bot scans excluded</span>
@@ -470,7 +526,7 @@ header {
       </div>
       <div class="card an-card wide">
         <h3>Cumulative Scans</h3>
-        <div class="sub">Growth since tracking began (June 2025)</div>
+        <div class="sub">Growth since tracking began — partial backfill from June 2025, every scan from April 7, 2026</div>
         <canvas id="chart-cumulative" height="70"></canvas>
       </div>
     </div>
@@ -533,11 +589,15 @@ const state = {
   includeBots: true,     // DEFAULT: include bots so totals match the Uniqode dashboard
   range: 'all',
   customFrom: null, customTo: null,
-  viz: 'bubble',
+  base: 'light',          // light | streets | dark | satellite
+  showPins: true,         // scan-sized court markers
+  showHeat: false,        // scan heat overlay
   view: 'map',
   search: '',
   stateFilter: '',
   allRankings: false,
+  kind: 'all',           // 'all' | 'court' | 'trail'
+  cityPanel: null,       // "City, ST" when the city panel is open
   openCities: new Set(),
   sortKey: 'scans', sortDir: -1,
 };
@@ -588,6 +648,11 @@ function countFor(court, bounds) {
   return sum;
 }
 
+// Every code name, city, address and Salesforce/Design Lab label is external
+// data — escape it before it goes into innerHTML or a Leaflet popup/tooltip.
+const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const escapeAttr = esc;
+
 /* ═════════════════════════════ Data loading ════════════════════════════ */
 async function loadData(isRefresh) {
   const btn = document.getElementById('refresh-btn');
@@ -601,9 +666,18 @@ async function loadData(isRefresh) {
       fetch(`/api/scans${bust}`),
     ]);
     if (!courtsResp.ok) throw new Error(`courts API ${courtsResp.status}`);
-    if (!scansResp.ok) throw new Error(`scans API ${scansResp.status}`);
     const courtsBody = await courtsResp.json();
-    const scansBody = await scansResp.json();
+    // Daily series is optional: without it the map still shows all-time totals.
+    const scansBody = scansResp.ok ? await scansResp.json() : { days: [] };
+    // Degraded, not broken: say so on the page instead of only in the console.
+    const warn = document.getElementById('warn-banner');
+    const problems = [];
+    if (courtsBody.archiveOk === false) problems.push('the scan archive didn’t load, so totals are Uniqode’s all-time counts and reconciliation is unknown');
+    if (!scansResp.ok) problems.push('daily scan history didn’t load, so date ranges and charts are empty');
+    if ((courtsBody.warnings || []).some((w) => /trail positions|qr_site_links/.test(w))) problems.push('some map positions didn’t load');
+    warn.innerHTML = problems.length ? `<b>Partial data right now:</b> ${esc(problems.join('; '))}. Try Refresh in a minute.` : '';
+    warn.style.display = problems.length ? 'block' : 'none';
+    if (problems.length) console.warn('Degraded data', courtsBody.warnings);
 
     state.courts = courtsBody.courts;
     state.summary = courtsBody.summary;
@@ -630,23 +704,80 @@ async function loadData(isRefresh) {
 }
 
 /* ═══════════════════════════════ Map setup ═════════════════════════════ */
+// Carto basemaps now require an API key, so light/dark use Esri's keyless
+// canvas tiles (same provider as aerial), with a separate labels overlay.
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
+// Basemaps. Light/Streets/Dark are OpenFreeMap vector styles (free, no key,
+// crisp at every zoom); Satellite is Esri imagery with a light labels layer.
+const OFM = 'https://tiles.openfreemap.org/styles';
+const OFM_ATTR = '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
 const TILES = {
-  light:  { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', sub: 'abcd', dark: false, attr: '&copy; OpenStreetMap &copy; CARTO' },
-  dark:   { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', sub: 'abcd', dark: true, attr: '&copy; OpenStreetMap &copy; CARTO' },
-  aerial: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', sub: null, dark: true, attr: 'Tiles &copy; Esri' },
+  light:     { label: 'Light',     style: `${OFM}/positron`, dark: false, attr: OFM_ATTR },
+  streets:   { label: 'Streets',   style: `${OFM}/liberty`,  dark: false, attr: OFM_ATTR },
+  dark:      { label: 'Dark',      style: `${OFM}/dark`,     dark: true,  attr: OFM_ATTR },
+  satellite: { label: 'Satellite', url: `${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`, labels: `${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`, native: 19, dark: true, attr: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics' },
 };
 const map = L.map('map', { center: [38.5, -97.5], zoom: 4, zoomControl: true });
 const markersLayer = L.layerGroup().addTo(map);
-let tileLayer = null, heatLayer = null, heatLabels = null, isDark = false;
+map.createPane('labels');
+map.getPane('labels').style.zIndex = 350;          // tiles 200 < labels < markers 400
+map.getPane('labels').style.pointerEvents = 'none';
+let tileLayer = null, labelLayer = null, heatLayer = null, heatLabels = null, isDark = false;
 
 function setBasemap(type) {
-  isDark = TILES[type].dark;
+  const t = TILES[type] || TILES.light;
+  isDark = t.dark;
   if (tileLayer) map.removeLayer(tileLayer);
-  const t = TILES[type];
-  tileLayer = L.tileLayer(t.url, { attribution: t.attr, subdomains: t.sub || 'abc', maxZoom: 19 }).addTo(map);
+  if (labelLayer) map.removeLayer(labelLayer);
+  labelLayer = null;
+  if (t.style && window.L.maplibreGL) {
+    tileLayer = L.maplibreGL({ style: t.style, attribution: t.attr, interactive: false }).addTo(map);
+  } else {
+    // Satellite, or MapLibre failed to load: plain raster tiles.
+    const fallback = t.url || `${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
+    tileLayer = L.tileLayer(fallback, { attribution: t.url ? t.attr : 'Tiles &copy; Esri', maxNativeZoom: t.native || 16, maxZoom: 19 }).addTo(map);
+    if (t.labels) labelLayer = L.tileLayer(t.labels, { maxNativeZoom: t.native, maxZoom: 19, pane: 'labels' }).addTo(map);
+  }
+  document.getElementById('map').classList.toggle('dark-base', isDark);
 }
-setBasemap('light');
-map.on('zoomend', () => { if (state.viz === 'heat') renderMap(); });
+setBasemap(state.base);
+map.on('zoomend', () => { if (state.showHeat) renderMap(); });
+
+// Layer control: a slim bar, top right — one background + any mix of overlays.
+const LayersControl = L.Control.extend({
+  options: { position: 'topright' },
+  onAdd() {
+    const el = L.DomUtil.create('div', 'layers-ctl');
+    L.DomEvent.disableClickPropagation(el);
+    L.DomEvent.disableScrollPropagation(el);
+    const chip = (id, label, on) => `<button type="button" class="lc-chip${on ? ' on' : ''}" data-layer="${id}" aria-pressed="${on}"><i></i>${label}</button>`;
+    el.innerHTML = `
+      <div class="lc-seg" role="group" aria-label="Basemap">
+        ${Object.entries(TILES).map(([k, t]) =>
+          `<button type="button" data-base="${k}" class="${state.base === k ? 'on' : ''}" aria-pressed="${state.base === k}">${t.label}</button>`).join('')}
+      </div>
+      <div class="lc-sep"></div>
+      ${chip('pins', 'Pins', state.showPins)}${chip('heat', 'Heat', state.showHeat)}`;
+    el.addEventListener('click', (ev) => {
+      const b = ev.target.closest('button');
+      if (!b) return;
+      if (b.dataset.base) {
+        state.base = b.dataset.base;
+        el.querySelectorAll('[data-base]').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+        setBasemap(state.base);
+        renderMap();
+      } else if (b.dataset.layer) {
+        const key = b.dataset.layer === 'pins' ? 'showPins' : 'showHeat';
+        state[key] = !state[key];
+        b.classList.toggle('on', state[key]);
+        b.setAttribute('aria-pressed', state[key]);
+        renderMap(); renderLegend();
+      }
+    });
+    return el;
+  },
+});
+new LayersControl().addTo(map);
 
 const BUCKETS = [
   { max: 0,        color: '#c9d2e0', label: '0',        r: 5  },
@@ -660,7 +791,28 @@ const BUCKETS = [
 function bucketFor(n) { return BUCKETS.find((b) => n <= b.max); }
 
 /* ══════════════════════════════ Rendering ══════════════════════════════ */
+const KIND_TEXT = {
+  all:   { total: 'QR Codes',          sub: 'Fitness Courts + Trail Lines', top: 'Top 3' },
+  court: { total: 'Fitness Courts',    sub: 'Total Unique QR Codes Printed', top: 'Top 3 Fitness Courts' },
+  trail: { total: 'Trail Line Codes',  sub: 'QR codes on Trail Line signs',  top: 'Top 3 Trail Line Codes' },
+};
+function setKind(k) {
+  state.kind = k;
+  document.querySelectorAll('#f-kind button').forEach((b) => b.classList.toggle('on', b.dataset.kind === k));
+  const t = KIND_TEXT[k];
+  document.getElementById('kpi-total-label').textContent = t.total;
+  document.getElementById('kpi-total-sub').textContent = t.sub;
+  document.getElementById('top3-title').textContent = t.top;
+  populateStateFilter();
+  renderAll();
+  const pts = visibleCourts().filter(plottable);
+  if (state.view === 'map' && pts.length && !state.cityPanel) {
+    map.fitBounds(L.latLngBounds(pts.map((c) => [c.lat, c.lon])).pad(0.2), { maxZoom: 14 });
+  }
+}
+
 function renderAll() {
+  renderCityPanel();
   renderKPIs();
   renderMap();
   renderLegend();
@@ -674,11 +826,12 @@ function renderAll() {
 function populateStateFilter() {
   const sel = document.getElementById('f-state');
   const current = state.stateFilter;
-  const states = [...new Set(state.courts.map((c) => c.state).filter(Boolean))].sort();
+  const pool = state.kind === 'all' ? state.courts : state.courts.filter((c) => c.kind === state.kind);
+  const states = [...new Set(pool.map((c) => c.state).filter(Boolean))].sort();
   sel.innerHTML = '<option value="">All States</option>' +
     states.map((s) => {
-      const n = state.courts.filter((c) => c.state === s).length;
-      return `<option value="${s}"${s === current ? ' selected' : ''}>${s} (${n})</option>`;
+      const n = pool.filter((c) => c.state === s).length;
+      return `<option value="${esc(s)}"${s === current ? ' selected' : ''}>${esc(s)} (${n})</option>`;
     }).join('');
 }
 function setStateFilter(s) {
@@ -695,6 +848,7 @@ function setStateFilter(s) {
 function visibleCourts() {
   const q = state.search.trim().toLowerCase();
   let list = state.courts;
+  if (state.kind !== 'all') list = list.filter((c) => c.kind === state.kind);
   if (state.stateFilter) list = list.filter((c) => c.state === state.stateFilter);
   if (q) list = list.filter((c) =>
     c.city.toLowerCase().includes(q) || c.state.toLowerCase().includes(q) || c.location.toLowerCase().includes(q));
@@ -721,7 +875,7 @@ function renderKPIs() {
   const unplottedScans = unplotted.reduce((s, c) => s + countFor(c, bounds), 0);
   document.getElementById('kpi-scans-sub').textContent =
     RANGE_LABELS[state.range] +
-    (state.stateFilter ? ` · ${state.stateFilter}` : '') +
+    (state.stateFilter ? ` · ${esc(state.stateFilter)}` : '') +
     (unplottedScans ? ` — incl. ${unplottedScans.toLocaleString()} from ${unplotted.length} unmapped codes` : '');
   document.getElementById('kpi-visible').textContent = courts.filter(plottable).length;
   // Unmapped = no position at all (geocoding couldn't place the name). These
@@ -737,10 +891,14 @@ function renderKPIs() {
 }
 
 function popupHTML(court, count) {
-  const recon = !court.reconciled
+  const recon = court.reconciled === null
+    ? '<span class="recon warn" title="The scan archive didn’t load, so this can’t be checked against Uniqode right now.">? Reconciliation unknown</span>'
+    : !court.reconciled
     ? `<span class="recon warn">⚠ Drift: ${court.delta > 0 ? '+' : ''}${court.delta} vs Uniqode</span>`
     : court.preArchive && court.delta > RECON_TOL
-      ? `<span class="recon ok" title="This code predates per-day tracking (June 2025); Uniqode's official total includes ${court.delta.toLocaleString()} earlier scans.">✓ Matches Uniqode · incl. ${court.delta.toLocaleString()} pre-Jun 2025 scans</span>`
+      ? `<span class="recon ok" title="This code predates live tracking (Apr 7, 2026); Uniqode's official total includes ${court.delta.toLocaleString()} earlier scans we have no per-day record of.">✓ Matches Uniqode · incl. ${court.delta.toLocaleString()} scans before Apr 2026</span>`
+    : court.preArchive && court.delta < -RECON_TOL
+      ? `<span class="recon ok" title="The one-off backfill of pre-April-2026 history counts ${(-court.delta).toLocaleString()} more than Uniqode shows today — within the 5% backfill tolerance.">✓ Matches Uniqode · within backfill tolerance</span>`
       : '<span class="recon ok">✓ Matches Uniqode</span>';
   // Location editing is tucked behind a small affordance so popups stay clean:
   // approx courts get a "Confirm location ▾" button; verified courts a subtle
@@ -751,14 +909,22 @@ function popupHTML(court, count) {
       <input id="pc-addr-${court.id}" placeholder="…or street address">
       <button onclick="confirmFromPopup(${court.id})">Save exact location</button>
     </div>`;
-  const approxBlock = court.locationStatus === 'approx'
+  // Salesforce-sourced pins are corrected in Salesforce, not here — an edit
+  // written to Uniqode would be overridden on the next sync.
+  const approxBlock = court.locationSource === 'designlab'
+    ? `<div class="loc-source">✓ Station location from the Design Lab · <a href="/vegas">pilot view</a></div>`
+    : court.locationSource === 'override'
+    ? `<div class="loc-source" title="${escapeAttr(court.sfSiteName || '')}">✓ Exact location · placed by hand (not in Salesforce)</div>`
+    : court.locationSource === 'salesforce'
+    ? `<div class="loc-source" title="${escapeAttr(court.sfSiteName || '')}">✓ Location from Salesforce</div>`
+    : court.locationStatus === 'approx'
     ? `<div><span class="recon warn">≈ Approximate</span>
        <button class="popup-toggle" onclick="togglePopupForm(${court.id})">Confirm location ▾</button></div>${form}`
     : `<div><button class="popup-toggle subtle" onclick="togglePopupForm(${court.id})">✎ edit location</button></div>${form}`;
   return `<div class="court-popup">
-    <h3>${court.location}</h3>
-    <div class="city">📍 ${court.city}${court.state ? ', ' + court.state : ''}</div>
-    ${court.address ? `<div class="address">${court.address}</div>` : ''}
+    <h3>${esc(displayName(court))}</h3>
+    <div class="city">📍 ${esc(court.city)}${court.state ? ', ' + esc(court.state) : ''}</div>
+    ${court.address ? `<div class="address">${esc(court.address)}</div>` : ''}
     <div class="scan-count">${count.toLocaleString()}</div>
     <div class="scan-lbl">${RANGE_LABELS[state.range]} · ${state.includeBots ? 'all scans' : 'human scans'}</div>
     ${recon}${approxBlock}
@@ -768,6 +934,7 @@ function popupHTML(court, count) {
 let heatLayers = [];
 const openMarkers = new Map(); // court id -> marker, for zoom-and-open from panels
 
+const TL_MAGENTA = '#c3268a';
 function renderMap() {
   markersLayer.clearLayers();
   openMarkers.clear();
@@ -776,41 +943,35 @@ function renderMap() {
   const bounds = rangeBounds();
   const courts = visibleCourts().filter(plottable);
 
-  if (state.viz === 'heat') {
+  // Heat: one layer on one scale — hotter always means more scans. Log scale
+  // so a 6-scan court still shows next to an 862-scan one. maxZoom: 0 turns
+  // off leaflet.heat's built-in fade (it divides intensity by 2^(19 − zoom),
+  // which made the whole layer near-invisible at city and national zooms).
+  if (state.showHeat) {
     const counts = courts.map((c) => countFor(c, bounds));
     const maxN = Math.max(...counts, 1);
     const zoom = map.getZoom();
-    const base = zoom <= 5 ? 22 : zoom <= 7 ? 30 : zoom <= 9 ? 38 : 48;
-    // Volume-scaled radius: hotter courts throw a bigger blob, in three tiers.
-    const tiers = [
-      { test: (n) => n / maxN < 0.15, radius: Math.round(base * 0.6) },
-      { test: (n) => n / maxN < 0.5,  radius: base },
-      { test: () => true,             radius: Math.round(base * 1.7) },
-    ];
-    for (const tier of tiers) {
-      const pts = courts
-        .map((c, i) => [c.lat, c.lon, counts[i]])
-        .filter((p, i) => counts[i] > 0 && tier.test(counts[i]) &&
-          !tiers.slice(0, tiers.indexOf(tier)).some((t) => t.test(counts[i])));
-      if (!pts.length) continue;
+    const radius = zoom <= 5 ? 16 : zoom <= 8 ? 24 : zoom <= 11 ? 34 : zoom <= 14 ? 46 : 60;
+    const pts = courts.map((c, i) => [c.lat, c.lon, Math.log1p(counts[i]) / Math.log1p(maxN)]).filter((p) => p[2] > 0);
+    if (pts.length) {
       heatLayers.push(L.heatLayer(pts, {
-        radius: tier.radius, blur: Math.round(tier.radius * 0.55),
-        max: Math.max(maxN * 0.4, 1), minOpacity: 0.35,
-        gradient: { 0.0: '#ffffb2', 0.25: '#fd8d3c', 0.5: '#f03b20', 0.75: '#bd0026', 1.0: '#2d004b' },
+        radius, blur: Math.round(radius * 0.75), max: 1, maxZoom: 0, minOpacity: 0.2,
+        gradient: { 0.2: '#ffffb2', 0.4: '#fecc5c', 0.6: '#fd8d3c', 0.8: '#e31a1c', 1.0: '#800026' },
       }).addTo(map));
     }
-    if (map.getZoom() >= 7) {
+    // Names on the hot spots when zoomed in and pins are off.
+    if (!state.showPins && zoom >= 7) {
       heatLabels = L.layerGroup().addTo(map);
       courts.forEach((c, i) => {
-        L.circleMarker([c.lat, c.lon], {
-          radius: counts[i] === 0 ? 3 : 5, color: '#fff', fillOpacity: 0,
-          weight: counts[i] === 0 ? 1 : 2, opacity: counts[i] === 0 ? 0.35 : 0.9,
-        }).bindTooltip(c.location, { permanent: true, direction: 'top', offset: [0, -8], className: 'heat-label' })
+        if (!counts[i]) return;
+        L.circleMarker([c.lat, c.lon], { radius: 4, color: '#fff', fillOpacity: 0, weight: 2, opacity: 0.9 })
+          .bindTooltip(esc(displayName(c)), { permanent: true, direction: 'top', offset: [0, -8], className: 'heat-label' })
           .bindPopup(popupHTML(c, counts[i]), { maxWidth: 260 })
           .addTo(heatLabels);
       });
     }
-  } else {
+  }
+  if (state.showPins) {
     courts.forEach((c) => {
       const n = countFor(c, bounds);
       const b = bucketFor(n);
@@ -818,8 +979,8 @@ function renderMap() {
       const m = L.circleMarker([c.lat, c.lon], {
         radius: b.r,
         fillColor: approx ? '#f59e0b' : b.color,
-        color: approx ? '#b45309' : (isDark ? 'rgba(255,255,255,0.4)' : 'rgba(15,31,61,0.25)'),
-        weight: approx ? 2 : 1.5,
+        color: approx ? '#b45309' : c.kind === 'trail' ? TL_MAGENTA : (isDark ? 'rgba(255,255,255,0.4)' : 'rgba(15,31,61,0.25)'),
+        weight: approx ? 2 : c.kind === 'trail' ? 2.5 : 1.5,
         dashArray: approx ? '4 3' : null,
         fillOpacity: approx ? 0.35 : (n === 0 ? 0.45 : 0.85),
       }).bindPopup(popupHTML(c, n), { maxWidth: 260 });
@@ -842,21 +1003,21 @@ function focusCourt(id) {
 
 function renderLegend() {
   const el = document.getElementById('legend');
-  if (state.viz === 'heat') {
-    el.innerHTML = `<h4>SCAN INTENSITY <span>(${RANGE_LABELS[state.range]})</span></h4>
-      <div style="width:170px;height:12px;border-radius:6px;background:linear-gradient(to right,#ffffb2,#fd8d3c,#f03b20,#bd0026,#2d004b)"></div>
-      <div style="display:flex;justify-content:space-between;font-size:0.66rem;color:var(--text-3);margin-top:5px"><span>Low</span><span>High</span></div>`;
-  } else {
-    el.innerHTML = `<h4>QR SCANS <span>(${RANGE_LABELS[state.range]})</span></h4>
+  const heat = `<h4>SCAN INTENSITY <span>(${RANGE_LABELS[state.range]})</span></h4>
+      <div style="width:170px;height:12px;border-radius:6px;background:linear-gradient(to right,#ffffb2,#fecc5c,#fd8d3c,#e31a1c,#800026)"></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.66rem;color:var(--text-3);margin-top:5px"><span>Fewer scans</span><span>More scans</span></div>`;
+  const pins = `<h4>QR SCANS <span>(${RANGE_LABELS[state.range]})</span></h4>
       <div class="legend-grid">` +
       BUCKETS.map((b, i) => {
         const size = 9 + i * 2;
         return `<div class="legend-row"><span class="legend-dot" style="width:${size}px;height:${size}px;background:${b.color}"></span>${b.label}</div>`;
       }).join('') +
       `<div class="legend-row" style="grid-column:1/-1;margin-top:4px;padding-top:6px;border-top:1px solid var(--border)">
-        <span class="legend-dot" style="width:12px;height:12px;background:rgba(245,158,11,0.35);border:2px dashed #b45309"></span>Approximate — needs verification
+        <span class="legend-dot" style="width:12px;height:12px;background:#fff;border:2.5px solid ${TL_MAGENTA}"></span>Trail Line sign
       </div></div>`;
-  }
+  const parts = [state.showPins && pins, state.showHeat && heat].filter(Boolean);
+  el.innerHTML = parts.join('<div style="height:12px"></div>');
+  el.style.display = parts.length ? '' : 'none';
 }
 
 function renderRankings() {
@@ -869,7 +1030,7 @@ function renderRankings() {
   document.getElementById('top3').innerHTML = ranked.slice(0, 3).map((r, i) => `
     <div class="row" onclick="focusCourt(${r.c.id})">
       <div class="rank-badge">${i + 1}</div>
-      <div><div class="row-name">${r.c.location}</div><div class="row-sub">${r.c.city}${r.c.state ? ', ' + r.c.state : ''}</div></div>
+      <div><div class="row-name">${esc(displayName(r.c))}${r.c.kind === 'trail' ? '<span class="cc-tl">TL</span>' : ''}</div><div class="row-sub">${esc(r.c.city)}${r.c.state ? ', ' + esc(r.c.state) : ''}</div></div>
       <div class="row-val"><b>${r.n.toLocaleString()}</b><span>SCANS</span></div>
     </div>`).join('') || '<div style="padding:10px 18px;color:var(--text-3);font-size:0.8rem">No scans in this range</div>';
 
@@ -893,21 +1054,186 @@ function renderRankings() {
     c.locationStatus === 'approx' ? '<span class="cc-status" title="Approximate location">≈</span>' :
     '<span class="cc-status" title="No location yet">⚠</span>';
   document.getElementById('citylist').innerHTML = shown.map((e) => `
-    <div class="city-row${isOpen(e.city) ? ' open' : ''}" id="city-${cssId(e.city)}">
-      <div class="line1" onclick="toggleCity('${e.city.replace(/'/g, "\\'")}')">
-        <span class="cname">${e.city}</span><span class="ccount">${e.courts.length} court${e.courts.length > 1 ? 's' : ''}<span class="chev">▶</span></span>
+    <div class="city-row${isOpen(e.city) ? ' open' : ''}" id="city-${cssId(e.city)}" data-city="${esc(e.city)}">
+      <div class="line1" data-action="toggle">
+        <span class="cname clickable" data-action="open" title="Open ${esc(e.city)} breakdown">${esc(e.city)}</span><span class="ccount">${codeCountLabel(e.courts.map((r) => r.c))}<span class="chev">▶</span></span>
         <span class="cval">${e.scans.toLocaleString()}<span>SCANS</span></span>
       </div>
       <div class="bar"><i style="width:${Math.max((e.scans / maxScans) * 100, 2)}%"></i></div>
       <div class="city-courts">
         ${e.courts.map((r) => `
-          <div class="city-court" onclick="focusCourt(${r.c.id})">
-            <span class="cc-name">${r.c.location}</span>${statusDot(r.c)}
+          <div class="city-court" onclick="focusCourt(${Number(r.c.id)})">
+            <span class="cc-name">${esc(displayName(r.c))}</span>${r.c.kind === 'trail' ? '<span class="cc-tl">TL</span>' : ''}${statusDot(r.c)}
             <span class="cc-scans">${r.n.toLocaleString()}</span>
           </div>`).join('')}
       </div>
     </div>`).join('');
 }
+/* ═════════════════════════════ City panel ══════════════════════════════ */
+// One city at a glance: fitness courts on one side, trail line signs on the
+// other, each with its scans for the selected range, this week vs last, a
+// four-week trend and a ranked list. Clicking any item zooms to it.
+const cityKey = (c) => c.city + (c.state ? ', ' + c.state : '');
+// Trail line codes read better as "B6 · Map" than "L B6 Map".
+function displayName(c) {
+  if (c.kind !== 'trail') return c.location;
+  const m = c.name.match(/^TL-[A-Z]{2}-[A-Za-z]+-([LMS])(?:-([A-Z]{1,2}\d+))?(?:-(Map|CTA))?$/i);
+  if (!m) return c.location;
+  const tier = { L: 'Gateway', M: 'Midway', S: 'Trail Marker' }[m[1].toUpperCase()];
+  // Midway signs' unsuffixed code is their app / CTA code.
+  return m[2] ? `${m[2]} ${tier} · ${m[3] || 'CTA'}` : tier;
+}
+function codeCountLabel(list) {
+  const courts = list.filter((c) => c.kind !== 'trail').length;
+  const trail = list.length - courts;
+  return [courts && `${courts} court${courts > 1 ? 's' : ''}`, trail && `${trail} trail`].filter(Boolean).join(' · ');
+}
+
+function openCityPanel(key) {
+  state.cityPanel = key;
+  if (state.view !== 'map') setView('map');
+  renderCityPanel();
+  const pts = state.courts.filter((c) => cityKey(c) === key && plottable(c));
+  if (pts.length) {
+    // Leave room on the right for the panel itself.
+    const wide = window.innerWidth > 700;
+    map.fitBounds(L.latLngBounds(pts.map((c) => [c.lat, c.lon])).pad(0.15),
+      { maxZoom: 15, paddingBottomRight: wide ? [460, 0] : [0, 0] });
+  }
+}
+function closeCityPanel() {
+  state.cityPanel = null;
+  renderCityPanel();
+}
+
+function sideStats(list) {
+  const bounds = rangeBounds();
+  const today = laToday();
+  const ranked = list.map((c) => ({ c, n: countFor(c, bounds) })).sort((a, b) => b.n - a.n);
+  const sum = (from, to) => list.reduce((t, c) => t + countFor(c, [from, to]), 0);
+  const thisWeek = sum(shiftDate(today, -6), today);
+  const lastWeek = sum(shiftDate(today, -13), shiftDate(today, -7));
+  const spark = [];
+  for (let i = 27; i >= 0; i--) { const d = shiftDate(today, -i); spark.push(sum(d, d)); }
+  return { ranked, total: ranked.reduce((t, r) => t + r.n, 0), thisWeek, lastWeek, spark };
+}
+
+function sparkSVG(vals, color) {
+  const w = 180, h = 34, max = Math.max(...vals, 1), step = w / (vals.length - 1);
+  const pts = vals.map((v, i) => `${(i * step).toFixed(1)},${(h - 3 - (v / max) * (h - 6)).toFixed(1)}`).join(' ');
+  return `<svg class="cp-spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-label="Daily scans, last 4 weeks">
+    <polyline points="0,${h} ${pts} ${w},${h}" fill="${color}" fill-opacity="0.12" stroke="none"/>
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+  </svg>`;
+}
+
+function trendLine(st) {
+  const d = st.thisWeek - st.lastWeek;
+  if (!st.thisWeek && !st.lastWeek) return { cls: 'flat', text: 'No scans in the last two weeks' };
+  const pct = st.lastWeek ? Math.round((d / st.lastWeek) * 100) : null;
+  if (d === 0) return { cls: 'flat', text: `${st.thisWeek} this week · flat vs last week` };
+  return {
+    cls: d > 0 ? 'up' : 'down',
+    text: `${st.thisWeek} this week · ${d > 0 ? '▲' : '▼'} ${Math.abs(d)}${pct != null ? ` (${d > 0 ? '+' : ''}${pct}%)` : ''} vs last week`,
+  };
+}
+
+// Plain-language overview, computed from the same numbers shown below it.
+function cityOverview(key, courts, trail) {
+  const range = RANGE_LABELS[state.range].toLowerCase();
+  const out = [];
+  const total = courts.total + trail.total;
+  const tw = courts.thisWeek + trail.thisWeek, lw = courts.lastWeek + trail.lastWeek;
+  const dir = tw === lw ? 'flat on' : tw > lw ? 'up from' : 'down from';
+  out.push(`<b>${escapeAttr(key)}</b> has ${total.toLocaleString()} scans (${range}) — ${tw} this week, ${dir} ${lw} last week.`);
+  if (courts.ranked.length) {
+    const top = courts.ranked[0];
+    const quiet = courts.ranked.filter((r) => r.n === 0).map((r) => r.c.location);
+    out.push(`<b>Fitness Courts:</b> ${top.n ? `${escapeAttr(top.c.location)} leads with ${top.n.toLocaleString()}` : 'no scans yet'}`
+      + (courts.ranked.length > 1 && courts.ranked.at(-1).n > 0 ? `; ${escapeAttr(courts.ranked.at(-1).c.location)} is lowest at ${courts.ranked.at(-1).n.toLocaleString()}` : '')
+      + (quiet.length ? `; ${quiet.length} with no scans (${quiet.slice(0, 2).map(escapeAttr).join(', ')}${quiet.length > 2 ? '…' : ''})` : '') + '.');
+  }
+  if (trail.ranked.length) {
+    const scanned = trail.ranked.filter((r) => r.n > 0);
+    out.push(`<b>Trail Line:</b> ${scanned.length} of ${trail.ranked.length} sign codes scanned`
+      + (scanned.length ? `, led by ${escapeAttr(displayName(scanned[0].c))} (${scanned[0].n})` : '')
+      + '. Pilot scans before install are test scans — see the pilot view.');
+  }
+  return out.map((t) => `<p>${t}</p>`).join('');
+}
+
+function sideHTML(title, color, st, emptyText) {
+  if (!st.ranked.length) {
+    return `<div class="cp-side"><h3><i style="background:${color}"></i>${title}</h3><div class="cp-empty">${emptyText}</div></div>`;
+  }
+  const t = trendLine(st);
+  const shown = st.ranked.slice(0, 12);
+  return `<div class="cp-side">
+    <h3><i style="background:${color}"></i>${title}</h3>
+    <div class="cp-num">${st.total.toLocaleString()}</div>
+    <div class="cp-sub">${st.ranked.length} code${st.ranked.length > 1 ? 's' : ''} · ${RANGE_LABELS[state.range]}</div>
+    <div class="cp-trend ${t.cls}">${t.text}</div>
+    ${sparkSVG(st.spark, color)}
+    <div class="cp-list">${shown.map((r) => `
+      <div class="cp-item${r.n ? '' : ' zero'}" onclick="focusCourt(${r.c.id})" title="${escapeAttr(r.c.name)}">
+        <span class="nm">${escapeAttr(displayName(r.c))}</span><span class="n">${r.n.toLocaleString()}</span>
+      </div>`).join('')}
+      ${st.ranked.length > shown.length ? `<div class="cp-sub">+ ${st.ranked.length - shown.length} more</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderCityPanel() {
+  const el = document.getElementById('citypanel');
+  const callout = document.querySelector('.callout');
+  el.parentElement.classList.toggle('cp-open', !!state.cityPanel);
+  if (!state.cityPanel) { el.style.display = 'none'; if (callout) callout.style.display = ''; return; }
+  const inCity = state.courts.filter((c) => cityKey(c) === state.cityPanel);
+  const courts = sideStats(inCity.filter((c) => c.kind !== 'trail'));
+  const trail = sideStats(inCity.filter((c) => c.kind === 'trail'));
+  el.innerHTML = `
+    <div class="cp-head">
+      <div><div class="cp-eyebrow">City breakdown</div><div class="cp-title">${escapeAttr(state.cityPanel)}</div></div>
+      <button class="cp-close" onclick="closeCityPanel()" aria-label="Close city breakdown">✕</button>
+    </div>
+    <div class="cp-overview" id="cp-overview"><div class="cp-label">Overview</div>${cityOverview(state.cityPanel, courts, trail)}</div>
+    <div class="cp-sides">
+      ${sideHTML('Fitness Courts', 'var(--blue)', courts, 'No Fitness Court codes in this city.')}
+      ${sideHTML('Trail Lines', TL_MAGENTA, trail, 'No Trail Line here yet.')}
+    </div>
+    ${trail.ranked.length && /^Las Vegas, NV$/.test(state.cityPanel) ? '<a class="cp-link" href="/vegas">Open the Las Vegas Trail Line pilot view →</a>' : ''}`;
+  el.style.display = 'block';
+  if (callout) callout.style.display = 'none';
+  loadCityAI(state.cityPanel);
+}
+
+// Swap in the AI-written overview when the server has one. Until AI Gateway
+// is enabled it answers { source: 'computed' } and the overview above stays.
+const cityAI = new Map(); // "City, ST" -> Promise<summary|null>
+function loadCityAI(key) {
+  const m = key.match(/^(.*),\s*([A-Z]{2})$/);
+  if (!m) return;
+  if (!cityAI.has(key)) {
+    cityAI.set(key, fetch(`/api/city-summary?city=${encodeURIComponent(m[1])}&state=${m[2]}`)
+      .then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  }
+  cityAI.get(key).then((s) => {
+    const box = document.getElementById('cp-overview');
+    if (!s || s.source !== 'ai' || state.cityPanel !== key || !box) return;
+    const part = (label, text) => (text ? `<p><b>${label}:</b> ${esc(text)}</p>` : '');
+    const when = s.writtenAt ? ' · ' + new Date(s.writtenAt).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : '';
+    box.innerHTML = `<div class="cp-label">Overview · AI summary${esc(when)}</div><p>${esc(s.city)}</p>`
+      + part('Fitness Courts', s.courts) + part('Trail Line', s.trail);
+  });
+}
+
+document.getElementById('citylist').addEventListener('click', (ev) => {
+  const row = ev.target.closest('.city-row');
+  const act = ev.target.closest('[data-action]')?.dataset.action;
+  if (!row || !act) return;
+  if (act === 'open') openCityPanel(row.dataset.city);
+  else toggleCity(row.dataset.city);
+});
 function cssId(s) { return s.replace(/[^a-z0-9]/gi, '-'); }
 function toggleCity(city) {
   state.openCities.has(city) ? state.openCities.delete(city) : state.openCities.add(city);
@@ -915,12 +1241,12 @@ function toggleCity(city) {
 }
 
 function renderNeeds() {
-  const needs = state.courts.filter((c) => c.locationStatus !== 'verified');
+  const needs = state.courts.filter((c) => c.locationStatus === 'missing' || c.locationStatus === 'approx');
   document.getElementById('needs-count').textContent = needs.length;
   document.getElementById('needs-list').innerHTML = needs.map((c) => `
     <div class="needs-row" id="needs-${c.id}">
       <div onclick="focusCourt(${c.id})">
-        <div class="n">${c.name}</div>
+        <div class="n">${esc(c.name)}</div>
         <div class="s">${countFor(c, null).toLocaleString()} scans all time — ${
           c.locationStatus === 'approx'
             ? `≈ placed approximately (${c.lat.toFixed(4)}, ${c.lon.toFixed(4)}) · click to view`
@@ -990,8 +1316,8 @@ function openUnmapped() {
   } else {
     list.innerHTML = unmapped.map((c) => `
       <div class="um-row" id="um-row-${c.id}">
-        <div class="um-name">${c.name}</div>
-        <div class="um-sub">${countFor(c, null).toLocaleString()} scans all time · ${c.city || ''}${c.state ? ', ' + c.state : ''}</div>
+        <div class="um-name">${esc(c.name)}</div>
+        <div class="um-sub">${countFor(c, null).toLocaleString()} scans all time · ${esc(c.city || '')}${c.state ? ', ' + esc(c.state) : ''}</div>
         <div class="row2">
           <input id="um-lat-${c.id}" placeholder="lat (e.g. 37.80614)">
           <input id="um-lon-${c.id}" placeholder="lon (e.g. -122.43512)">
@@ -1041,10 +1367,10 @@ function renderFooter() {
   document.getElementById('mode-line').textContent = mode;
   document.getElementById('mode-line-2').textContent = mode;
   const s = state.summary;
-  const reconOk = s && s.reconciled === s.totalCourts;
-  document.getElementById('recon-line').textContent = s
-    ? `Reconciliation: ${s.reconciled}/${s.totalCourts} codes match Uniqode${reconOk ? '' : ' — drift detected'}`
-    : 'Reconciliation: —';
+  const reconOk = s && s.reconciliationOk === true;
+  document.getElementById('recon-line').textContent = !s ? 'Reconciliation: —'
+    : s.reconciliationOk === null ? 'Reconciliation: unknown — scan archive unavailable'
+    : `Reconciliation: ${s.reconciled}/${s.totalCourts} codes match Uniqode${reconOk ? '' : ' — drift detected'}`;
   const ts = state.lastSynced
     ? new Date(state.lastSynced).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
     : '—';
@@ -1131,8 +1457,6 @@ function setView(v) {
     document.getElementById('tab-' + t).classList.toggle('active', v === t);
     document.getElementById('view-' + t).style.display = v === t ? '' : 'none';
   }
-  document.getElementById('field-viz').style.display = v === 'map' ? '' : 'none';
-  document.getElementById('field-basemap').style.display = v === 'map' ? '' : 'none';
   if (v === 'map') { map.invalidateSize(); renderMap(); }
   else if (v === 'list') renderList();
   else renderAnalytics();
@@ -1167,21 +1491,21 @@ function renderList() {
   const totalScans = rows.reduce((s, r) => s + r.scans, 0);
   document.getElementById('list-body').innerHTML = rows.map((r) => `
     <tr onclick="focusCourt(${r.c.id})">
-      <td><b>${r.c.location}</b></td>
-      <td>${r.c.city || '—'}</td>
-      <td>${r.c.state || '—'}</td>
+      <td><b>${esc(displayName(r.c))}</b></td>
+      <td>${esc(r.c.city || '—')}</td>
+      <td>${esc(r.c.state || '—')}</td>
       <td class="num">${r.scans.toLocaleString()}</td>
       <td>${badge[r.status]}</td>
     </tr>`).join('') + `
     <tr class="total-row">
       <td>Total</td>
       <td>${rows.length} locations</td>
-      <td>${state.stateFilter || 'All states'}</td>
+      <td>${esc(state.stateFilter || 'All states')}</td>
       <td class="num">${totalScans.toLocaleString()}</td>
       <td></td>
     </tr>`;
   document.getElementById('mode-line-3').textContent =
-    `${rows.length} locations · ${RANGE_LABELS[state.range]} · ${state.includeBots ? 'all scans (matches Uniqode)' : 'human scans only'}${state.stateFilter ? ' · ' + state.stateFilter : ''}`;
+    `${rows.length} locations · ${RANGE_LABELS[state.range]} · ${state.includeBots ? 'all scans (matches Uniqode)' : 'human scans only'}${state.stateFilter ? ' · ' + esc(state.stateFilter) : ''}`;
 }
 function setRange(r) {
   state.range = r;

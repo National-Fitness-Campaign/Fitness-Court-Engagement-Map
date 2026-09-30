@@ -5,6 +5,11 @@
   "type": "module",
   "description": "NFC Fitness Court Tracking — exact QR scan data from Uniqode",
   "scripts": {
-    "test:api": "node scripts/test-api.js"
+    "test:api": "node scripts/test-api.js",
+    "sync:locations": "node scripts/sync-salesforce-locations.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.130.0",
+    "ai": "^6.0.297"
   }
 }

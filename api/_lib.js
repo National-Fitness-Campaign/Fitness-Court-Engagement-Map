@@ -1,6 +1,14 @@
 // Shared helpers for the API gateway. Secrets come from Vercel env vars only.
 
 const UNIQODE_BASE = 'https://api.uniqode.com/api/2.0';
+// Every upstream call gets a deadline so one hung request can't hold a
+// function (and the page spinner) until the platform timeout.
+const UPSTREAM_TIMEOUT_MS = 10000;
+const withTimeout = () => AbortSignal.timeout(UPSTREAM_TIMEOUT_MS);
+
+// Scans are bucketed by the Uniqode account's timezone, so "today" is too.
+export const TZ = 'America/Los_Angeles';
+export const laToday = () => new Date().toLocaleDateString('en-CA', { timeZone: TZ });
 
 export function env(name) {
   const v = process.env[name];
@@ -11,6 +19,7 @@ export function env(name) {
 export async function uniqodeFetch(path) {
   const resp = await fetch(`${UNIQODE_BASE}${path}`, {
     headers: { Authorization: `Token ${env('UNIQODE_API_KEY')}` },
+    signal: withTimeout(),
   });
   if (!resp.ok) {
     const body = await resp.text().catch(() => '');
@@ -20,15 +29,26 @@ export async function uniqodeFetch(path) {
 }
 
 // Pages through /qrcodes/ and returns every QR code object in the account.
-export async function fetchAllQRCodes() {
-  const results = [];
-  let path = '/qrcodes/?limit=100';
-  while (path) {
-    const page = await uniqodeFetch(path);
-    results.push(...page.results);
-    path = page.next ? page.next.replace(UNIQODE_BASE, '') : null;
-  }
-  return results;
+// Memoized for a minute per function instance: /api/trail and
+// /api/trail-summary both need the list, and a cache-busting refresh
+// shouldn't re-page the whole Uniqode account every time.
+const CODES_TTL_MS = 60_000;
+let codesCache = null; // { at, promise }
+export function fetchAllQRCodes() {
+  if (codesCache && Date.now() - codesCache.at < CODES_TTL_MS) return codesCache.promise;
+  const promise = (async () => {
+    const results = [];
+    let path = '/qrcodes/?limit=100';
+    while (path) {
+      const page = await uniqodeFetch(path);
+      results.push(...page.results);
+      path = page.next ? page.next.replace(UNIQODE_BASE, '') : null;
+    }
+    return results;
+  })();
+  codesCache = { at: Date.now(), promise };
+  promise.catch(() => { if (codesCache?.promise === promise) codesCache = null; });
+  return promise;
 }
 
 export async function supabaseSelect(pathAndQuery) {
@@ -45,6 +65,7 @@ export async function supabaseSelect(pathAndQuery) {
         Range: `${from}-${from + PAGE - 1}`,
         'Range-Unit': 'items',
       },
+      signal: withTimeout(),
     });
     if (!resp.ok) {
       const body = await resp.text().catch(() => '');
@@ -65,8 +86,12 @@ export function sendError(res, err) {
   res.status(status).json({ error: String(err.message || err) });
 }
 
-export function setCache(res) {
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+// Healthy responses cache 5 min; degraded ones (an upstream failed and we
+// fell back) only 30 s, so a blip doesn't pin a wrong picture for 15 minutes.
+export function setCache(res, { degraded = false } = {}) {
+  res.setHeader('Cache-Control', degraded
+    ? 's-maxage=30, stale-while-revalidate=30'
+    : 's-maxage=300, stale-while-revalidate=600');
 }
 
 // Valid plotting coordinates only — anything else means "needs location verification".
@@ -89,7 +114,18 @@ export function parseLocation(metadata) {
 // Best-effort display parsing of the QR-{ST}-{City}-{Location} naming convention.
 // Regional batches like QR-TX-DFW-GrandPrairie-Tyre are split to their real
 // city (Grand Prairie) so each site ranks and plots individually.
+// QR-name "states" that aren't the court's state: QR-SF-SanFranciscoCA-* is San Francisco, CA.
+const STATE_ALIAS = { SF: 'CA' };
+
 export function parseName(name) {
+  const r = parseNameRaw(name);
+  const state = STATE_ALIAS[r.state] || r.state;
+  // "San Francisco CA" (state baked into the city segment) → "San Francisco".
+  const city = state ? r.city.replace(new RegExp('\\s+' + state + '$'), '') : r.city;
+  return { ...r, state, city };
+}
+
+function parseNameRaw(name) {
   const spaced = (s) =>
     s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim();
   const parts = name.split('-');
@@ -104,7 +140,7 @@ export function parseName(name) {
   if (parts.length === 3 && parts[0] === 'QR') {
     return { state: parts[1], city: spaced(parts[2]), location: spaced(parts[2]) };
   }
-  if (parts.length >= 4 && parts[0] === 'QR') {
+  if (parts.length >= 4 && (parts[0] === 'QR' || parts[0] === 'TL')) {
     return {
       state: parts[1],
       city: spaced(parts[2]),

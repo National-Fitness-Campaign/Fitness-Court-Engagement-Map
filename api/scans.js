@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       }
     }
 
-    let q = 'scan_daily?select=qr_id,scan_date_la,is_bot,scans&order=scan_date_la.asc';
+    let q = 'scan_daily?select=qr_id,scan_date_la,is_bot,scans&order=scan_date_la.asc,qr_id.asc,is_bot.asc';
     if (from) q += `&scan_date_la=gte.${from}`;
     if (to) q += `&scan_date_la=lte.${to}`;
 

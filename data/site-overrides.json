@@ -1,0 +1,40 @@
+{
+  "_comment": "qr_id -> Salesforce Site__c Id, or \"none\". Beats the name matcher. Entries below were checked by hand on 2026-09-30 (Claude, for Emily). See docs/location-review.md.",
+  "12270511": "a3MQh0000067kNdMAI",
+  "12138889": "a3MQh000005GPXRMA4",
+  "12065396": "a3MQh0000099mxtMAA",
+  "12065386": "a3MQh000000lAf3MAE",
+  "12016750": "a3MQh000008G8jNMAS",
+  "11994288": "a3MQh000000aGcXMAU",
+  "11994139": "a3MQh000000rcWzMAI",
+  "11951460": "a3MQh000000aBjLMAU",
+  "11951434": "a3MQh000000aAs7MAE",
+  "11951428": "a3MQh000000aEXVMA2",
+  "11951188": "a3MQh000000aGr3MAE",
+  "9164194": "a3MQh000000aCdlMAE",
+  "9164196": "a3MQh000000aBRaMAM",
+  "9164184": "a3MQh000000aCh0MAE",
+  "9164193": "a3MQh000000aCc9MAE",
+  "9164189": "a3MQh000000aBkxMAE",
+  "9016747": "a3MQh000000aBoCMAU",
+  "11442714": "a3MQh000000ljsvMAA",
+  "9164235": "a3MQh000000aEu5MAE",
+  "9781490": "a3MQh000000aE4VMAU",
+  "12138876": "a3MQh00000970AzMAI",
+  "11947995": "a3MQh000000aDpyMAE",
+  "11484205": "a3MQh000000aDV2MAM",
+  "11484240": "a3MQh000000aAwwMAE",
+  "11483640": "a3MQh000000aEFoMAM",
+  "10783851": "a3MQh000000rBjhMAE",
+  "11114265": "a3MQh000003pGU1MAM",
+  "11033908": {
+    "lat": 36.1797553,
+    "lon": -115.271001,
+    "source": "NFC Las Vegas planning map (Google My Maps) \u2014 Kellogg Zaher Sports Complex"
+  },
+  "11033889": {
+    "lat": 36.180986,
+    "lon": -115.078773,
+    "source": "NFC Las Vegas planning map \u2014 East Las Vegas Family Park, 4480 E Washington Ave (confirmed by Jessica)"
+  }
+}
