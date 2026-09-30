@@ -2,3 +2,8 @@
 .claude
 node_modules
 .vercel
+# Not part of the site: schema, review notes, Salesforce Site IDs, scripts
+sql
+docs
+data
+scripts

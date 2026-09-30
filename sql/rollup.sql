@@ -121,3 +121,26 @@ create table if not exists public.qr_site_links (
 alter table public.qr_site_links enable row level security;
 revoke all on public.qr_site_links from anon, authenticated;
 grant select, insert, update, delete on public.qr_site_links to service_role;
+
+-- ── Guard + maintenance (migration: engagement_map_scan_logs_guard) ───────
+-- * scan_rollup_errors: the trigger records any row it couldn't tally.
+-- * scan_logs is append-only: BEFORE UPDATE/DELETE (row) and BEFORE TRUNCATE
+--   (statement) triggers raise unless app.scan_logs_maintenance = 'on', and
+--   UPDATE/DELETE/TRUNCATE are revoked from anon, authenticated, service_role.
+-- * rebuild_scan_rollup(): recomputes scan_daily_rollup + scan_rollup_dedup
+--   from scratch with the scan_events_clean rules (idempotent — this replaces
+--   the one-off step-2 backfill, which must NOT be re-run: it adds).
+-- * scan_rollup_audit: rows where the rollup and a full recount disagree.
+--
+-- Deliberate cleanup (e.g. removing test scans):
+--   begin;
+--   set local app.scan_logs_maintenance = 'on';
+--   delete from public.scan_logs where ...;
+--   select * from public.rebuild_scan_rollup();
+--   commit;
+--
+-- Health check (expect 0 and 0):
+--   select (select count(*) from scan_rollup_audit), (select count(*) from scan_rollup_errors);
+--
+-- Full SQL as applied: see the migration in the Supabase dashboard
+-- (Database → Migrations → engagement_map_scan_logs_guard).

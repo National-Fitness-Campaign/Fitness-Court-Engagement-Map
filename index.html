@@ -275,6 +275,8 @@ header {
 @keyframes spin { to { transform: rotate(360deg); } }
 .overlay-text { font-weight: 700; color: var(--text-2); }
 .error-banner { display: none; align-items: center; gap: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: var(--radius); padding: 13px 18px; margin-bottom: 16px; font-weight: 600; }
+.warn-banner { display: none; background: #fff7e6; border: 1px solid #fde2a8; color: #7a4b00; border-radius: var(--radius); padding: 11px 18px; margin-bottom: 16px; font-size: 0.85rem; }
+.warn-banner b { font-weight: 700; }
 .error-banner button { margin-left: auto; font: inherit; font-weight: 700; border: 1px solid #fca5a5; background: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; color: #991b1b; }
 
 /* Modal */
@@ -332,6 +334,7 @@ header {
 </header>
 
 <div class="page">
+  <div class="warn-banner" id="warn-banner" role="status"></div>
   <div class="error-banner" id="error-banner">
     <span id="error-text">Could not load data.</span>
     <button onclick="loadData(true)">Retry</button>
@@ -644,7 +647,10 @@ function countFor(court, bounds) {
   return sum;
 }
 
-const escapeAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+// Every code name, city, address and Salesforce/Design Lab label is external
+// data — escape it before it goes into innerHTML or a Leaflet popup/tooltip.
+const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const escapeAttr = esc;
 
 /* ═════════════════════════════ Data loading ════════════════════════════ */
 async function loadData(isRefresh) {
@@ -662,9 +668,15 @@ async function loadData(isRefresh) {
     const courtsBody = await courtsResp.json();
     // Daily series is optional: without it the map still shows all-time totals.
     const scansBody = scansResp.ok ? await scansResp.json() : { days: [] };
-    if (!scansResp.ok || courtsBody.archiveOk === false) {
-      console.warn('Scan archive unavailable — showing Uniqode all-time totals only', courtsBody.warnings);
-    }
+    // Degraded, not broken: say so on the page instead of only in the console.
+    const warn = document.getElementById('warn-banner');
+    const problems = [];
+    if (courtsBody.archiveOk === false) problems.push('the scan archive didn’t load, so totals are Uniqode’s all-time counts and reconciliation is unknown');
+    if (!scansResp.ok) problems.push('daily scan history didn’t load, so date ranges and charts are empty');
+    if ((courtsBody.warnings || []).some((w) => /trail positions|qr_site_links/.test(w))) problems.push('some map positions didn’t load');
+    warn.innerHTML = problems.length ? `<b>Partial data right now:</b> ${esc(problems.join('; '))}. Try Refresh in a minute.` : '';
+    warn.style.display = problems.length ? 'block' : 'none';
+    if (problems.length) console.warn('Degraded data', courtsBody.warnings);
 
     state.courts = courtsBody.courts;
     state.summary = courtsBody.summary;
@@ -771,7 +783,7 @@ function populateStateFilter() {
   sel.innerHTML = '<option value="">All States</option>' +
     states.map((s) => {
       const n = pool.filter((c) => c.state === s).length;
-      return `<option value="${s}"${s === current ? ' selected' : ''}>${s} (${n})</option>`;
+      return `<option value="${esc(s)}"${s === current ? ' selected' : ''}>${esc(s)} (${n})</option>`;
     }).join('');
 }
 function setStateFilter(s) {
@@ -815,7 +827,7 @@ function renderKPIs() {
   const unplottedScans = unplotted.reduce((s, c) => s + countFor(c, bounds), 0);
   document.getElementById('kpi-scans-sub').textContent =
     RANGE_LABELS[state.range] +
-    (state.stateFilter ? ` · ${state.stateFilter}` : '') +
+    (state.stateFilter ? ` · ${esc(state.stateFilter)}` : '') +
     (unplottedScans ? ` — incl. ${unplottedScans.toLocaleString()} from ${unplotted.length} unmapped codes` : '');
   document.getElementById('kpi-visible').textContent = courts.filter(plottable).length;
   // Unmapped = no position at all (geocoding couldn't place the name). These
@@ -831,7 +843,9 @@ function renderKPIs() {
 }
 
 function popupHTML(court, count) {
-  const recon = !court.reconciled
+  const recon = court.reconciled === null
+    ? '<span class="recon warn" title="The scan archive didn’t load, so this can’t be checked against Uniqode right now.">? Reconciliation unknown</span>'
+    : !court.reconciled
     ? `<span class="recon warn">⚠ Drift: ${court.delta > 0 ? '+' : ''}${court.delta} vs Uniqode</span>`
     : court.preArchive && court.delta > RECON_TOL
       ? `<span class="recon ok" title="This code predates live tracking (Apr 7, 2026); Uniqode's official total includes ${court.delta.toLocaleString()} earlier scans we have no per-day record of.">✓ Matches Uniqode · incl. ${court.delta.toLocaleString()} scans before Apr 2026</span>`
@@ -860,9 +874,9 @@ function popupHTML(court, count) {
        <button class="popup-toggle" onclick="togglePopupForm(${court.id})">Confirm location ▾</button></div>${form}`
     : `<div><button class="popup-toggle subtle" onclick="togglePopupForm(${court.id})">✎ edit location</button></div>${form}`;
   return `<div class="court-popup">
-    <h3>${court.location}</h3>
-    <div class="city">📍 ${court.city}${court.state ? ', ' + court.state : ''}</div>
-    ${court.address ? `<div class="address">${court.address}</div>` : ''}
+    <h3>${esc(displayName(court))}</h3>
+    <div class="city">📍 ${esc(court.city)}${court.state ? ', ' + esc(court.state) : ''}</div>
+    ${court.address ? `<div class="address">${esc(court.address)}</div>` : ''}
     <div class="scan-count">${count.toLocaleString()}</div>
     <div class="scan-lbl">${RANGE_LABELS[state.range]} · ${state.includeBots ? 'all scans' : 'human scans'}</div>
     ${recon}${approxBlock}
@@ -910,7 +924,7 @@ function renderMap() {
         L.circleMarker([c.lat, c.lon], {
           radius: counts[i] === 0 ? 3 : 5, color: '#fff', fillOpacity: 0,
           weight: counts[i] === 0 ? 1 : 2, opacity: counts[i] === 0 ? 0.35 : 0.9,
-        }).bindTooltip(c.location, { permanent: true, direction: 'top', offset: [0, -8], className: 'heat-label' })
+        }).bindTooltip(esc(displayName(c)), { permanent: true, direction: 'top', offset: [0, -8], className: 'heat-label' })
           .bindPopup(popupHTML(c, counts[i]), { maxWidth: 260 })
           .addTo(heatLabels);
       });
@@ -974,7 +988,7 @@ function renderRankings() {
   document.getElementById('top3').innerHTML = ranked.slice(0, 3).map((r, i) => `
     <div class="row" onclick="focusCourt(${r.c.id})">
       <div class="rank-badge">${i + 1}</div>
-      <div><div class="row-name">${displayName(r.c)}${r.c.kind === 'trail' ? '<span class="cc-tl">TL</span>' : ''}</div><div class="row-sub">${r.c.city}${r.c.state ? ', ' + r.c.state : ''}</div></div>
+      <div><div class="row-name">${esc(displayName(r.c))}${r.c.kind === 'trail' ? '<span class="cc-tl">TL</span>' : ''}</div><div class="row-sub">${esc(r.c.city)}${r.c.state ? ', ' + esc(r.c.state) : ''}</div></div>
       <div class="row-val"><b>${r.n.toLocaleString()}</b><span>SCANS</span></div>
     </div>`).join('') || '<div style="padding:10px 18px;color:var(--text-3);font-size:0.8rem">No scans in this range</div>';
 
@@ -998,16 +1012,16 @@ function renderRankings() {
     c.locationStatus === 'approx' ? '<span class="cc-status" title="Approximate location">≈</span>' :
     '<span class="cc-status" title="No location yet">⚠</span>';
   document.getElementById('citylist').innerHTML = shown.map((e) => `
-    <div class="city-row${isOpen(e.city) ? ' open' : ''}" id="city-${cssId(e.city)}">
-      <div class="line1" onclick="toggleCity('${e.city.replace(/'/g, "\\'")}')">
-        <span class="cname clickable" onclick="event.stopPropagation(); openCityPanel('${e.city.replace(/'/g, "\\'")}')" title="Open ${escapeAttr(e.city)} breakdown">${e.city}</span><span class="ccount">${codeCountLabel(e.courts.map((r) => r.c))}<span class="chev">▶</span></span>
+    <div class="city-row${isOpen(e.city) ? ' open' : ''}" id="city-${cssId(e.city)}" data-city="${esc(e.city)}">
+      <div class="line1" data-action="toggle">
+        <span class="cname clickable" data-action="open" title="Open ${esc(e.city)} breakdown">${esc(e.city)}</span><span class="ccount">${codeCountLabel(e.courts.map((r) => r.c))}<span class="chev">▶</span></span>
         <span class="cval">${e.scans.toLocaleString()}<span>SCANS</span></span>
       </div>
       <div class="bar"><i style="width:${Math.max((e.scans / maxScans) * 100, 2)}%"></i></div>
       <div class="city-courts">
         ${e.courts.map((r) => `
-          <div class="city-court" onclick="focusCourt(${r.c.id})">
-            <span class="cc-name">${displayName(r.c)}</span>${r.c.kind === 'trail' ? '<span class="cc-tl">TL</span>' : ''}${statusDot(r.c)}
+          <div class="city-court" onclick="focusCourt(${Number(r.c.id)})">
+            <span class="cc-name">${esc(displayName(r.c))}</span>${r.c.kind === 'trail' ? '<span class="cc-tl">TL</span>' : ''}${statusDot(r.c)}
             <span class="cc-scans">${r.n.toLocaleString()}</span>
           </div>`).join('')}
       </div>
@@ -1150,6 +1164,13 @@ function renderCityPanel() {
   if (callout) callout.style.display = 'none';
 }
 
+document.getElementById('citylist').addEventListener('click', (ev) => {
+  const row = ev.target.closest('.city-row');
+  const act = ev.target.closest('[data-action]')?.dataset.action;
+  if (!row || !act) return;
+  if (act === 'open') openCityPanel(row.dataset.city);
+  else toggleCity(row.dataset.city);
+});
 function cssId(s) { return s.replace(/[^a-z0-9]/gi, '-'); }
 function toggleCity(city) {
   state.openCities.has(city) ? state.openCities.delete(city) : state.openCities.add(city);
@@ -1162,7 +1183,7 @@ function renderNeeds() {
   document.getElementById('needs-list').innerHTML = needs.map((c) => `
     <div class="needs-row" id="needs-${c.id}">
       <div onclick="focusCourt(${c.id})">
-        <div class="n">${c.name}</div>
+        <div class="n">${esc(c.name)}</div>
         <div class="s">${countFor(c, null).toLocaleString()} scans all time — ${
           c.locationStatus === 'approx'
             ? `≈ placed approximately (${c.lat.toFixed(4)}, ${c.lon.toFixed(4)}) · click to view`
@@ -1232,8 +1253,8 @@ function openUnmapped() {
   } else {
     list.innerHTML = unmapped.map((c) => `
       <div class="um-row" id="um-row-${c.id}">
-        <div class="um-name">${c.name}</div>
-        <div class="um-sub">${countFor(c, null).toLocaleString()} scans all time · ${c.city || ''}${c.state ? ', ' + c.state : ''}</div>
+        <div class="um-name">${esc(c.name)}</div>
+        <div class="um-sub">${countFor(c, null).toLocaleString()} scans all time · ${esc(c.city || '')}${c.state ? ', ' + esc(c.state) : ''}</div>
         <div class="row2">
           <input id="um-lat-${c.id}" placeholder="lat (e.g. 37.80614)">
           <input id="um-lon-${c.id}" placeholder="lon (e.g. -122.43512)">
@@ -1283,10 +1304,10 @@ function renderFooter() {
   document.getElementById('mode-line').textContent = mode;
   document.getElementById('mode-line-2').textContent = mode;
   const s = state.summary;
-  const reconOk = s && s.reconciled === s.totalCourts;
-  document.getElementById('recon-line').textContent = s
-    ? `Reconciliation: ${s.reconciled}/${s.totalCourts} codes match Uniqode${reconOk ? '' : ' — drift detected'}`
-    : 'Reconciliation: —';
+  const reconOk = s && s.reconciliationOk === true;
+  document.getElementById('recon-line').textContent = !s ? 'Reconciliation: —'
+    : s.reconciliationOk === null ? 'Reconciliation: unknown — scan archive unavailable'
+    : `Reconciliation: ${s.reconciled}/${s.totalCourts} codes match Uniqode${reconOk ? '' : ' — drift detected'}`;
   const ts = state.lastSynced
     ? new Date(state.lastSynced).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
     : '—';
@@ -1409,21 +1430,21 @@ function renderList() {
   const totalScans = rows.reduce((s, r) => s + r.scans, 0);
   document.getElementById('list-body').innerHTML = rows.map((r) => `
     <tr onclick="focusCourt(${r.c.id})">
-      <td><b>${r.c.location}</b></td>
-      <td>${r.c.city || '—'}</td>
-      <td>${r.c.state || '—'}</td>
+      <td><b>${esc(displayName(r.c))}</b></td>
+      <td>${esc(r.c.city || '—')}</td>
+      <td>${esc(r.c.state || '—')}</td>
       <td class="num">${r.scans.toLocaleString()}</td>
       <td>${badge[r.status]}</td>
     </tr>`).join('') + `
     <tr class="total-row">
       <td>Total</td>
       <td>${rows.length} locations</td>
-      <td>${state.stateFilter || 'All states'}</td>
+      <td>${esc(state.stateFilter || 'All states')}</td>
       <td class="num">${totalScans.toLocaleString()}</td>
       <td></td>
     </tr>`;
   document.getElementById('mode-line-3').textContent =
-    `${rows.length} locations · ${RANGE_LABELS[state.range]} · ${state.includeBots ? 'all scans (matches Uniqode)' : 'human scans only'}${state.stateFilter ? ' · ' + state.stateFilter : ''}`;
+    `${rows.length} locations · ${RANGE_LABELS[state.range]} · ${state.includeBots ? 'all scans (matches Uniqode)' : 'human scans only'}${state.stateFilter ? ' · ' + esc(state.stateFilter) : ''}`;
 }
 function setRange(r) {
   state.range = r;

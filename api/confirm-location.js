@@ -9,7 +9,15 @@
 // On success the matching row in qr_location_suggestions is deleted —
 // the code graduates from "approximate" to "verified".
 
+import { timingSafeEqual } from 'node:crypto';
 import { env, uniqodeFetch, sendError, UpstreamError } from './_lib.js';
+
+// Constant-time compare so the key can't be guessed byte by byte from timing.
+function keyMatches(given, expected) {
+  const a = Buffer.from(String(given ?? ''));
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 const sanitize = (s) => s.replace(/[^A-Za-z0-9 _-]/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -26,11 +34,12 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') { res.status(405).json({ error: 'POST only' }); return; }
     const adminKey = process.env.ADMIN_KEY;
     if (!adminKey) { res.status(503).json({ error: 'ADMIN_KEY is not configured in Vercel — add it under Settings → Environment Variables to enable location editing.' }); return; }
-    if (req.headers['x-admin-key'] !== adminKey) { res.status(401).json({ error: 'Wrong admin key.' }); return; }
+    if (!keyMatches(req.headers['x-admin-key'], adminKey)) { res.status(401).json({ error: 'Wrong admin key.' }); return; }
 
     const { id, address } = req.body || {};
     let { lat, lon } = req.body || {};
-    if (!id) { res.status(400).json({ error: 'Missing QR code id.' }); return; }
+    // Uniqode ids are numeric; anything else would be spliced into the API path.
+    if (!/^\d{1,12}$/.test(String(id ?? ''))) { res.status(400).json({ error: 'Missing or invalid QR code id.' }); return; }
 
     if ((lat == null || lon == null) && address) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&q=${encodeURIComponent(address)}`;

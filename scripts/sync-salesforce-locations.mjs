@@ -181,8 +181,27 @@ const overrides = fs.existsSync(overridesPath) ? JSON.parse(fs.readFileSync(over
 delete overrides._comment;
 
 const [codes, sites] = await Promise.all([fetchAllQRCodes(), salesforceSites()]);
+
+// Refuse to write from a half-empty read. A Salesforce permission change or a
+// Uniqode hiccup would otherwise upsert every row with lat:null and wipe every
+// pin on the map in one run.
+const MIN_SITES = 500;   // 808 Site__c records as of 2026-09-30
+const MIN_COURTS = 100;  // 167 active QR- codes as of 2026-09-30
+if (sites.length < MIN_SITES) {
+  throw new Error(`Only ${sites.length} Salesforce sites came back (expected ${MIN_SITES}+). Not writing anything — check the integration user's access.`);
+}
 const siteById = new Map(sites.map((s) => [s.id, s]));
 const courts = codes.filter((c) => c.name.startsWith('QR') && c.state === 'A');
+if (courts.length < MIN_COURTS) {
+  throw new Error(`Only ${courts.length} active QR- codes came back from Uniqode (expected ${MIN_COURTS}+). Not writing anything.`);
+}
+// An override pointing at a Site Id Salesforce no longer has would quietly
+// fall back to name matching — say so instead.
+for (const [qr, ov] of Object.entries(overrides)) {
+  if (typeof ov === 'string' && ov !== 'none' && !siteById.has(ov)) {
+    console.warn(`⚠ override for QR ${qr} points at Site ${ov}, which Salesforce didn't return — falling back to name matching`);
+  }
+}
 
 const rows = [];
 const review = [];

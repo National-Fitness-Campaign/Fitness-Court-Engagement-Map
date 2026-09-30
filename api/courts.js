@@ -1,11 +1,10 @@
 // GET /api/courts — the map's single source for the QR code list.
 //
-// Lists every active Uniqode QR code whose name starts with "QR", joins exact
-// per-code scan totals from the cleaned webhook archive (scan_totals view),
-// reads locations ONLY from Uniqode metadata (lat/lon/address keys), and
-// reconciles computed totals against Uniqode's official `scans` field.
-// Codes without valid coordinates are returned in the same list with
-// hasLocation:false — visible, never plotted at a guess.
+// Lists every active Uniqode QR code named QR-* (Fitness Courts) or TL-*
+// (Trail Line signs), joins exact per-code scan totals from the webhook
+// archive (scan_totals), places each code (Design Lab station > Salesforce /
+// hand override > Uniqode metadata > geocoded guess), and reconciles computed
+// totals against Uniqode's official `scans` field.
 
 import {
   fetchAllQRCodes,
@@ -15,7 +14,7 @@ import {
   sendError,
   setCache,
 } from './_lib.js';
-import { trailCodePositions } from './_trail.js';
+import { trailStationPositions, placeTrailCodes } from './_trail.js';
 
 const RECONCILE_TOLERANCE = 2; // R11: delta ≤ 2 = matches Uniqode
 // Complete per-scan history starts when the receive-scan webhook went live
@@ -33,18 +32,16 @@ export default async function handler(req, res) {
     // so the map still loads instead of 502ing.
     const warnings = [];
     const soft = (p, label) => p.catch((err) => { warnings.push(`${label}: ${err.message}`); return null; });
-    const [codes, totalsRows, suggestionRows, linkRows] = await Promise.all([
+    const [codes, totalsRows, suggestionRows, linkRows, stationSets] = await Promise.all([
       fetchAllQRCodes(),
-      soft(supabaseSelect('scan_totals?select=qr_id,human_scans,bot_scans'), 'scan_totals'),
-      soft(supabaseSelect('qr_location_suggestions?select=qr_id,lat,lon,source'), 'suggestions'),
+      soft(supabaseSelect('scan_totals?select=qr_id,human_scans,bot_scans&order=qr_id.asc'), 'scan_totals'),
+      soft(supabaseSelect('qr_location_suggestions?select=qr_id,lat,lon,source&order=qr_id.asc'), 'suggestions'),
       // Salesforce Site__c coordinates, synced by scripts/sync-salesforce-locations.mjs.
-      soft(supabaseSelect('qr_site_links?select=qr_id,sf_site_id,sf_site_name,lat,lon&lat=not.is.null'), 'qr_site_links'),
+      soft(supabaseSelect('qr_site_links?select=qr_id,sf_site_id,sf_site_name,lat,lon&lat=not.is.null&order=qr_id.asc'), 'qr_site_links'),
+      // Trail line signs are placed from the Design Lab station layer.
+      soft(trailStationPositions(), 'trail positions'),
     ]);
-    // Trail line signs are placed from the Design Lab station layer.
-    const trailPos = await trailCodePositions(codes).catch((err) => {
-      warnings.push(`trail positions: ${err.message}`);
-      return new Map();
-    });
+    const trailPos = placeTrailCodes(codes, stationSets || []);
     const archiveOk = totalsRows !== null;
     const totals = totalsRows || [];
     const suggestions = suggestionRows || [];
@@ -58,11 +55,13 @@ export default async function handler(req, res) {
       .map((c) => {
         const loc = parseLocation(c.metadata);
         const named = parseName(c.name);
+        // Archive down: show Uniqode's official total so the map still works,
+        // but say reconciliation is unknown rather than claiming a match.
         const t = totalsById.get(String(c.id)) ||
           (archiveOk ? { human_scans: 0, bot_scans: 0 } : { human_scans: c.scans ?? 0, bot_scans: 0 });
         const computedAll = t.human_scans + t.bot_scans;
         const official = c.scans ?? 0;
-        const delta = official - computedAll;
+        const delta = archiveOk ? official - computedAll : null;
         const preArchive = (c.created || '').slice(0, 10) < ARCHIVE_START;
         // Location precedence:
         //   salesforce = the court's Site__c geo location (source of truth)
@@ -97,7 +96,7 @@ export default async function handler(req, res) {
           officialScans: official,
           humanScans: t.human_scans,
           botScans: t.bot_scans,
-          reconciled: Math.abs(delta) <= RECONCILE_TOLERANCE
+          reconciled: !archiveOk ? null : Math.abs(delta) <= RECONCILE_TOLERANCE
             || (preArchive && (delta > 0 || -delta <= Math.max(RECONCILE_TOLERANCE, official * BACKFILL_TOLERANCE))),
           preArchive,
           delta,
@@ -106,23 +105,24 @@ export default async function handler(req, res) {
       .sort((a, b) => b.humanScans - a.humanScans);
 
     const needsLocation = courts.filter((c) => c.locationStatus === 'missing' || c.locationStatus === 'approx').map((c) => c.id);
-    const reconciledCount = courts.filter((c) => c.reconciled).length;
+    const reconciledCount = courts.filter((c) => c.reconciled === true).length;
     const approxCount = courts.filter((c) => c.locationStatus === 'approx').length;
 
-    setCache(res);
+    setCache(res, { degraded: warnings.length > 0 });
     res.status(200).json({
       courts,
       needsLocation,
       summary: {
         totalCourts: courts.length,
-        plotted: courts.length - needsLocation.length,
+        plotted: courts.filter((c) => c.lat != null && c.lon != null).length,
         approx: approxCount,
         needsLocation: needsLocation.length,
         humanScans: courts.reduce((s, c) => s + c.humanScans, 0),
         botScans: courts.reduce((s, c) => s + c.botScans, 0),
         officialScans: courts.reduce((s, c) => s + c.officialScans, 0),
         reconciled: reconciledCount,
-        reconciliationOk: reconciledCount === courts.length,
+        // null = unknown (archive unavailable), not "fine".
+        reconciliationOk: archiveOk ? reconciledCount === courts.length : null,
       },
       archiveOk,
       warnings,

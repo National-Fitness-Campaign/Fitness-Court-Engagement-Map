@@ -175,7 +175,11 @@ main { padding: 20px 28px 40px; display: grid; gap: 16px; max-width: 1500px; mar
 </main>
 
 <script>
-const PILOT = new URLSearchParams(location.search).get('pilot') || 'las-vegas';
+const PILOT = encodeURIComponent(new URLSearchParams(location.search).get('pilot') || 'las-vegas');
+// Scans are bucketed by Pacific day, so the chart's "today" and every date
+// label are Pacific too (UTC would drop tonight into tomorrow).
+const laDate = (t) => new Date(t).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+const addDays = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 864e5).toISOString().slice(0, 10);
 const TIER_LABEL = { gateway: 'Gateway', midway: 'Midway', marker: 'Trail Marker' };
 const TIER_COLOR = { gateway: '#1e3a8a', midway: '#2563eb', marker: '#0ea5e9' };
 const TIER_R = { gateway: 11, midway: 8, marker: 6 };
@@ -299,10 +303,10 @@ function renderKpis(d) {
 }
 
 function renderChart() {
-  const start = (data.firstCodeCreated || new Date().toISOString()).slice(0, 10);
-  const today = new Date().toISOString().slice(0, 10);
+  const start = laDate(data.firstCodeCreated ? Date.parse(data.firstCodeCreated) : Date.now());
+  const today = laDate(Date.now());
   const labels = [];
-  for (let t = Date.parse(start); t <= Date.parse(today); t += 864e5) labels.push(new Date(t).toISOString().slice(0, 10));
+  for (let d = start; d <= today; d = addDays(d, 1)) labels.push(d);
   const codes = allCodes();
   const series = (tier) => labels.map((d) => codes.filter((c) => c.tier === tier).reduce((n, c) => n + (c.days[d] || 0), 0));
   const datasets = ['gateway', 'midway', 'marker'].map((t) => ({ label: TIER_LABEL[t], data: series(t), backgroundColor: TIER_COLOR[t], borderRadius: 3, maxBarThickness: 26 }));
@@ -334,13 +338,23 @@ async function load(refresh) {
     document.getElementById('title').textContent = `${data.pilot.name}, ${data.pilot.state}`;
     document.title = `Trail Line Pilot — ${data.pilot.name}`;
 
+    // Three phases: before install (test scans), installing (installer
+    // checks), live. Public counting starts at launchDate, the day after install.
     const banner = document.getElementById('launch-banner');
-    const launch = data.pilot.launchDate;
-    const daysOut = launch ? Math.ceil((Date.parse(launch + 'T00:00:00') - Date.now()) / 864e5) : null;
-    banner.style.display = !launch || daysOut > 0 ? 'block' : 'none';
-    banner.innerHTML = !launch
-      ? '<b>Launch date not set.</b> Every scan is counted as a pre-launch check until the install date is added — then the view splits public scans from test scans.'
-      : `<b>Installing ${esc(data.pilot.installWindow || fmtDate(launch))} · ${daysOut} day${daysOut === 1 ? '' : 's'} to go.</b> Scans before ${fmtDate(launch)} are counted as test scans; public scans start with the install.`;
+    const { launchDate: launch, installStart, installWindow } = data.pilot;
+    const today = laDate(Date.now());
+    const daysTo = (d) => Math.round((Date.parse(d + 'T12:00:00Z') - Date.parse(today + 'T12:00:00Z')) / 864e5);
+    let msg = null;
+    if (!launch) {
+      msg = '<b>Launch date not set.</b> Every scan is counted as a pre-launch check until the install date is added — then the view splits public scans from test scans.';
+    } else if (installStart && today < installStart) {
+      const n = daysTo(installStart);
+      msg = `<b>Installing ${esc(installWindow || fmtDate(installStart))} · ${n} day${n === 1 ? '' : 's'} to go.</b> Public counting starts ${fmtDate(launch)}; every scan before then is a test or install scan.`;
+    } else if (today < launch) {
+      msg = `<b>Signs are going in now.</b> Installer checks don’t count — public counting starts ${fmtDate(launch)}.`;
+    }
+    banner.innerHTML = msg || '';
+    banner.style.display = msg ? 'block' : 'none';
 
     drawLoops(data.loops);
     drawStations();

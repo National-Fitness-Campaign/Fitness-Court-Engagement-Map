@@ -10,7 +10,7 @@
 //   Purpose Map = "scan for the city map", CTA = "your personal trainers" (app);
 //           a Midway's unsuffixed code is its CTA
 
-import { fetchAllQRCodes, supabaseSelect } from './_lib.js';
+import { fetchAllQRCodes, supabaseSelect, laToday } from './_lib.js';
 
 export const PILOTS = {
   'las-vegas': {
@@ -18,9 +18,11 @@ export const PILOTS = {
     state: 'NV',
     prefix: 'TL-NV-LasVegas-',
     designLabCityId: 'cmnp7a5ng0000l404woglts7g',
-    // Scans before this date are pre-install checks, not public use.
-    // Install window Oct 19–21, 2026 (pilot status update, 2026-09-30).
-    launchDate: '2026-10-19',
+    // Signs go in Oct 19–21 (pilot status update, 2026-09-30). Installer
+    // checks on those days aren't public use, so public counting starts the
+    // day after install; everything earlier is a test / install scan.
+    installStart: '2026-10-19',
+    launchDate: '2026-10-22',
     installWindow: 'Oct 19–21',
     center: [36.1835, -115.2615],
   },
@@ -39,14 +41,15 @@ const LINES = [
 const lineFor = (station) => (LINES.find(([p]) => station && station.startsWith(p) && /^\d/.test(station.slice(p.length))) || [])[1] || null;
 
 export function parseTrailCode(name, prefix) {
-  const rest = name.slice(prefix.length).split('-');
-  const size = rest[0];
-  const suffix = /^(map|cta)$/i.test(rest.at(-1)) ? rest.pop().toUpperCase().replace('MAP', 'Map') : null;
-  const station = rest[1] || null;
+  // Tolerate case slips and trailing extras (…-KL2-Map-v2, …-l-kl2-map).
+  const parts = name.slice(prefix.length).split('-').map((p) => p.trim()).filter(Boolean);
+  const size = (parts[0] || '').toUpperCase();
+  const station = parts[1] && /^[A-Za-z]{1,2}\d+$/.test(parts[1]) ? parts[1].toUpperCase() : null;
+  const tagged = parts.slice(station ? 2 : 1).find((p) => /^(map|cta)$/i.test(p));
   // Midway signs carry the station's original code as the app / personal
   // trainer QR and a "-Map" code in the map key (checked against the print
-  // files 2026-09-30), so an unsuffixed station code is the CTA.
-  const purpose = suffix || (station ? 'CTA' : null);
+  // files 2026-09-30), so an untagged station code is the CTA.
+  const purpose = tagged ? (tagged.toLowerCase() === 'map' ? 'Map' : 'CTA') : station ? 'CTA' : null;
   return { tier: TIERS[size] || 'unknown', station, purpose };
 }
 
@@ -71,15 +74,23 @@ function stationPositions(features) {
   return positions;
 }
 
-// For the all-courts map: where each trail line code's sign stands, keyed by
-// QR id. Codes without a station ID (e.g. a trail marker) are left out.
-export async function trailCodePositions(codes) {
-  const out = new Map();
+// For the all-courts map: every pilot's Design Lab station positions, fetched
+// without needing the code list, so it can run alongside the other reads.
+export async function trailStationPositions() {
+  const out = [];
   for (const pilot of Object.values(PILOTS)) {
-    const mine = codes.filter((c) => c.name.startsWith(pilot.prefix));
-    if (!mine.length) continue;
-    const positions = stationPositions(await designLabLayer(pilot.designLabCityId, 'Trail Line Stations'));
-    for (const c of mine) {
+    out.push({ pilot, positions: stationPositions(await designLabLayer(pilot.designLabCityId, 'Trail Line Stations')) });
+  }
+  return out;
+}
+
+// Where each trail line code's sign stands, keyed by QR id. Codes without a
+// station ID (e.g. a trail marker) are left out.
+export function placeTrailCodes(codes, stationSets) {
+  const out = new Map();
+  for (const { pilot, positions } of stationSets) {
+    for (const c of codes) {
+      if (!c.name.toLowerCase().startsWith(pilot.prefix.toLowerCase())) continue;
       const { station } = parseTrailCode(c.name, pilot.prefix);
       const pos = station && positions.get(station);
       if (pos) out.set(String(c.id), { ...pos, station });
@@ -98,10 +109,10 @@ export async function buildPilot(slug) {
     designLabLayer(pilot.designLabCityId, 'Trail Line Loops'),
   ]);
 
-  const trailCodes = codes.filter((c) => c.name.startsWith(pilot.prefix) && c.state === 'A');
+  const trailCodes = codes.filter((c) => c.name.toLowerCase().startsWith(pilot.prefix.toLowerCase()) && c.state === 'A');
   const ids = trailCodes.map((c) => c.id);
   const daily = ids.length
-    ? await supabaseSelect(`scan_daily?select=qr_id,scan_date_la,is_bot,scans&qr_id=in.(${ids.join(',')})&order=scan_date_la.asc`)
+    ? await supabaseSelect(`scan_daily?select=qr_id,scan_date_la,is_bot,scans&qr_id=in.(${ids.join(',')})&order=scan_date_la.asc,qr_id.asc,is_bot.asc`)
     : [];
 
   const positions = stationPositions(stationFeatures);
@@ -154,7 +165,7 @@ export async function buildPilot(slug) {
     }));
 
   return {
-    pilot: { slug, name: pilot.name, state: pilot.state, launchDate: launch, installWindow: pilot.installWindow || null, center: pilot.center },
+    pilot: { slug, name: pilot.name, state: pilot.state, launchDate: launch, installStart: pilot.installStart || null, installWindow: pilot.installWindow || null, center: pilot.center },
     stations: list,
     unplaced,
     loops: { type: 'FeatureCollection', features: loops },
@@ -165,7 +176,7 @@ export async function buildPilot(slug) {
 
 // Numbers the summary is written from — computed here so the model only ever
 // words facts, never invents them.
-export function digest(data, today = new Date().toISOString().slice(0, 10)) {
+export function digest(data, today = laToday()) {
   const all = [...data.stations.flatMap((s) => s.codes.map((c) => ({ ...c, station: s.id, tier: s.tier, line: s.line }))),
     ...data.unplaced];
   const sumDays = (from, to) => all.reduce((n, c) => n + Object.entries(c.days).filter(([d]) => d >= from && d <= to).reduce((m, [, v]) => m + v, 0), 0);
@@ -179,6 +190,8 @@ export function digest(data, today = new Date().toISOString().slice(0, 10)) {
   return {
     city: data.pilot.name,
     launchDate: data.pilot.launchDate,
+    installStart: data.pilot.installStart,
+    installWindow: data.pilot.installWindow,
     today,
     codes: all.length,
     stations: data.stations.length,
