@@ -70,13 +70,14 @@ header {
 .controls { margin-bottom: 16px; display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px 18px; padding: 12px 18px; }
 .controls .filterbar { display: contents; }
 .controls .field { order: 1; }
-.controls .kpis { order: 2; display: flex; border-top: none; border-left: 1px solid var(--border); padding-left: 4px; align-self: stretch; align-items: flex-end; }
+.controls .kpis { order: 2; flex: 1; display: flex; justify-content: space-around; border-top: none; border-left: 1px solid var(--border); padding-left: 8px; align-self: stretch; align-items: center; }
 .controls .bots-pill { order: 3; }
-.controls .kpi { padding: 0 12px; gap: 0; cursor: default; }
+.controls .kpi { padding: 0 14px; gap: 12px; cursor: default; }
 .controls .kpi + .kpi { border-left: none; }
-.controls .kpi-icon, .controls .kpi-sub { display: none; }
-.controls .kpi-num { font-size: 1.2rem; line-height: 1.1; }
-.controls .kpi-label { font-size: 0.6rem; white-space: nowrap; }
+.controls .kpi-sub { display: none; }
+.controls .kpi-icon { width: 38px; height: 38px; border-radius: 11px; }
+.controls .kpi-num { font-size: 1.75rem; line-height: 1.05; }
+.controls .kpi-label { font-size: 0.68rem; white-space: nowrap; }
 .controls .unmapped-btn { margin: 3px 0 0; padding: 2px 7px; font-size: 0.62rem; }
 .controls .field input[type=text] { min-width: 170px; }
 .search-wrap { position: relative; display: flex; }
@@ -337,6 +338,9 @@ header {
 .modal p, .modal li { font-size: 0.8rem; color: var(--text-2); line-height: 1.6; }
 .modal ul { padding-left: 18px; }
 .modal code { background: #eef2fa; border-radius: 4px; padding: 0 5px; font-size: 0.74rem; }
+.setting-row { display: flex; align-items: center; gap: 16px; padding: 10px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+.setting-row .bots-pill { margin-left: auto; flex: none; }
+.setting-help { font-size: 0.78rem; color: var(--text-2); margin-top: 2px; }
 .modal-close { float: right; border: none; background: #f1f4f9; border-radius: 8px; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; }
 
 @media (max-width: 1100px) {
@@ -380,7 +384,7 @@ header {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
     Refresh Scans
   </button>
-  <button class="hbtn" onclick="openAbout()" title="About this data" aria-label="About this data">
+  <button class="hbtn" onclick="openAbout()" title="Settings &amp; data notes" aria-label="Settings and data notes">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
 </header>
@@ -439,40 +443,35 @@ header {
           <input type="date" id="f-to" onchange="applyCustom()">
         </div>
       </div>
-      <div class="bots-pill on" id="bots-pill" onclick="toggleBots()" title="Bot scans are identified by Uniqode (isBotScan). Including them matches the Uniqode dashboard totals exactly; excluding them shows real human engagement only.">
-        <span class="dot"></span>
-        <span id="bots-label">Bots: included</span>
-      </div>
     </div>
       <!-- Summary of what the filters currently show -->
       <div class="kpis">
       <div class="kpi">
         <div class="kpi-icon" style="background:#e8effc;color:var(--blue)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1v1h-1zM14 20h1v1h-1zM18 18h3v3h-3z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1v1h-1zM14 20h1v1h-1zM18 18h3v3h-3z"/></svg>
         </div>
         <div><div class="kpi-num" style="color:var(--blue)" id="kpi-total">—</div><div class="kpi-label" id="kpi-total-label">QR Codes</div><div class="kpi-sub" id="kpi-total-sub">Fitness Courts + Trail Lines</div></div>
       </div>
       <div class="kpi">
         <div class="kpi-icon" style="background:#e7f6ec;color:var(--green)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg>
         </div>
         <div><div class="kpi-num" style="color:var(--green)" id="kpi-active">—</div><div class="kpi-label">With Scans</div><div class="kpi-sub" id="kpi-active-sub">—</div></div>
       </div>
       <div class="kpi">
         <div class="kpi-icon" style="background:#efeafb;color:var(--purple)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21v-6M9 21V9M15 21v-9M21 21V3"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21v-6M9 21V9M15 21v-9M21 21V3"/></svg>
         </div>
         <div><div class="kpi-num" style="color:var(--purple)" id="kpi-scans">—</div><div class="kpi-label">Total Scans</div><div class="kpi-sub" id="kpi-scans-sub">All Time</div></div>
       </div>
       <div class="kpi">
         <div class="kpi-icon" style="background:#e8effc;color:var(--blue)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </div>
         <div style="flex:1">
           <div class="kpi-num" style="color:var(--blue)" id="kpi-visible">—</div>
           <div class="kpi-label">Visible</div>
           <div class="kpi-sub">On the map</div>
-          <button class="unmapped-btn" id="unmapped-btn" onclick="openUnmapped()" style="display:none">⚠ <span id="unmapped-count">0</span> unmapped — verify</button>
         </div>
       </div>
     </div>
@@ -587,23 +586,33 @@ header {
 <div class="modal-bg" id="about-bg" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal">
     <button class="modal-close" onclick="document.getElementById('about-bg').style.display='none'">✕</button>
-    <h2>About this data</h2>
+    <h2>Settings &amp; data notes</h2>
+    <h3>Settings</h3>
+    <div class="setting-row">
+      <div><b>Bot scans</b><div class="setting-help">Included by default so totals match the Uniqode dashboard. Exclude them to see human scans only.</div></div>
+      <div class="bots-pill on" id="bots-pill" onclick="toggleBots()" title="Bot scans are identified by Uniqode (isBotScan). Including them matches the Uniqode dashboard totals exactly; excluding them shows real human engagement only.">
+        <span class="dot"></span>
+        <span id="bots-label">Bots: included</span>
+      </div>
+    </div>
     <p>Every number on this dashboard comes from <b>Uniqode</b> — no estimates, no stale snapshots.</p>
     <h3>Scan counts</h3>
     <ul>
       <li>Each physical scan is counted once (Uniqode's webhook sends duplicate events; they are deduplicated).</li>
-      <li><b>Bot scans</b> (flagged by Uniqode as automated traffic) are <b>included by default</b>, so totals match the Uniqode dashboard exactly. Use the "Bot scans" pill to exclude them and see real human engagement only.</li>
+      <li><b>Bot scans</b> (flagged by Uniqode as automated traffic) are <b>included by default</b>, so totals match the Uniqode dashboard exactly. Switch them off above to see human scans only.</li>
       <li>Days are bucketed in Pacific time, matching the Uniqode dashboard.</li>
-      <li>Per-day history begins June 4, 2025. All-time totals are exact from each code's creation.</li>
+      <li>Every scan is recorded from <b>April 7, 2026</b>, when the webhook went live. Before that there's only a partial backfill, so ranges reaching further back undercount. All-time totals are Uniqode's own and always exact.</li>
     </ul>
     <h3>Locations</h3>
     <ul>
-      <li><b>Solid markers</b> sit at exact coordinates stored in the code's Uniqode <b>Metadata</b> (<code>lat</code>, <code>lon</code>, optional <code>address</code>) — human-confirmed.</li>
-      <li><b>Dashed amber markers</b> are <b>approximate</b> — placed from the code's name (state/city/park) so nothing is invisible. Click one to confirm its exact location; that writes the coordinates into Uniqode and the marker turns solid.</li>
-      <li>Codes whose names couldn't be placed at all are listed under <b>Needs Location Verification</b> with a manual entry form.</li>
+      <li><b>Fitness Courts</b> are placed from <b>Salesforce</b> (each court's Site geo location). A few Salesforce doesn't have are placed by hand from NFC's planning maps.</li>
+      <li><b>Trail Line signs</b> are placed from the <b>Design Lab</b> station layer, matched by the station ID in the code's name.</li>
+      <li>Codes with no known location aren't guessed onto the map; they're listed under <b>Needs Location Verification</b> in the rankings panel.</li>
     </ul>
+    <h3>AI summaries</h3>
+    <p>City and pilot overviews are written by Claude from the numbers shown on the page — never estimates. The label shows when each was written.</p>
     <h3>Trust check</h3>
-    <p>On every sync, each code's computed total is reconciled against Uniqode's official all-time count. The status dot at the bottom of the map turns amber if any code drifts by more than 2 scans.</p>
+    <p>On every load, each code's archive total is reconciled against Uniqode's official all-time count. The status line at the bottom of the map shows how many match.</p>
   </div>
 </div>
 
@@ -922,16 +931,6 @@ function renderKPIs() {
     (state.stateFilter ? ` · ${esc(state.stateFilter)}` : '') +
     (unplottedScans ? ` — incl. ${unplottedScans.toLocaleString()} from ${unplotted.length} unmapped codes` : '');
   document.getElementById('kpi-visible').textContent = courts.filter(plottable).length;
-  // Unmapped = no position at all (geocoding couldn't place the name). These
-  // are the ones to clean up via the "verify" button on the Visible card.
-  const unmapped = courts.filter((c) => c.locationStatus === 'missing');
-  const btn = document.getElementById('unmapped-btn');
-  if (unmapped.length) {
-    document.getElementById('unmapped-count').textContent = unmapped.length;
-    btn.style.display = '';
-  } else {
-    btn.style.display = 'none';
-  }
   kpiTooltips();
 }
 
