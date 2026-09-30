@@ -142,6 +142,13 @@ body.embed main { padding: 0; max-width: none; }
 </head>
 <body>
 <script>
+// This view lives inside Analytics (bottom of Raw QR code scans) now. Opened
+// on its own, send people there instead of keeping a second page.
+if (new URLSearchParams(location.search).get('embed') !== '1') {
+  const CITY = { 'las-vegas': 'Las Vegas, NV' };
+  const slug = new URLSearchParams(location.search).get('pilot') || 'las-vegas';
+  location.replace('/#analytics:' + encodeURIComponent(CITY[slug] || '') + ':pilot');
+}
 // ?embed=1: shown inside Analytics. Hide the header and tell the parent page
 // how tall we are so its frame fits without a second scrollbar.
 if (new URLSearchParams(location.search).get('embed') === '1') {

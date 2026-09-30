@@ -2078,7 +2078,6 @@ function renderPilotSection() {
   const frame = document.getElementById('an-pilot-frame');
   if (frame && frame.dataset.src === src) return; // already showing; don't reload it
   el.innerHTML = `<div class="an-pilot-head"><div><div class="cp-eyebrow">Trail Line pilot</div><h2>${esc(pilot.city)}</h2></div>
-      <a class="hbtn" href="/vegas?pilot=${encodeURIComponent(pilot.slug)}" target="_blank" rel="noopener">Open full view ↗</a>
       <a class="hbtn" href="/report?pilot=${encodeURIComponent(pilot.slug)}" target="_blank" rel="noopener" title="Internal only: raw numbers">Internal report ↗</a></div>
     <iframe id="an-pilot-frame" data-src="${esc(src)}" src="${esc(src)}" title="${esc(pilot.city)} Trail Line pilot"></iframe>`;
 }
@@ -2620,12 +2619,14 @@ function pushRoute() {
 function applyRoute() {
   applyingRoute = true;
   try {
-    const [v, c] = location.hash.slice(1).split(':');
+    const [v, c, part] = location.hash.slice(1).split(':');
     const view = ['map', 'list', 'analytics'].includes(v) ? v : 'map';
     const city = c ? decodeURIComponent(c) : '';
     if (view === 'analytics') { state.anCity = city; state.cityPanel = null; renderCityPanel(); }
     if (view === 'map') { if (city) openCityPanel(city); else closeCityPanel(); }
+    if (part === 'pilot') state.anMode = 'raw';
     setView(view);
+    if (part === 'pilot') setTimeout(() => document.getElementById('an-pilot')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 600);
   } finally { applyingRoute = false; }
 }
 addEventListener('popstate', (ev) => {
