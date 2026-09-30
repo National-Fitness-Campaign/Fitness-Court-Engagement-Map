@@ -18,9 +18,10 @@ export const PILOTS = {
     state: 'NV',
     prefix: 'TL-NV-LasVegas-',
     designLabCityId: 'cmnp7a5ng0000l404woglts7g',
-    // Scans before this date are pre-print checks, not public use. Set it to
-    // the install date once the signs are in the ground.
-    launchDate: null,
+    // Scans before this date are pre-install checks, not public use.
+    // Install window Oct 19–21, 2026 (pilot status update, 2026-09-30).
+    launchDate: '2026-10-19',
+    installWindow: 'Oct 19–21',
     center: [36.1835, -115.2615],
   },
 };
@@ -153,7 +154,7 @@ export async function buildPilot(slug) {
     }));
 
   return {
-    pilot: { slug, name: pilot.name, state: pilot.state, launchDate: launch, center: pilot.center },
+    pilot: { slug, name: pilot.name, state: pilot.state, launchDate: launch, installWindow: pilot.installWindow || null, center: pilot.center },
     stations: list,
     unplaced,
     loops: { type: 'FeatureCollection', features: loops },

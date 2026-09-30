@@ -16,7 +16,8 @@ function fallback(d) {
   const top = d.top[0] ? ` ${d.top[0].station} leads with ${d.top[0].scans}.` : '';
   const trend = d.thisWeek === d.lastWeek ? 'flat on last week' : d.thisWeek > d.lastWeek ? `up from ${d.lastWeek} last week` : `down from ${d.lastWeek} last week`;
   return `${total} scan${total === 1 ? '' : 's'} so far at ${d.stationsWithScans} of ${d.stations} stations — ${d.thisWeek} this week, ${trend}.${top}`
-    + (d.launchDate ? '' : ' Launch date isn’t set, so every scan is counted as a pre-launch check.');
+    + (!d.launchDate ? ' Launch date isn’t set, so every scan is counted as a pre-launch check.'
+      : d.today < d.launchDate ? ` Signs install ${new Date(d.launchDate + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}; these are test scans until then.` : '');
 }
 
 export default async function handler(req, res) {
@@ -34,7 +35,7 @@ export default async function handler(req, res) {
           'You write the one-glance status line for an internal dashboard tracking QR-code scans on a new outdoor trail signage pilot. '
           + 'Use ONLY the numbers given. 2-3 short sentences, plain English, no headings, no bullet points, no emoji. '
           + 'Say whether it is trending up or down week over week, name the strongest and any silent stations, and compare Map vs CTA codes when both have scans. '
-          + 'If there is too little data to call a trend, say so plainly. If launchDate is null, note the scans are likely pre-launch checks.',
+          + 'If there is too little data to call a trend, say so plainly. If launchDate is null or still in the future (compare with today), say the scans so far are pre-install test scans and public tracking starts at launchDate.',
         prompt: JSON.stringify(d),
       });
       text = out.text.trim();

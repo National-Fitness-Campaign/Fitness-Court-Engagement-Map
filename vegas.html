@@ -288,7 +288,7 @@ function renderKpis(d) {
   const t = d.publicScans + d.testScans;
   document.getElementById('k-scans').textContent = t.toLocaleString();
   document.getElementById('k-scans-sub').textContent = d.launchDate
-    ? `${d.publicScans} public · ${d.testScans} before launch`
+    ? `${d.publicScans} public · ${d.testScans} test (before ${fmtDate(d.launchDate)})`
     : `across ${d.codes} codes · all pre-launch`;
   document.getElementById('k-stations').textContent = `${d.stationsWithScans} / ${d.stations}`;
   document.getElementById('k-stations-sub').textContent = d.silentStations.length ? `${d.silentStations.length} with no scans yet` : 'every station has scans';
@@ -335,8 +335,12 @@ async function load(refresh) {
     document.title = `Trail Line Pilot — ${data.pilot.name}`;
 
     const banner = document.getElementById('launch-banner');
-    banner.style.display = data.pilot.launchDate ? 'none' : 'block';
-    banner.innerHTML = '<b>Launch date not set.</b> Every scan is counted as a pre-launch check until the install date is added — then the view splits public scans from test scans.';
+    const launch = data.pilot.launchDate;
+    const daysOut = launch ? Math.ceil((Date.parse(launch + 'T00:00:00') - Date.now()) / 864e5) : null;
+    banner.style.display = !launch || daysOut > 0 ? 'block' : 'none';
+    banner.innerHTML = !launch
+      ? '<b>Launch date not set.</b> Every scan is counted as a pre-launch check until the install date is added — then the view splits public scans from test scans.'
+      : `<b>Installing ${esc(data.pilot.installWindow || fmtDate(launch))} · ${daysOut} day${daysOut === 1 ? '' : 's'} to go.</b> Scans before ${fmtDate(launch)} are counted as test scans; public scans start with the install.`;
 
     drawLoops(data.loops);
     drawStations();
