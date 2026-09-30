@@ -395,6 +395,17 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .acb-chart, .acb-table { border-radius: 16px; }
 .an-card { border-radius: 16px; }
 .an-city { border-radius: 18px; }
+.rw-tod h4 { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.rw-tod-note { font-size: 0.7rem; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text-3); }
+.rw-tod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.tod-sum { font-size: 0.82rem; color: var(--text-2); margin-bottom: 10px; }
+.tod-sum b { color: var(--text); }
+.tod-rows { display: grid; gap: 3px; }
+.tod-row { display: grid; grid-template-columns: 34px repeat(24, 1fr); gap: 3px; align-items: center; }
+.tod-row span { font-size: 0.72rem; font-weight: 700; color: var(--text-2); }
+.tod-row i { display: block; height: 16px; border-radius: 3px; }
+.tod-axis em { font-style: normal; font-size: 0.64rem; color: var(--text-3); white-space: nowrap; }
+@media (max-width: 900px) { .rw-tod-grid { grid-template-columns: 1fr; } }
 .eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.55; }
 .eng-notes summary { cursor: pointer; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
 .eng-notes ul { margin-top: 8px; }
@@ -1887,6 +1898,8 @@ function renderCityBreakdown() {
       <div class="acb-chart"><h4>By day of week</h4><div class="acb-dow">${[1, 2, 3, 4, 5, 6, 0].map((i) => `
         <div><b>${dowNames[i]}</b><span class="track"><i style="width:${Math.round((dow[i] / dowMax) * 100)}%"></i></span><span>${Math.round((dow[i] / dowSum) * 100)}%</span></div>`).join('')}</div></div>
     </div>
+    <div class="acb-chart rw-tod"><h4>Time of day · ${esc(RANGE_LABELS[state.range])} <span class="rw-tod-note">Pacific time · live scans since Apr 7, 2026</span></h4>
+      <div class="rw-tod-grid"><div><canvas id="chart-tod" height="150"></canvas></div><div id="tod-heat" class="tod-heat"><div class="an-city-empty">Loading…</div></div></div></div>
     ${all ? '' : `<div class="acb-table"><h4>Every code</h4><table>
       <thead><tr><th>Name</th><th>Type</th><th class="n">${esc(RANGE_LABELS[state.range])}</th>${bounds ? '<th class="n">Prior period</th><th class="n">Change</th>' : ''}<th class="n">Share</th><th class="n">All time</th><th>Last scan</th></tr></thead>
       <tbody>${rows}</tbody></table></div>`}`;
@@ -1914,6 +1927,7 @@ function renderCityBreakdown() {
     options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
       scales: { x: { stacked: true, ticks: { maxTicksLimit: 10 } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
   });
+  loadTimeOfDay(all ? null : inCity.map((c) => c.id), bounds);
   if (!all) loadCityAI(state.anCity, 'an-overview', () => state.view === 'analytics' && state.anMode === 'raw' && !!state.anCity);
 }
 
@@ -2273,6 +2287,44 @@ function renderEngagement(body) {
     ] },
     options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
       scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
+  });
+}
+
+// Time of day: /api/hourly (scan_hourly_rollup). Bars for the 24 hours plus a
+// day-of-week x hour grid; darker = more scans.
+const todCache = new Map();
+function loadTimeOfDay(ids, bounds) {
+  const q = new URLSearchParams();
+  if (ids) q.set('ids', ids.join(','));
+  if (bounds) { q.set('from', bounds[0]); q.set('to', bounds[1]); }
+  q.set('bots', state.includeBots ? '1' : '0');
+  const key = q.toString();
+  if (!todCache.has(key)) todCache.set(key, fetch(`/api/hourly?${key}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  const stamp = (loadTimeOfDay.stamp = (loadTimeOfDay.stamp || 0) + 1);
+  todCache.get(key).then((d) => {
+    const heat = document.getElementById('tod-heat');
+    const canvas = document.getElementById('chart-tod');
+    if (stamp !== loadTimeOfDay.stamp || !heat || !canvas) return;
+    if (!d) { todCache.delete(key); heat.innerHTML = '<div class="an-city-empty">Time of day unavailable right now.</div>'; return; }
+    const hours = Array.from({ length: 24 }, (_, h) => d.grid.reduce((t, row) => t + row[h], 0));
+    const total = hours.reduce((a, b) => a + b, 0);
+    if (!total) { heat.innerHTML = '<div class="an-city-empty">No timed scans in this range.</div>'; return; }
+    const hl = (h) => (h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h - 12}p`);
+    const peakH = hours.indexOf(Math.max(...hours));
+    charts.tod = new Chart(canvas, {
+      type: 'bar',
+      data: { labels: hours.map((_, h) => hl(h)), datasets: [{ data: hours, borderRadius: 3,
+        backgroundColor: hours.map((_, h) => (h === peakH ? TL_MAGENTA : '#2563eb')) }] },
+      options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.raw.toLocaleString()} scans (${Math.round((c.raw / total) * 100)}%)` } } },
+        scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: true, ticks: { precision: 0 } } } },
+    });
+    const max = Math.max(1, ...d.grid.flat());
+    const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    const morning = hours.slice(5, 12).reduce((a, b) => a + b, 0), midday = hours.slice(12, 17).reduce((a, b) => a + b, 0), evening = hours.slice(17, 22).reduce((a, b) => a + b, 0);
+    heat.innerHTML = `<div class="tod-sum">Busiest hour <b>${hl(peakH)} to ${hl((peakH + 1) % 24)}</b> · mornings ${Math.round((morning / total) * 100)}% · midday ${Math.round((midday / total) * 100)}% · evenings ${Math.round((evening / total) * 100)}%</div>
+      <div class="tod-rows">${order.map((dw) => `<div class="tod-row"><span>${names[dw]}</span>${d.grid[dw].map((n, h) => `<i title="${names[dw]} ${hl(h)}: ${n}" style="background:${n ? `rgba(37,99,235,${(0.12 + 0.88 * Math.sqrt(n / max)).toFixed(2)})` : '#f1f4f9'}"></i>`).join('')}</div>`).join('')}
+      <div class="tod-row tod-axis"><span></span>${Array.from({ length: 24 }, (_, h) => `<em>${h % 6 === 0 ? hl(h) : ''}</em>`).join('')}</div></div>`;
   });
 }
 

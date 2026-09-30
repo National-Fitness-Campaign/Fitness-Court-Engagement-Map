@@ -155,3 +155,17 @@ drop policy if exists allow_service_insert on public.scan_logs;
 revoke all on public.scan_logs from anon, authenticated;
 alter table public.scan_logs enable row level security;
 revoke all on sequence public.scan_logs_id_seq from anon, authenticated;
+
+-- ── Time of day (migrations: engagement_map_scan_hourly_rollup,
+--    engagement_map_scan_hour_profile), 2026-09-30 ──────────────────────────
+-- scan_hourly_rollup(qr_id, scan_date_la, hour_la 0-23, is_bot, scans):
+--   filled by the same scan_rollup_on_insert() trigger (same dedup), live
+--   webhook scans only; the pre-April backfill has no time of day.
+--   rebuild_scan_rollup() now truncates and rebuilds it too.
+--   Backfilled at migration time under a share-row-exclusive lock on
+--   scan_logs. Verified: 42,979 scans, equal to the daily rollup's live scans
+--   (the only difference is 2026-04-07 for 8664801, where 1 legacy scan with
+--   no time sits alongside 2 live ones).
+-- scan_hour_profile(p_ids text[], p_from date, p_to date, p_bots boolean):
+--   day-of-week x hour sums (at most 168 rows), service_role only; read by
+--   /api/hourly.
