@@ -167,7 +167,8 @@ export function digest(data, today = new Date().toISOString().slice(0, 10)) {
   const thisWeek = sumDays(shift(today, -6), today);
   const lastWeek = sumDays(shift(today, -13), shift(today, -7));
   const scanned = data.stations.filter((s) => s.publicScans + s.testScans > 0);
-  const byPurpose = (p) => all.filter((c) => c.purpose === p).reduce((n, c) => n + c.publicScans + c.testScans, 0);
+  // Only Gateways carry both a Map and a CTA code, so that's the fair comparison.
+  const byPurpose = (p) => all.filter((c) => c.tier === 'gateway' && c.purpose === p).reduce((n, c) => n + c.publicScans + c.testScans, 0);
   const byTier = (t) => all.filter((c) => c.tier === t).reduce((n, c) => n + c.publicScans + c.testScans, 0);
   const ranked = [...data.stations].sort((a, b) => (b.publicScans + b.testScans) - (a.publicScans + a.testScans));
   return {
