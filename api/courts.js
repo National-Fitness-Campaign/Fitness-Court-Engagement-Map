@@ -15,6 +15,7 @@ import {
   sendError,
   setCache,
 } from './_lib.js';
+import { trailCodePositions } from './_trail.js';
 
 const RECONCILE_TOLERANCE = 2; // R11: delta ≤ 2 = matches Uniqode
 // Per-day webhook archive begins here. Codes created before this date have
@@ -36,6 +37,11 @@ export default async function handler(req, res) {
       // Salesforce Site__c coordinates, synced by scripts/sync-salesforce-locations.mjs.
       soft(supabaseSelect('qr_site_links?select=qr_id,sf_site_id,sf_site_name,lat,lon&lat=not.is.null'), 'qr_site_links'),
     ]);
+    // Trail line signs are placed from the Design Lab station layer.
+    const trailPos = await trailCodePositions(codes).catch((err) => {
+      warnings.push(`trail positions: ${err.message}`);
+      return new Map();
+    });
     const archiveOk = totalsRows !== null;
     const totals = totalsRows || [];
     const suggestions = suggestionRows || [];
@@ -60,10 +66,12 @@ export default async function handler(req, res) {
         //   uniqode    = exact coords hand-entered in Uniqode metadata
         //   geocoded   = guessed from the code's name, awaiting confirmation
         // locationStatus keeps the UI's three states: verified | approx | missing.
-        const site = siteById.get(String(c.id));
+        const site = siteById.get(String(c.id)) || trailPos.get(String(c.id));
         const suggestion = suggestionById.get(String(c.id));
-        const locationSource = site ? 'salesforce' : loc.hasLocation ? 'uniqode' : suggestion ? 'geocoded' : null;
-        const locationStatus = locationSource === 'geocoded' ? 'approx' : locationSource ? 'verified' : 'missing';
+        const locationSource = trailPos.has(String(c.id)) ? 'designlab' : site ? 'salesforce' : loc.hasLocation ? 'uniqode' : suggestion ? 'geocoded' : null;
+        // Pop-ups and sandwich boards move around — nothing to verify.
+        const mobile = /popup|sandwich/i.test(c.name);
+        const locationStatus = locationSource === 'geocoded' ? 'approx' : locationSource ? 'verified' : mobile ? 'mobile' : 'missing';
         const lat = site ? site.lat : loc.hasLocation ? loc.lat : suggestion ? suggestion.lat : null;
         const lon = site ? site.lon : loc.hasLocation ? loc.lon : suggestion ? suggestion.lon : null;
         return {
@@ -93,7 +101,7 @@ export default async function handler(req, res) {
       })
       .sort((a, b) => b.humanScans - a.humanScans);
 
-    const needsLocation = courts.filter((c) => !c.hasLocation).map((c) => c.id);
+    const needsLocation = courts.filter((c) => c.locationStatus === 'missing' || c.locationStatus === 'approx').map((c) => c.id);
     const reconciledCount = courts.filter((c) => c.reconciled).length;
     const approxCount = courts.filter((c) => c.locationStatus === 'approx').length;
 

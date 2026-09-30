@@ -770,7 +770,9 @@ function popupHTML(court, count) {
     </div>`;
   // Salesforce-sourced pins are corrected in Salesforce, not here — an edit
   // written to Uniqode would be overridden on the next sync.
-  const approxBlock = court.locationSource === 'salesforce'
+  const approxBlock = court.locationSource === 'designlab'
+    ? `<div class="loc-source">✓ Station location from the Design Lab · <a href="/vegas">pilot view</a></div>`
+    : court.locationSource === 'salesforce'
     ? `<div class="loc-source" title="${escapeAttr(court.sfSiteName || '')}">✓ Location from Salesforce</div>`
     : court.locationStatus === 'approx'
     ? `<div><span class="recon warn">≈ Approximate</span>
@@ -936,7 +938,7 @@ function toggleCity(city) {
 }
 
 function renderNeeds() {
-  const needs = state.courts.filter((c) => c.locationStatus !== 'verified');
+  const needs = state.courts.filter((c) => c.locationStatus === 'missing' || c.locationStatus === 'approx');
   document.getElementById('needs-count').textContent = needs.length;
   document.getElementById('needs-list').innerHTML = needs.map((c) => `
     <div class="needs-row" id="needs-${c.id}">

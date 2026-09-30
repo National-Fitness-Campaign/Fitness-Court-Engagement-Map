@@ -51,6 +51,37 @@ async function designLabLayer(cityId, name) {
   return rows[0]?.geojsonData?.features || [];
 }
 
+// Design Lab station points. `label` is the printed station ID; the older
+// `code` field went stale when stations were renumbered, so it's a fallback.
+function stationPositions(features) {
+  const positions = new Map();
+  for (const f of features) {
+    const p = f.properties || {};
+    const id = (p.label || p.code || '').trim();
+    if (!/^[A-Z]{1,2}\d+$/.test(id) || f.geometry?.type !== 'Point') continue;
+    const [lon, lat] = f.geometry.coordinates;
+    positions.set(id, { lat, lon });
+  }
+  return positions;
+}
+
+// For the all-courts map: where each trail line code's sign stands, keyed by
+// QR id. Codes without a station ID (e.g. a trail marker) are left out.
+export async function trailCodePositions(codes) {
+  const out = new Map();
+  for (const pilot of Object.values(PILOTS)) {
+    const mine = codes.filter((c) => c.name.startsWith(pilot.prefix));
+    if (!mine.length) continue;
+    const positions = stationPositions(await designLabLayer(pilot.designLabCityId, 'Trail Line Stations'));
+    for (const c of mine) {
+      const { station } = parseTrailCode(c.name, pilot.prefix);
+      const pos = station && positions.get(station);
+      if (pos) out.set(String(c.id), { ...pos, station });
+    }
+  }
+  return out;
+}
+
 export async function buildPilot(slug) {
   const pilot = PILOTS[slug];
   if (!pilot) return null;
@@ -67,16 +98,7 @@ export async function buildPilot(slug) {
     ? await supabaseSelect(`scan_daily?select=qr_id,scan_date_la,is_bot,scans&qr_id=in.(${ids.join(',')})&order=scan_date_la.asc`)
     : [];
 
-  // Design Lab station points. `label` is the printed station ID; the older
-  // `code` field went stale when stations were renumbered, so it's a fallback.
-  const positions = new Map();
-  for (const f of stationFeatures) {
-    const p = f.properties || {};
-    const id = (p.label || p.code || '').trim();
-    if (!/^[A-Z]{1,2}\d+$/.test(id) || f.geometry?.type !== 'Point') continue;
-    const [lon, lat] = f.geometry.coordinates;
-    positions.set(id, { lat, lon });
-  }
+  const positions = stationPositions(stationFeatures);
 
   const launch = pilot.launchDate;
   const byCode = new Map(trailCodes.map((c) => [String(c.id), []]));
