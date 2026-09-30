@@ -79,6 +79,11 @@ header {
 .controls .kpi-label { font-size: 0.6rem; white-space: nowrap; }
 .controls .unmapped-btn { margin: 3px 0 0; padding: 2px 7px; font-size: 0.62rem; }
 .controls .field input[type=text] { min-width: 170px; }
+.search-wrap { position: relative; display: flex; }
+.search-wrap input[type=text] { padding-right: 36px; width: 100%; }
+.search-go { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border: none; border-radius: 7px;
+  background: none; color: var(--text-2); cursor: pointer; display: grid; place-items: center; }
+.search-go:hover { background: #eef1f6; color: var(--blue); }
 .controls .field select { min-width: 128px; }
 @media (max-width: 1250px) {
   /* Not enough width for one row: stats drop to their own line under the filters. */
@@ -400,7 +405,14 @@ header {
       </div>
       <div class="field">
         <label for="f-search">Search City</label>
-        <input type="text" id="f-search" placeholder="Search city..." oninput="onSearch(this.value)">
+        <div class="search-wrap">
+          <input type="text" id="f-search" placeholder="Search city..." oninput="onSearch(this.value)"
+                 onkeydown="if (event.key === 'Enter') { event.preventDefault(); runSearch(this.value); }">
+          <button type="button" class="search-go" aria-label="Search" title="Search (reopens the city panel)"
+                  onclick="runSearch(document.getElementById('f-search').value)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </button>
+        </div>
       </div>
       <div class="field">
         <label for="f-state">State</label>
@@ -1569,21 +1581,25 @@ function toggleBots() {
 let searchTimer = null;
 function onSearch(q) {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    state.search = q;
-    const needle = q.trim().toLowerCase();
-    // Typing a city ("las vegas") opens that city's panel — the overview and
-    // the Fitness Court / Trail Line split — instead of just filtering pins.
-    const cities = [...new Set(visibleCourts().map(cityKey))];
-    const exact = needle ? cities.filter((k) => k.toLowerCase().startsWith(needle) || k.toLowerCase().split(',')[0] === needle) : [];
-    if (exact.length === 1) { state.cityPanel = exact[0]; if (state.view !== 'map') setView('map'); }
-    renderAll();
-    const match = visibleCourts().filter((c) => c.hasLocation);
-    if (exact.length === 1) openCityPanel(exact[0]);
-    else if (needle && match.length) {
-      map.fitBounds(L.latLngBounds(match.map((c) => [c.lat, c.lon])).pad(0.3), { maxZoom: 11 });
-    }
-  }, 250);
+  searchTimer = setTimeout(() => runSearch(q), 250);
+}
+// Runs immediately — the magnifying glass and Enter call this directly, so a
+// closed city panel reopens even when the text hasn't changed.
+function runSearch(q) {
+  clearTimeout(searchTimer);
+  state.search = q;
+  const needle = q.trim().toLowerCase();
+  // Typing a city ("las vegas") opens that city's panel — the overview and
+  // the Fitness Court / Trail Line split — instead of just filtering pins.
+  const cities = [...new Set(visibleCourts().map(cityKey))];
+  const exact = needle ? cities.filter((k) => k.toLowerCase().startsWith(needle) || k.toLowerCase().split(',')[0] === needle) : [];
+  if (exact.length === 1) { state.cityPanel = exact[0]; if (state.view !== 'map') setView('map'); }
+  renderAll();
+  const match = visibleCourts().filter((c) => c.hasLocation);
+  if (exact.length === 1) openCityPanel(exact[0]);
+  else if (needle && match.length) {
+    map.fitBounds(L.latLngBounds(match.map((c) => [c.lat, c.lon])).pad(0.3), { maxZoom: 11 });
+  }
 }
 function panTo(lat, lon) { if (lat != null) map.setView([lat, lon], 10); }
 function toggleAllRankings() { state.allRankings = !state.allRankings; renderRankings(); }
