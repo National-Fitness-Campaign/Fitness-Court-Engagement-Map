@@ -445,53 +445,6 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 @media (max-width: 1100px) { .eq-row { grid-template-columns: 1fr 1fr; } .eq-op { display: none; } .eq-total { grid-column: 1 / -1; } }
 @media (max-width: 700px) { .eq-row, .eq-pair { grid-template-columns: 1fr; } }
 
-/* ── Engagement: dark, like its map ─────────────────────────────────────── */
-.an-city.eng-dark { background: #0b0f17; border-color: #1c2331; color: #e6edf7; box-shadow: 0 10px 40px rgba(2,6,23,0.35); }
-.eng-dark .cp-eyebrow, .eng-dark .an-city-pick { color: #8b97ad; }
-.eng-dark .an-city-head h2 { color: #fff; }
-.eng-dark .an-city-pick select { background: #121826; color: #e6edf7; border-color: #283143; }
-.eng-dark .eq-card, .eng-dark .eq-stat, .eng-dark .eng-pillar, .eng-dark .acb-chart, .eng-dark .acb-table, .eng-dark .eng-map-card, .eng-dark .eng-notes, .eng-dark .rw-ai {
-  background: #111722; border-color: #1f2736; color: #e6edf7; }
-.eng-dark .eq-head h3, .eng-dark .eng-sec h3, .eng-dark .ep-name, .eng-dark .eq-lbl, .eng-dark .acb-chart h4, .eng-dark .acb-table h4, .eng-dark .eng-map-head h4, .eng-dark .eng-notes summary { color: #fff; }
-.eng-dark .eq-head p, .eng-dark .eq-sub, .eng-dark .ep-sub, .eng-dark .ep-foot, .eng-dark .eng-sec span, .eng-dark .rw-tod-note, .eng-dark .eng-map-head span, .eng-dark .eng-notes, .eng-dark .ep-list-h, .eng-dark .bar-sub, .eng-dark .eq-head h3 span { color: #8b97ad; }
-.eng-dark .eq-tile { background: #0d121c; border-color: color-mix(in srgb, var(--c) 35%, #0d121c); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--c) 30%, transparent); }
-.eng-dark .eq-tile b, .eng-dark .ep-big b { text-shadow: 0 0 18px color-mix(in srgb, var(--c, var(--pc)) 55%, transparent); }
-.eng-dark .ep-big b { color: var(--pc); }
-.eng-dark .eq-dot { box-shadow: 0 0 10px var(--c); }
-.eng-dark .eq-op { color: #475569; }
-.eng-dark .eq-total { background: #fff; color: #0b0f17; box-shadow: 0 0 30px rgba(255,255,255,0.12); }
-.eng-dark .eq-total .eq-lbl { color: #0b0f17; }
-.eng-dark .eq-total .eq-sub { color: #5a6a85; }
-.eng-dark .eq-stat b { color: #fff; }
-.eng-dark .eng-pillar::before { height: 3px; box-shadow: 0 0 16px var(--pc); }
-.eng-dark .ep-icon { box-shadow: 0 0 18px color-mix(in srgb, var(--pc) 60%, transparent); }
-.eng-dark .ep-cell { background: #0b0f17; }
-.eng-dark .ep-cell span { color: #8b97ad; }
-.eng-dark .ep-cell b { color: #fff; }
-.eng-dark .ep-cell b.xx, .eng-dark b.xx { color: #64748b; background: repeating-linear-gradient(-45deg, #151c29 0 6px, #0f141e 6px 12px); border-color: #2a3345; }
-.eng-dark .eq-stat b.xx { background: none; }
-.eng-dark .info { background: #1f2736; color: #c7d2e3; }
-.eng-dark .acb-bar .nm, .eng-dark .acb-bar .n { color: #e6edf7; }
-.eng-dark .acb-bar .nm small, .eng-dark .rw-bars .nm em { color: #64748b; }
-.eng-dark .acb-bar .track { background: #1a2130; }
-.eng-dark .acb-bar .track i { filter: brightness(1.15) saturate(1.2); }
-.eng-dark .ep-empty { background: #150d14; border-color: #4a1d3a; color: #c7d2e3; }
-.eng-dark .rw-ai-body, .eng-dark .rw-ai-body p { color: #dbe3ef; }
-.eng-dark .rw-ai .cp-label { color: #8b97ad; }
-.eng-dark .eng-chip { background: #0b0f17; color: #c7d2e3; }
-.eng-dark .eng-chip b { color: #fff; }
-.eng-dark .acb-table th { color: #64748b; border-color: #1f2736; }
-.eng-dark .acb-table td { border-color: #171e2b; color: #dbe3ef; }
-.eng-dark .acb-table tbody tr:hover { background: #151c29; }
-.eng-dark .type-badge.court { background: rgba(59,130,246,0.15); color: #93c5fd; }
-.eng-dark .type-badge.trail { background: rgba(236,72,153,0.15); color: #f9a8d4; }
-.eng-dark .ch-flat { color: #64748b; }
-.eng-dark .eng-notes b { color: #fff; }
-.eng-dark .eng-layers { background: rgba(13,18,28,0.92); border-color: #283143; color: #e6edf7; box-shadow: 0 4px 18px rgba(0,0,0,0.45); }
-.eng-dark .eng-layers b { color: #8b97ad; }
-.eng-dark .eng-map-base { background: rgba(13,18,28,0.92); }
-.eng-dark .eng-map-base button { color: #c7d2e3; }
-.eng-dark .eng-map-base button.on { background: #fff; color: #0b0f17; }
 .eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.55; }
 .eng-notes summary { cursor: pointer; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
 .eng-notes ul { margin-top: 8px; }
@@ -2159,7 +2112,7 @@ function engagementFigures(city) {
    of the courts (2,414 m) and of the Trail Line (a 402 m walk either side),
    inside the city limits. Shapes come from scripts/compute-accessibility.mjs. */
 let engMap = null;
-let engDark = true; // the walk areas glow on the dark basemap; Light is one click away
+let engDark = false; // light by default (Emily: no black); Dark is one click away on the map
 const engLayers = { courtReach: true, trailReach: true, boundary: true, lines: true, courts: true, stations: true };
 const pilotCache = new Map(); // slug -> Promise(/api/trail payload)
 function pilotData(slug) {
@@ -2178,7 +2131,7 @@ function engMapCard(F) {
       <div class="eng-chips">
         <span class="eng-chip"><i style="background:rgba(37,99,235,0.3);border:1.5px solid #2563eb"></i>Courts <b>${F.court.access != null ? F.court.access.toLocaleString() : 'XX'}</b></span>
         ${A.trail ? `<span class="eng-chip"><i style="background:rgba(195,38,138,0.3);border:1.5px solid ${TL_MAGENTA}"></i>Trail Line <b>${F.trail.access != null ? F.trail.access.toLocaleString() : 'XX'}</b></span>` : ''}
-        <span class="eng-chip"><i style="background:#fff;box-shadow:0 0 6px rgba(255,255,255,0.6)"></i>Together <b>${F.total.access != null ? F.total.access.toLocaleString() : 'XX'}</b></span>
+        <span class="eng-chip"><i style="background:#0f1f3d"></i>Together <b>${F.total.access != null ? F.total.access.toLocaleString() : 'XX'}</b></span>
       </div></div>
     <div class="eng-map-wrap"><div id="eng-map"></div>
       <div class="eng-map-base"><button type="button" class="${engDark ? 'on' : ''}" onclick="engDark = true; renderAnalytics()">Dark</button><button type="button" class="${engDark ? '' : 'on'}" onclick="engDark = false; renderAnalytics()">Light</button></div>
@@ -2473,9 +2426,8 @@ function renderEngagement(body) {
       { label: 'Trail Line QR scans', data: trailSeries, backgroundColor: NEON.trail, borderRadius: 3, stack: 's' },
       { label: 'App check-ins + downloads', data: digitalSeries, backgroundColor: NEON.app, borderRadius: 3, stack: 's' },
     ] },
-    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, color: '#c7d2e3' } } },
-      scales: { x: { stacked: true, grid: { display: false }, ticks: { color: '#8b97ad' } },
-        y: { stacked: true, beginAtZero: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { precision: 0, color: '#8b97ad' }, title: { display: true, text: 'engagements', color: '#8b97ad' } } } },
+    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
+      scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: 'engagements' } } } },
   });
 }
 
@@ -2526,7 +2478,6 @@ function renderAnalytics() {
   });
   document.getElementById('an-city-eyebrow').textContent = eng ? 'Engagement' : 'City breakdown';
   document.getElementById('an-raw-extra').style.display = eng ? 'none' : '';
-  document.querySelector('.an-city').classList.toggle('eng-dark', eng);
   renderCityBreakdown();
   if (eng) return;
   renderPilotSection();
