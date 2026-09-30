@@ -406,6 +406,15 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .tod-row i { display: block; height: 16px; border-radius: 3px; }
 .tod-axis em { font-style: normal; font-size: 0.64rem; color: var(--text-3); white-space: nowrap; }
 @media (max-width: 900px) { .rw-tod-grid { grid-template-columns: 1fr; } }
+.eh-pie-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+.eh-keys small { color: rgba(255,255,255,0.6); font-size: 0.74rem; }
+.eng-sec { display: flex; align-items: baseline; gap: 12px; margin: 22px 2px 0; flex-wrap: wrap; }
+.eng-sec h3 { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; }
+.eng-sec span { font-size: 0.8rem; color: var(--text-3); }
+.ep-list-h { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+.ep-empty { margin-top: 16px; padding: 14px; border-radius: 11px; border: 1px dashed #e7c3da; background: #fdf5fa; font-size: 0.8rem; color: var(--text-2); line-height: 1.5; }
+.acb-table tr.quiet-row td { color: var(--text-3); font-size: 0.78rem; cursor: default; }
+.bar-sub { grid-column: 1 / -1; font-size: 0.7rem; color: var(--text-3); margin-top: -1px; }
 .eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.55; }
 .eng-notes summary { cursor: pointer; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
 .eng-notes ul { margin-top: 8px; }
@@ -2087,7 +2096,7 @@ function engMapCard(F) {
   if (!A) return `<div class="eng-map-card"><div class="eng-map-head"><h4>Accessibility map</h4><span>Not drawn for ${esc(F.city)} yet. Run scripts/compute-accessibility.mjs for this city.</span></div></div>`;
   const row = (key, swatch, label) => `<label><input type="checkbox" data-eng-layer="${key}"${engLayers[key] ? ' checked' : ''}><i style="${swatch}"></i>${label}</label>`;
   return `<div class="eng-map-card">
-    <div class="eng-map-head"><h4>Accessibility map</h4><span>10 minute walk · 2020 Census · city limits</span>
+    <div class="eng-map-head"><h4>Who lives within a 10 minute walk</h4><span>shaded = 805 m walk from a court or the Trail Line · 2020 Census · inside city limits</span>
       <div class="eng-chips">
         <span class="eng-chip"><i style="background:rgba(37,99,235,0.3);border:1.5px solid #2563eb"></i>Courts <b>${F.court.access != null ? F.court.access.toLocaleString() : 'XX'}</b></span>
         ${A.trail ? `<span class="eng-chip"><i style="background:rgba(195,38,138,0.3);border:1.5px solid ${TL_MAGENTA}"></i>Trail Line <b>${F.trail.access != null ? F.trail.access.toLocaleString() : 'XX'}</b></span>` : ''}
@@ -2175,118 +2184,191 @@ function renderEngagement(body) {
     return;
   }
   const F = engagementFigures(state.anCity || null);
-  const range = RANGE_LABELS[state.range];
-  const perYear = !F.bounds;
-  const kcalWhen = perYear ? 'per year' : esc(range.toLowerCase());
-  const engWhen = esc(range.toLowerCase());
-  const info = (t) => `<i class="info" title="${esc(t)}">i</i>`;
-  const cell = (label, n, tip) => `<div class="ep-cell"><span>${label}${tip ? info(tip) : ''}</span>${n == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(n)}</b>`}</div>`;
-  const walk = (m) => (m === 805 ? '10 min walk' : `${Number(m).toLocaleString()} m`);
-  const TBD = 'Formula to be set in the formula workshop.';
-  const noAcc = state.anCity ? 'Not computed for this city yet.' : 'Computed per city. Pick a city.';
-  const fmtD = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-  const ICON = {
-    court: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>',
-    trail: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4 0 4-6 8-6s4 6 8 6M8 4l-2 6M16 4l2 6"/></svg>',
-    digital: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18h2"/></svg>',
-  };
-  const pillar = (key, name, color, sub, big, foot, cells, empty) => `
-    <div class="eng-pillar${empty ? ' empty' : ''}" style="--pc:${color}">
-      <div class="ep-top"><div class="ep-icon">${ICON[key]}</div><div><div class="ep-name">${name}</div><div class="ep-sub">${sub}</div></div></div>
-      <div class="ep-big">${big == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(big)}</b>`}<span>engagements</span></div>
-      <div class="ep-foot">${foot}</div>
-      <div class="ep-grid">${cells}</div>
-    </div>`;
-  const bots = state.includeBots ? 'Bot scans included (see Settings).' : 'Human scans only.';
-  const courtP = pillar('court', 'Fitness Court', '#2563eb', `${F.installed} court${F.installed === 1 ? '' : 's'} · ${engWhen}`,
-    F.court.engagements, `QR scans on the court signs ${info(bots)}`,
-    cell('Reach', F.court.access, F.court.access != null ? `Residents within ${walk(F.court.accessMeters)} (${F.court.accessMeters} m) of a court, 2020 Census, inside city limits.` : noAcc) +
-    cell(`Calories · ${kcalWhen}`, F.court.kcal, `NFC benchmark: ${F.installed} courts × 1.3M calories per court per year${perYear ? '' : `, prorated to ${F.days} days`}.`));
-  const trailFoot = !F.trailCodes.length ? 'No Trail Line here yet'
-    : F.trail.pilot && laToday() < F.trail.pilot.launchDate ? `Public counting starts ${fmtD(F.trail.pilot.launchDate)}${F.trail.test ? ` · ${F.trail.test} test scans left out` : ''}`
-    : 'Public QR scans on the trail signs';
-  const trailP = pillar('trail', 'Trail Line', TL_MAGENTA, F.trailCodes.length ? `${F.trail.trailMiles ? F.trail.trailMiles + ' miles' : F.trailCodes.length + ' codes'} · ${engWhen}` : 'none yet',
-    F.trailCodes.length ? F.trail.engagements : null, trailFoot,
-    cell('Reach', F.trailCodes.length ? F.trail.access : null, F.trail.access != null ? `Residents within ${walk(F.trail.accessMeters)} (${F.trail.accessMeters} m) either side of the line, 2020 Census, inside city limits.` : noAcc) +
-    cell(`Calories · ${kcalWhen}`, null, TBD), !F.trailCodes.length);
-  const digitalP = pillar('digital', 'Digital', '#6d4de0', `NFC app · ${engWhen}`,
-    F.digital.engagements, `${F.digital.checkins.toLocaleString()} check-ins + ${F.digital.newUsers.toLocaleString()} new users ${info(`App check-ins plus new app users (people whose first ever check-in was at one of these courts, our stand-in for downloads). ${F.matched} of ${F.courtCodes.length} courts matched to the app.${F.digital.prorated ? ' Monthly totals, prorated to the range.' : ''}${F.bounds ? '' : ' App data starts Jan 2026.'}${F.bounds && F.bounds[1] > engagementData.app.takenAt ? ` App data runs through ${engagementData.app.takenAt}.` : ''} Nationally: ${F.digital.natUsers.toLocaleString()} new app users in this period.`)}`,
-    cell('Reach', null, TBD) + cell(`Calories · ${kcalWhen}`, null, TBD));
-
-  // Three equal pieces of the pie: each pillar's share of engagements.
-  const parts = [['Fitness Court', '#3b82f6', F.court.engagements], ['Trail Line', '#e0369f', F.trail.engagements || 0], ['Digital', '#8b6cf0', F.digital.engagements]];
-  const sum = parts.reduce((t, p) => t + p[2], 0);
-  const pct = (n) => (sum ? Math.round((n / sum) * 100) : 0);
-
-  body.innerHTML = `
-    <div class="eng-hero">
-      <div class="eh-stats">
-        <div class="eh-stat"><span>People within reach</span>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}<em>${F.total.access != null ? 'live within a 10 minute walk' : noAcc}</em></div>
-        <div class="eh-stat"><span>Calories burned · ${kcalWhen}</span>${F.total.kcal == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(F.total.kcal)}</b>`}<em>Fitness Courts so far</em></div>
-        <div class="eh-stat"><span>Engagements · ${engWhen}</span><b>${F.total.engagements.toLocaleString()}</b><em>scans, check-ins and new app users</em></div>
-      </div>
-      <div class="eh-pie">
-        <div class="eh-bar">${sum ? parts.filter((p) => p[2]).map((p) => `<i style="width:${(p[2] / sum) * 100}%;background:${p[1]}" title="${p[0]}: ${p[2].toLocaleString()}"></i>`).join('') : ''}</div>
-        <div class="eh-keys">${parts.map((p) => `<span><i style="background:${p[1]}"></i>${p[0]} <b>${pct(p[2])}%</b></span>`).join('')}</div>
-      </div>
-    </div>
-    <div class="eng-pillars">${courtP}${trailP}${digitalP}</div>
-    ${engMapCard(F)}
-    <div class="acb-chart"><h4>Engagements by month</h4><canvas id="chart-eng" height="80"></canvas></div>
-    <details class="eng-notes"><summary>How these are counted</summary><ul>
-      <li><b>Reach</b>: 2020 Census block population inside a 10 minute walk (805 m) of a court, or of either side of the Trail Line, clipped to city limits. The total counts each person once.</li>
-      <li><b>Calories</b>: NFC's benchmark of 1.3M calories per Fitness Court per year. Trail Line and Digital show XX until the formula workshop sets them.</li>
-      <li><b>Engagements</b>: QR scans on court signs, public QR scans on Trail Line signs, and app check-ins plus new app users at the city's courts.</li>
-      <li><b>App data</b>: ${esc(engagementData.app.monthsFrom)} to ${esc(engagementData.app.monthsThrough)} (snapshot ${esc(engagementData.app.takenAt)}). A court counts when an app court sits within ${engagementData.app.matchRadiusMeters} m of its QR sign.</li>
-      <li>Internal view: raw figures, not the city-facing report.</li>
-    </ul></details>`;
-
-  drawEngMap(F);
-
-  // Monthly engagements, stacked by pillar. QR history is complete from Apr 7, 2026.
   const E = engagementData, today = laToday();
+  const range = RANGE_LABELS[state.range], rangeLc = esc(range.toLowerCase());
+  const perYear = !F.bounds;
+  const all = !state.anCity;
+  const place = all ? 'Across the network' : esc(state.anCity.split(',')[0]);
+  const from = F.bounds ? F.bounds[0] : null, to = F.bounds ? F.bounds[1] : today;
+  const pilotByCity = new Map((E.pilots || []).map((p) => [p.city, p]));
+  const fmtD = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const info = (t) => `<i class="info" title="${esc(t)}">i</i>`;
+  const n0 = (n) => (n == null ? 'XX' : Math.round(n).toLocaleString());
+  const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);
+  const TBD = 'Formula to be set in the formula workshop.';
+  const noAcc = all ? 'Pick a city to see it.' : 'Not computed for this city yet.';
+
+  // ── Per code: what each court and sign contributed ────────────────────
+  const trailPublic = (c, a, z) => {
+    const launch = pilotByCity.get(cityKey(c))?.launchDate || '2000-01-01';
+    const st = a && a > launch ? a : launch;
+    return st <= z ? countFor(c, [st, z]) : 0;
+  };
+  const appFor = (c, a, z) => {
+    const e = E.app.byCode[c.id];
+    if (!e) return null;
+    let ci = 0, nu = 0;
+    for (const [mo, [x, y]] of Object.entries(e.m)) { const f = a ? monthShare(mo, a, z) : 1; ci += x * f; nu += y * f; }
+    return { ci: Math.round(ci), nu: Math.round(nu) };
+  };
+  const courtRows = F.courtCodes.map((c) => {
+    const qr = countFor(c, F.bounds), app = appFor(c, from, to);
+    return { c, qr, ci: app ? app.ci : null, nu: app ? app.nu : null, app: app ? app.ci + app.nu : 0, total: qr + (app ? app.ci + app.nu : 0) };
+  }).sort((x, y) => y.total - x.total);
+  const trailRows = F.trailCodes.map((c) => ({ c, qr: trailPublic(c, from, to) })).sort((x, y) => y.qr - x.qr);
+
+  // ── Monthly series (complete QR history starts Apr 7, 2026) ───────────
   const start = F.bounds ? (F.bounds[0] > '2026-04-07' ? F.bounds[0] : '2026-04-07') : '2026-04-07';
-  const end = F.bounds ? F.bounds[1] : today;
+  const end = to;
   const months = [];
   for (let m = start.slice(0, 7); m <= end.slice(0, 7);) {
     months.push(m);
     const [y, mm] = m.split('-').map(Number);
     m = mm === 12 ? `${y + 1}-01` : `${y}-${String(mm + 1).padStart(2, '0')}`;
   }
-  const mBounds = (m) => {
+  const mB = (m) => {
     const [y, mm] = m.split('-').map(Number);
-    const a = m + '-01', b = new Date(Date.UTC(y, mm, 0)).toISOString().slice(0, 10);
-    return [a < start ? start : a, b > end ? end : b];
+    const a1 = m + '-01', z1 = new Date(Date.UTC(y, mm, 0)).toISOString().slice(0, 10);
+    return [a1 < start ? start : a1, z1 > end ? end : z1];
   };
-  const pilotByCity = new Map((E.pilots || []).map((p) => [p.city, p]));
-  const courtSeries = months.map((m) => F.courtCodes.reduce((t, c) => t + countFor(c, mBounds(m)), 0));
-  const trailSeries = months.map((m) => {
-    const [a, b] = mBounds(m);
-    return F.trailCodes.reduce((t, c) => {
-      const launch = pilotByCity.get(cityKey(c))?.launchDate || '2000-01-01';
-      const s2 = a > launch ? a : launch;
-      return t + (s2 <= b ? countFor(c, [s2, b]) : 0);
-    }, 0);
-  });
+  const courtSeries = months.map((m) => F.courtCodes.reduce((t, c) => t + countFor(c, mB(m)), 0));
+  const trailSeries = months.map((m) => { const [a1, z1] = mB(m); return F.trailCodes.reduce((t, c) => t + trailPublic(c, a1, z1), 0); });
   const digitalSeries = months.map((m) => {
-    const [a, b] = mBounds(m);
+    const [a1, z1] = mB(m);
     let n = 0;
-    for (const c of F.courtCodes) {
-      const v = E.app.byCode[c.id]?.m[m];
-      if (v) n += (v[0] + v[1]) * monthShare(m, a, b);
-    }
+    for (const c of F.courtCodes) { const v = E.app.byCode[c.id]?.m[m]; if (v) n += (v[0] + v[1]) * monthShare(m, a1, z1); }
     return Math.round(n);
   });
+  const spark = (vals, color) => sparkSVG(vals.length > 1 ? vals : [0, ...vals], color);
+  const monthName = (m) => new Date(m + '-15T12:00:00Z').toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
+
+  // ── Overview: the whole picture in plain words ────────────────────────
+  const T = F.total.engagements;
+  const lines = [];
+  if (F.total.access != null) lines.push(`<b>${F.total.access.toLocaleString()} people</b> in ${place} live within a 10 minute walk of a Fitness Court or the Trail Line.`);
+  lines.push(`<b>${T.toLocaleString()} engagements</b> ${perYear ? 'all time' : rangeLc}: ${F.court.engagements.toLocaleString()} Fitness Court QR scans (${pctOf(F.court.engagements, T)}%), ${(F.trail.engagements || 0).toLocaleString()} public Trail Line scans (${pctOf(F.trail.engagements || 0, T)}%) and ${F.digital.engagements.toLocaleString()} from the app (${pctOf(F.digital.engagements, T)}%).`);
+  if (courtRows[0]?.total) lines.push(`<b>${esc(displayName(courtRows[0].c))}</b> leads with ${courtRows[0].total.toLocaleString()} engagements${all ? ` (${esc(cityKey(courtRows[0].c))})` : ''}.`);
+  const full = months.filter((m) => m < today.slice(0, 7));
+  if (full.length >= 2) {
+    const i = months.indexOf(full.at(-1)), tot = (k) => courtSeries[k] + trailSeries[k] + digitalSeries[k];
+    const p = pctChange(tot(i), tot(i - 1));
+    if (p != null) lines.push(`${monthName(full.at(-1))} had ${tot(i).toLocaleString()}, ${p === 0 ? 'level with' : `${p > 0 ? 'up' : 'down'} ${Math.abs(p)}% on`} ${monthName(full.at(-2))}.`);
+  }
+  const pilot = F.trail.pilot;
+  if (pilot && today < pilot.launchDate) lines.push(`Trail Line public counting starts ${fmtD(pilot.launchDate)}; ${F.trail.test} test or install scan${F.trail.test === 1 ? '' : 's'} so far don't count.`);
+
+  // ── Pillar cards ──────────────────────────────────────────────────────
+  const ICON = {
+    court: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>',
+    trail: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4 0 4-6 8-6s4 6 8 6M8 4l-2 6M16 4l2 6"/></svg>',
+    digital: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18h2"/></svg>',
+  };
+  const cell = (label, n, tip) => `<div class="ep-cell"><span>${label}${tip ? info(tip) : ''}</span>${n == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(n)}</b>`}</div>`;
+  const bars = (title, rows, color, val, sub) => {
+    const max = Math.max(1, ...rows.map(val));
+    return `<div class="rw-bars"><div class="ep-list-h">${title}</div>${rows.slice(0, 5).map((r, i) => `
+      <div class="acb-bar" onclick="setView('map'); focusCourt(${Number(r.c.id)})" title="${esc(r.c.name)}">
+        <span class="nm"><em>${i + 1}</em>${esc(displayName(r.c))}${all ? ` <small>${esc(cityKey(r.c))}</small>` : ''}</span><span class="n">${val(r).toLocaleString()}</span>
+        <span class="track"><i style="width:${Math.max(2, Math.round((val(r) / max) * 100))}%;background:${color}"></i></span>
+        ${sub ? `<span class="bar-sub">${sub(r)}</span>` : ''}
+      </div>`).join('')}</div>`;
+  };
+  const pillar = (key, name, color, what, big, formula, cells, series, list) => `
+    <div class="eng-pillar" style="--pc:${color}">
+      <div class="ep-top"><div class="ep-icon">${ICON[key]}</div><div><div class="ep-name">${name}</div><div class="ep-sub">${what}</div></div>
+        <div class="rw-spark" title="Engagements per month">${spark(series, color)}</div></div>
+      <div class="ep-big">${big == null ? '<b class="xx">XX</b>' : `<b>${big.toLocaleString()}</b>`}<span>engagements · ${rangeLc}</span></div>
+      <div class="ep-foot">${formula}</div>
+      <div class="ep-grid">${cells}</div>
+      ${list}
+    </div>`;
+  const kcalLabel = perYear ? 'Calories burned / year' : `Calories burned · ${rangeLc}`;
+  const bots = state.includeBots ? 'Bot scans included (Settings).' : 'Human scans only.';
+  const courtP = pillar('court', 'Fitness Court', '#2563eb', `The physical courts · ${F.installed} in ${all ? 'the network' : place}`,
+    F.court.engagements, `= QR scans on the court signs ${info(bots)}`,
+    cell('People within a 10 min walk', F.court.access, F.court.access != null ? `Residents living within 805 m of a court (2020 Census, inside city limits).` : noAcc)
+    + cell(kcalLabel, F.court.kcal, `NFC estimate: ${F.installed} courts × 1.3M calories per court per year${perYear ? '' : `, prorated to ${F.days} days`}.`),
+    courtSeries, courtRows.length ? bars('Top courts · QR scans', [...courtRows].sort((x, y) => y.qr - x.qr), '#2563eb', (r) => r.qr) : '');
+  const trailList = !F.trailCodes.length ? `<div class="ep-foot">No Trail Line ${all ? 'yet' : 'in ' + place + ' yet'}.</div>`
+    : trailRows[0]?.qr ? bars('Top signs · public QR scans', trailRows, TL_MAGENTA, (r) => r.qr)
+    : `<div class="ep-empty">${pilot && today < pilot.launchDate ? `Public counting starts <b>${fmtD(pilot.launchDate)}</b>. The ${F.trailCodes.length} sign codes will rank here once people start scanning.` : 'No public scans in this range yet.'}</div>`;
+  const trailP = pillar('trail', 'Trail Line', TL_MAGENTA, F.trailCodes.length ? `The physical signs · ${F.trail.trailMiles ? F.trail.trailMiles + ' miles, ' : ''}${F.trailCodes.length} codes` : 'The physical signs · none yet',
+    F.trailCodes.length ? F.trail.engagements : null, F.trailCodes.length ? `= public QR scans on the trail signs${pilot ? `, counted from ${fmtD(pilot.launchDate)}` : ''}` : '',
+    cell('People within a 10 min walk', F.trailCodes.length ? F.trail.access : null, F.trail.access != null ? 'Residents living within 805 m either side of the line (2020 Census, inside city limits).' : noAcc)
+    + cell(kcalLabel, null, TBD), trailSeries, trailList);
+  const digitalP = pillar('digital', 'Digital', '#6d4de0', `The NFC app · at ${F.matched} of ${F.courtCodes.length} courts`,
+    F.digital.engagements, `= ${F.digital.checkins.toLocaleString()} app check-ins + ${F.digital.newUsers.toLocaleString()} new app users ${info(`New app users: people whose first ever check-in was at one of these courts, our stand-in for downloads.${F.digital.prorated ? ' Monthly totals, prorated to the range.' : ''}${F.bounds ? '' : ' App data starts Jan 2026.'}${F.bounds && F.bounds[1] > E.app.takenAt ? ` App data runs through ${E.app.takenAt}.` : ''} Nationally: ${F.digital.natUsers.toLocaleString()} new app users in this period.`)}`,
+    cell('People within reach', null, TBD) + cell(kcalLabel, null, TBD),
+    digitalSeries, courtRows.some((r) => r.app) ? bars('Top courts · app activity', [...courtRows].filter((r) => r.app).sort((x, y) => y.app - x.app), '#6d4de0', (r) => r.app, (r) => `${r.ci} check-ins · ${r.nu} new users`) : '<div class="ep-empty">No app activity at these courts in this range.</div>');
+
+  // ── Sources breakdown ─────────────────────────────────────────────────
+  const SRC = [
+    ['Fitness Court QR scans', '#2563eb', F.court.engagements],
+    ['Trail Line QR scans (public)', TL_MAGENTA, F.trail.engagements || 0],
+    ['App check-ins', '#6d4de0', F.digital.checkins],
+    ['New app users', '#a78bfa', F.digital.newUsers],
+  ];
+  const srcMax = Math.max(1, ...SRC.map((x) => x[2]));
+  const parts = [['Fitness Court', '#3b82f6', F.court.engagements], ['Trail Line', '#e0369f', F.trail.engagements || 0], ['Digital', '#8b6cf0', F.digital.engagements]];
+
+  // ── Every court and sign ──────────────────────────────────────────────
+  const quietSigns = trailRows.filter((r) => !r.qr).length;
+  const tableRows = [...courtRows.map((r) => ({ ...r, kind: 'court' })), ...trailRows.filter((r) => r.qr).map((r) => ({ c: r.c, qr: r.qr, ci: null, nu: null, total: r.qr, kind: 'trail' }))]
+    .sort((x, y) => y.total - x.total)
+    .map((r) => `<tr onclick="setView('map'); focusCourt(${Number(r.c.id)})">
+      <td><b>${esc(displayName(r.c))}</b></td><td>${r.kind === 'trail' ? '<span class="type-badge trail">Trail Line</span>' : '<span class="type-badge court">Fitness Court</span>'}</td>
+      <td class="n">${r.qr.toLocaleString()}</td><td class="n">${r.kind === 'trail' ? '<span class="ch-flat">n/a</span>' : r.ci == null ? '<span class="ch-flat" title="No app court within 400 m">not matched</span>' : r.ci.toLocaleString()}</td>
+      <td class="n">${r.kind === 'trail' || r.nu == null ? '<span class="ch-flat">·</span>' : r.nu.toLocaleString()}</td>
+      <td class="n"><b>${r.total.toLocaleString()}</b></td><td class="n">${pctOf(r.total, T)}%</td></tr>`).join('')
+    + (quietSigns ? `<tr class="quiet-row"><td colspan="7">+ ${quietSigns} Trail Line sign code${quietSigns === 1 ? '' : 's'} with no public scans ${pilot && today < pilot.launchDate ? `yet (counting starts ${fmtD(pilot.launchDate)})` : 'in this range'}</td></tr>` : '');
+
+  body.innerHTML = `
+    <div class="eng-hero">
+      <div class="eh-stats">
+        <div class="eh-stat"><span>People within a 10 minute walk</span>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}<em>${F.total.access != null ? 'of a Fitness Court or the Trail Line · 2020 Census, each person counted once' : noAcc}</em></div>
+        <div class="eh-stat"><span>${kcalLabel}</span>${F.total.kcal == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(F.total.kcal)}</b>`}<em>NFC estimate for the courts · Trail Line and app to come</em></div>
+        <div class="eh-stat"><span>Total engagements · ${rangeLc}</span><b>${T.toLocaleString()}</b><em>QR scans + app check-ins + new app users</em></div>
+      </div>
+      <div class="eh-pie">
+        <div class="eh-pie-lbl">Where engagements come from</div>
+        <div class="eh-bar">${T ? parts.filter((x) => x[2]).map((x) => `<i style="width:${(x[2] / T) * 100}%;background:${x[1]}" title="${x[0]}: ${x[2].toLocaleString()}"></i>`).join('') : ''}</div>
+        <div class="eh-keys">${parts.map((x) => `<span><i style="background:${x[1]}"></i>${x[0]} <b>${pctOf(x[2], T)}%</b> <small>${x[2].toLocaleString()}</small></span>`).join('')}</div>
+      </div>
+    </div>
+    <div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="rw-ai-body"><div class="cp-label">Overview · ${perYear ? 'all time' : rangeLc}</div><p>${lines.join(' ')}</p></div></div>
+    <div class="eng-sec"><h3>The three pillars</h3><span>Each one shows who it reaches, what it burns and how people use it</span></div>
+    <div class="eng-pillars">${courtP}${trailP}${digitalP}</div>
+    <div class="acb-row2">
+      <div class="acb-chart"><h4>Engagements by month <span class="rw-tod-note">stacked by pillar · from Apr 7, 2026</span></h4><canvas id="chart-eng" height="90"></canvas></div>
+      <div class="acb-chart"><h4>Engagement sources <span class="rw-tod-note">${rangeLc}</span></h4><div class="acb-bars">${SRC.map((x) => `
+        <div class="acb-bar" style="cursor:default"><span class="nm">${x[0]}</span><span class="n">${x[2].toLocaleString()} <small class="ch-flat">${pctOf(x[2], T)}%</small></span>
+          <span class="track"><i style="width:${Math.max(x[2] ? 2 : 0, Math.round((x[2] / srcMax) * 100))}%;background:${x[1]}"></i></span></div>`).join('')}</div>
+        <div class="ep-foot" style="margin-top:12px">Added together, these are the ${T.toLocaleString()} engagements.</div></div>
+    </div>
+    ${engMapCard(F)}
+    ${all ? '' : `<div class="acb-table"><h4>Every court and sign <span class="rw-tod-note">engagements ${rangeLc}, click a row to see it on the map</span></h4><table>
+      <thead><tr><th>Name</th><th>Type</th><th class="n">QR scans</th><th class="n">App check-ins</th><th class="n">New app users</th><th class="n">Total engagements</th><th class="n">Share</th></tr></thead>
+      <tbody>${tableRows}</tbody></table></div>`}
+    <details class="eng-notes"><summary>How these are counted</summary><ul>
+      <li><b>Engagement</b>: one QR scan on a court or trail sign, one app check-in, or one new app user. Added up, that's the total.</li>
+      <li><b>People within a 10 minute walk</b>: 2020 Census block population inside an 805 m walk of a court, or of either side of the Trail Line, clipped to city limits. The total counts each person once.</li>
+      <li><b>Calories</b>: NFC's estimate of 1.3M calories per Fitness Court per year. Trail Line and app calories show XX until the formula workshop sets them.</li>
+      <li><b>Trail Line</b>: only public scans count, from the pilot's launch date. Test and install scans before that are left out.</li>
+      <li><b>App data</b>: ${esc(E.app.monthsFrom)} to ${esc(E.app.monthsThrough)} (snapshot ${esc(E.app.takenAt)}), monthly totals. A court counts when an app court sits within ${E.app.matchRadiusMeters} m of its QR sign. New app users are people whose first ever check-in was at that court.</li>
+      <li>Internal view: raw figures, not the city-facing report.</li>
+    </ul></details>`;
+
+  drawEngMap(F);
   const monthLabel = (m) => new Date(m + '-15T12:00:00Z').toLocaleDateString('en-US', { month: 'short', year: '2-digit', timeZone: 'UTC' });
   charts.eng = new Chart(document.getElementById('chart-eng'), {
     type: 'bar',
     data: { labels: months.map(monthLabel), datasets: [
-      { label: 'Fitness Court scans', data: courtSeries, backgroundColor: '#2563eb', borderRadius: 3, stack: 's' },
-      { label: 'Trail Line scans', data: trailSeries, backgroundColor: TL_MAGENTA, borderRadius: 3, stack: 's' },
-      { label: 'Digital (app)', data: digitalSeries, backgroundColor: '#6d4de0', borderRadius: 3, stack: 's' },
+      { label: 'Fitness Court QR scans', data: courtSeries, backgroundColor: '#2563eb', borderRadius: 3, stack: 's' },
+      { label: 'Trail Line QR scans', data: trailSeries, backgroundColor: TL_MAGENTA, borderRadius: 3, stack: 's' },
+      { label: 'App check-ins + new users', data: digitalSeries, backgroundColor: '#6d4de0', borderRadius: 3, stack: 's' },
     ] },
     options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
-      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
+      scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: 'engagements' } } } },
   });
 }
 
