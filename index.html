@@ -633,20 +633,30 @@ async function loadData(isRefresh) {
 }
 
 /* ═══════════════════════════════ Map setup ═════════════════════════════ */
+// Carto basemaps now require an API key, so light/dark use Esri's keyless
+// canvas tiles (same provider as aerial), with a separate labels overlay.
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
 const TILES = {
-  light:  { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', sub: 'abcd', dark: false, attr: '&copy; OpenStreetMap &copy; CARTO' },
-  dark:   { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', sub: 'abcd', dark: true, attr: '&copy; OpenStreetMap &copy; CARTO' },
-  aerial: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', sub: null, dark: true, attr: 'Tiles &copy; Esri' },
+  light:  { url: `${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, labels: `${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, native: 16, dark: false, attr: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors' },
+  dark:   { url: `${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`,  labels: `${ESRI}/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`,  native: 16, dark: true,  attr: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors' },
+  aerial: { url: `${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`, labels: null, native: 19, dark: true, attr: 'Tiles &copy; Esri' },
 };
 const map = L.map('map', { center: [38.5, -97.5], zoom: 4, zoomControl: true });
 const markersLayer = L.layerGroup().addTo(map);
-let tileLayer = null, heatLayer = null, heatLabels = null, isDark = false;
+map.createPane('labels');
+map.getPane('labels').style.zIndex = 350;          // tiles 200 < labels < markers 400
+map.getPane('labels').style.pointerEvents = 'none';
+let tileLayer = null, labelLayer = null, heatLayer = null, heatLabels = null, isDark = false;
 
 function setBasemap(type) {
   isDark = TILES[type].dark;
   if (tileLayer) map.removeLayer(tileLayer);
+  if (labelLayer) map.removeLayer(labelLayer);
   const t = TILES[type];
-  tileLayer = L.tileLayer(t.url, { attribution: t.attr, subdomains: t.sub || 'abc', maxZoom: 19 }).addTo(map);
+  tileLayer = L.tileLayer(t.url, { attribution: t.attr, maxNativeZoom: t.native, maxZoom: 19 }).addTo(map);
+  labelLayer = t.labels
+    ? L.tileLayer(t.labels, { maxNativeZoom: t.native, maxZoom: 19, pane: 'labels' }).addTo(map)
+    : null;
 }
 setBasemap('light');
 map.on('zoomend', () => { if (state.viz === 'heat') renderMap(); });
