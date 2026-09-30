@@ -11,7 +11,8 @@
 // park tokens, typo-tolerant). Exact matches are applied automatically;
 // anything weaker is written as 'likely'/'none' and listed in
 // docs/location-review.md for a human. data/site-overrides.json beats the
-// matcher: { "<qr_id>": "<Site__c Id>" } pins a link, "none" clears it.
+// matcher: { "<qr_id>": "<Site__c Id>" } pins a link, "none" clears it, and
+// { "lat": .., "lon": .., "source": ".." } places a court Salesforce lacks.
 //
 // Salesforce is read-only here (a single SOQL query). Its credentials are only
 // read from --sf-env / the environment at run time — they are never stored in
@@ -189,6 +190,10 @@ for (const code of courts) {
   const ov = overrides[String(code.id)];
   let m;
   if (ov === 'none') m = { match: 'none', reason: 'override: no Salesforce site' };
+  else if (ov && typeof ov === 'object' && Number.isFinite(ov.lat) && Number.isFinite(ov.lon)) {
+    // A court Salesforce doesn't have: exact coordinates from another source.
+    m = { match: 'override', best: { s: { id: null, name: ov.source || 'manual override', ...cleanCoords(ov.lat, ov.lon) } } };
+  }
   else if (ov && siteById.has(ov)) m = { match: 'override', best: { s: siteById.get(ov) } };
   else m = matchCode(code, sites);
 

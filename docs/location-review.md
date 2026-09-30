@@ -11,12 +11,10 @@ Not applied to the map until confirmed.
 - **QR-IL-LoganCounty-LincolnMemorial** (`11674738`) → Community Park District of La Grange Park, IL (Memorial Park) `a3MQh000000aD3dMAE` · runner-up: City of Le Roy, IL (Gaultney Memorial Park) `a3MQh000007g3ezMAA`
 - **QR-NY-SUNYSchenectady-MohawkHudson** (`9164185`) → Schenectady County Community College, NY (Albany County Helderberg-Hudson Trail) `a3MQh000000aClpMAE` · runner-up: Town of Greece, NY (Basil Marella Park) `a3MQh000000aAVXMA2`
 
-## No match (3)
+## No match (1)
 
 No Salesforce site found by name. Link one by Id, or mark "none".
 
-- **QR-NV-LasVegas-EastLasVegasFamilyPark** (`11033889`) · closest: Las Vegas, NV (Woofter Family Park) `a3MQh000000aCM1MAM`
-- **QR-NV-LasVegas-KelloggZaherSportsComplex** (`11033908`) · closest: Las Vegas, NV (Bill Briare Park) `a3MQh000000aBudMAE`
 - **QR-CA-SanFrancisco-WelcomeSign** (`11407467`) · closest: San Francisco, CA (Marina Green) `a3MQh000000aAdZMAU`
 
 ## Salesforce coordinate problems (3)

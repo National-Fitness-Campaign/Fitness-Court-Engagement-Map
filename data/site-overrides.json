@@ -26,5 +26,15 @@
   "11484240": "a3MQh000000aAwwMAE",
   "11483640": "a3MQh000000aEFoMAM",
   "10783851": "a3MQh000000rBjhMAE",
-  "11114265": "a3MQh000003pGU1MAM"
+  "11114265": "a3MQh000003pGU1MAM",
+  "11033908": {
+    "lat": 36.1797553,
+    "lon": -115.271001,
+    "source": "NFC Las Vegas planning map (Google My Maps) \u2014 Kellogg Zaher Sports Complex"
+  },
+  "11033889": {
+    "lat": 36.180986,
+    "lon": -115.078773,
+    "source": "NFC Las Vegas planning map \u2014 East Las Vegas Family Park, 4480 E Washington Ave (confirmed by Jessica)"
+  }
 }

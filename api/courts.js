@@ -68,7 +68,7 @@ export default async function handler(req, res) {
         // locationStatus keeps the UI's three states: verified | approx | missing.
         const site = siteById.get(String(c.id)) || trailPos.get(String(c.id));
         const suggestion = suggestionById.get(String(c.id));
-        const locationSource = trailPos.has(String(c.id)) ? 'designlab' : site ? 'salesforce' : loc.hasLocation ? 'uniqode' : suggestion ? 'geocoded' : null;
+        const locationSource = trailPos.has(String(c.id)) ? 'designlab' : site ? (site.sf_site_id ? 'salesforce' : 'override') : loc.hasLocation ? 'uniqode' : suggestion ? 'geocoded' : null;
         // Pop-ups and sandwich boards move around — nothing to verify.
         const mobile = /popup|sandwich/i.test(c.name);
         const locationStatus = locationSource === 'geocoded' ? 'approx' : locationSource ? 'verified' : mobile ? 'mobile' : 'missing';
