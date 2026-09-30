@@ -13,7 +13,8 @@ import { writeWithAI, storedSummary, directAI } from './_ai.js';
 const SYSTEM =
   'You write short overviews for an internal dashboard of QR-code scans at outdoor fitness sites in one city. '
   + 'Fitness Courts are outdoor gyms; Trail Line signs are wayfinding stations on trails (Map codes open a trail map, CTA codes open the coaching app). '
-  + 'Use ONLY the numbers given — never invent numbers, causes, weather or seasons. Dates are Pacific time. '
+  + 'Never use em dashes or en dashes as punctuation; write with commas, periods or colons so it reads like a person wrote it. '
+  + 'Use ONLY the numbers given. Never invent numbers, causes, weather or seasons. Dates are Pacific time. '
   + 'Reply with JSON only: {"city": string, "courts": string, "trail": string}. Each value is 1-2 plain sentences, no emoji, no markdown. '
   + '"city": the total picture and whether this week is up or down vs last week. '
   + '"courts": the trend, the busiest and the lowest court, and any that went quiet. '

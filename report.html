@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Las Vegas Movement Report — National Fitness Campaign</title>
+<title>Las Vegas Movement Report | National Fitness Campaign</title>
 <meta name="description" content="Fitness Court engagement and the Trail Line pilot in Las Vegas, from live QR scan data.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -215,7 +215,7 @@ async function build() {
   const data = await (await fetch(`/api/trail?pilot=${encodeURIComponent(pilot)}`)).json();
   if (data.error) throw new Error(data.error);
   const city = `${data.pilot.name}, ${data.pilot.state}`;
-  document.title = `${data.pilot.name} Movement Report — National Fitness Campaign`;
+  document.title = `${data.pilot.name} Movement Report | National Fitness Campaign`;
   const courts = data.courts || [];
   const allTime = courts.reduce((t, c) => t + c.allTime, 0);
   const wk = weekly(courts, 12);
@@ -241,7 +241,7 @@ async function build() {
         <img class="cover-logo" src="/assets/nfc-logo.png" alt="National Fitness Campaign">
         <div class="eyebrow">Movement Report · City of ${esc(data.pilot.name)}</div>
         <h1>${esc(data.pilot.name)}<br>Moves</h1>
-        <p class="sub">How residents are using ${esc(poss(data.pilot.name))} Fitness Courts today — and the Trail Line network launching on ${esc(data.pilot.installWindow || 'the trail')}.</p>
+        <p class="sub">How residents are using ${esc(poss(data.pilot.name))} Fitness Courts today, and the Trail Line network launching ${esc(data.pilot.installWindow || 'the trail')}.</p>
         <div class="date">As of ${esc(asOf)}</div>
       </div>
       <div class="cover-stats">
@@ -261,7 +261,7 @@ async function build() {
     <div class="pad">
       <div class="eyebrow">Fitness Court network</div>
       <h2>Where ${esc(data.pilot.name)} works out</h2>
-      <p class="lede">Every Fitness Court carries QR codes that open free guided workouts in the Fitness Court app. Each scan is a resident starting a session — so scans show where the network is most used.</p>
+      <p class="lede">Every Fitness Court carries QR codes that open free guided workouts in the Fitness Court app. Each scan is a resident starting a session, so scans show where the network is most used.</p>
       <div class="grid2">
         <div class="mapbox" id="court-map"></div>
         <div class="card">
@@ -279,7 +279,7 @@ async function build() {
         </div>
       </div>
       <div class="callout">
-        <div><div class="k">Most used</div><div class="v">${esc(ranked[0]?.name || '—')}</div><div class="d">${fmt(ranked[0]?.allTime)} scans — ${Math.round(((ranked[0]?.allTime || 0) / Math.max(1, allTime)) * 100)}% of all court scans in the city.</div></div>
+        <div><div class="k">Most used</div><div class="v">${esc(ranked[0]?.name || 'None yet')}</div><div class="d">${fmt(ranked[0]?.allTime)} scans, or ${Math.round(((ranked[0]?.allTime || 0) / Math.max(1, allTime)) * 100)}% of all court scans in the city.</div></div>
         <div><div class="k">Best week</div><div class="v">${fmt(best.n)} scans</div><div class="d">Week of ${niceDay(best.start)}, in the last 12 weeks.</div></div>
         <div><div class="k">Network</div><div class="v">${courts.length} courts, ${ranked.filter((c) => c.allTime > 0).length} active</div><div class="d">Each has QR codes leading to coached workouts.</div></div>
       </div>
@@ -307,7 +307,7 @@ async function build() {
       <div class="timeline">
         <div class="step done"><div class="dot">✓</div><b>Designed &amp; printed</b><span>Station maps and graphics complete</span></div>
         <div class="step ${install && today >= install ? 'done' : 'next'}"><div class="dot">${install && today >= install ? '✓' : '2'}</div><b>Installation</b><span>${esc(data.pilot.installWindow || 'Scheduled')}</span></div>
-        <div class="step ${live ? 'done' : ''}"><div class="dot">${live ? '✓' : '3'}</div><b>Public launch</b><span>${launch ? niceDay(launch) : 'After install'} — scan tracking begins</span></div>
+        <div class="step ${live ? 'done' : ''}"><div class="dot">${live ? '✓' : '3'}</div><b>Public launch</b><span>${launch ? niceDay(launch) : 'After install'}: scan tracking begins</span></div>
         <div class="step"><div class="dot">4</div><b>First results</b><span>Station-by-station engagement report</span></div>
       </div>
       <div class="measure">

@@ -1219,7 +1219,7 @@ function cityOverview(key, courts, trail) {
   const total = courts.total + trail.total;
   const tw = courts.thisWeek + trail.thisWeek, lw = courts.lastWeek + trail.lastWeek;
   const dir = tw === lw ? 'flat on' : tw > lw ? 'up from' : 'down from';
-  out.push(`<b>${escapeAttr(key)}</b> has ${total.toLocaleString()} scans (${range}) — ${tw} this week, ${dir} ${lw} last week.`);
+  out.push(`<b>${escapeAttr(key)}</b> has ${total.toLocaleString()} scans (${range}), with ${tw} this week, ${dir} ${lw} last week.`);
   if (courts.ranked.length) {
     const top = courts.ranked[0];
     const quiet = courts.ranked.filter((r) => r.n === 0).map((r) => r.c.location);
@@ -1231,7 +1231,7 @@ function cityOverview(key, courts, trail) {
     const scanned = trail.ranked.filter((r) => r.n > 0);
     out.push(`<b>Trail Line:</b> ${scanned.length} of ${trail.ranked.length} sign codes scanned`
       + (scanned.length ? `, led by ${escapeAttr(displayName(scanned[0].c))} (${scanned[0].n})` : '')
-      + '. Pilot scans before install are test scans — see the pilot view.');
+      + '. Pilot scans before install are test scans; see the pilot view for details.');
   }
   return out.map((t) => `<p>${t}</p>`).join('');
 }

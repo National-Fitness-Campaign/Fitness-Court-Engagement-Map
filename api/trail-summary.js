@@ -30,11 +30,12 @@ function fallback(d) {
   if (total === 0) return `No scans yet across the ${d.codes} ${d.city} Trail Line codes.${when}`;
   const top = d.top[0] ? ` ${d.top[0].station} leads with ${d.top[0].scans}.` : '';
   const trend = d.thisWeek === d.lastWeek ? 'flat on last week' : d.thisWeek > d.lastWeek ? `up from ${d.lastWeek} last week` : `down from ${d.lastWeek} last week`;
-  return `${total} scan${total === 1 ? '' : 's'} so far at ${d.stationsWithScans} of ${d.stations} stations — ${d.thisWeek} this week, ${trend}.${top}${when}`;
+  return `${total} scan${total === 1 ? '' : 's'} so far at ${d.stationsWithScans} of ${d.stations} stations, ${d.thisWeek} this week, ${trend}.${top}${when}`;
 }
 
 const SYSTEM =
   'You write the one-glance status line for an internal dashboard tracking QR-code scans on a new outdoor trail signage pilot. '
+  + 'Never use em dashes or en dashes as punctuation; write with commas, periods or colons so it reads like a person wrote it. '
   + 'Use ONLY the numbers given. 2-3 short sentences, plain English, no headings, no bullet points, no emoji. '
   + 'Say whether it is trending up or down week over week, name the strongest and any silent stations, and compare Map vs CTA codes when both have scans. '
   + 'If there is too little data to call a trend, say so plainly. '
