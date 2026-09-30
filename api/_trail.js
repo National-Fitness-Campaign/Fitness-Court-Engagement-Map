@@ -25,6 +25,14 @@ export const PILOTS = {
     launchDate: '2026-10-22',
     installWindow: 'Oct 19–21',
     center: [36.1835, -115.2615],
+    // One QR per line for all of that line's mile markers (meeting 2026-09-30),
+    // placed at the line's 0-mile start: the origin of its chain in the Design
+    // Lab "Trail Line Markers" layer. Red = Bonanza, yellow = Lone Mountain
+    // (their loop strokes are #a52714 and #f9a825).
+    mileMarkers: {
+      redline: { id: 'MM-R', chain: 'BN', line: 'Bonanza Trail · red line mile markers' },
+      yellowline: { id: 'MM-Y', chain: 'LM', line: 'Lone Mountain Trail · yellow line mile markers' },
+    },
   },
 };
 
@@ -38,12 +46,20 @@ const LINES = [
   ['B', 'Bonanza Trail'],
   ['L', 'Lone Mountain Trail'],
 ];
-const lineFor = (station) => (LINES.find(([p]) => station && station.startsWith(p) && /^\d/.test(station.slice(p.length))) || [])[1] || null;
+const mileMarkerLine = (station) => {
+  for (const p of Object.values(PILOTS)) for (const m of Object.values(p.mileMarkers || {})) if (m.id === station) return m.line;
+  return null;
+};
+const lineFor = (station) => mileMarkerLine(station) || (LINES.find(([p]) => station && station.startsWith(p) && /^\d/.test(station.slice(p.length))) || [])[1] || null;
 
 export function parseTrailCode(name, prefix) {
   // Tolerate case slips and trailing extras (…-KL2-Map-v2, …-l-kl2-map).
   const parts = name.slice(prefix.length).split('-').map((p) => p.trim()).filter(Boolean);
   const size = (parts[0] || '').toUpperCase();
+  // Mile markers: …-S-redline, …-S-yellowline (one code per line).
+  const pilot = Object.values(PILOTS).find((p) => p.prefix.toLowerCase() === prefix.toLowerCase());
+  const mm = size === 'S' && parts[1] && pilot?.mileMarkers?.[parts[1].toLowerCase()];
+  if (mm) return { tier: 'marker', station: mm.id, purpose: 'Mile marker' };
   const station = parts[1] && /^[A-Za-z]{1,2}\d+$/.test(parts[1]) ? parts[1].toUpperCase() : null;
   const tagged = parts.slice(station ? 2 : 1).find((p) => /^(map|cta)$/i.test(p));
   // Midway signs carry the station's original code as the app / personal
@@ -74,12 +90,25 @@ function stationPositions(features) {
   return positions;
 }
 
+// Mile-marker codes sit at their chain's 0-mile origin (Trail Line Markers).
+function mileMarkerPositions(pilot, markerFeatures, positions) {
+  for (const m of Object.values(pilot.mileMarkers || {})) {
+    const f = markerFeatures.find((x) => x.properties?.chain_trail_code === m.chain && !x.properties?.deleted && Array.isArray(x.properties?.chain_origin));
+    if (f) { const [lon, lat] = f.properties.chain_origin; positions.set(m.id, { lat, lon }); }
+  }
+  return positions;
+}
+
 // For the all-courts map: every pilot's Design Lab station positions, fetched
 // without needing the code list, so it can run alongside the other reads.
 export async function trailStationPositions() {
   const out = [];
   for (const pilot of Object.values(PILOTS)) {
-    out.push({ pilot, positions: stationPositions(await designLabLayer(pilot.designLabCityId, 'Trail Line Stations')) });
+    const [st, mk] = await Promise.all([
+      designLabLayer(pilot.designLabCityId, 'Trail Line Stations'),
+      pilot.mileMarkers ? designLabLayer(pilot.designLabCityId, 'Trail Line Markers') : [],
+    ]);
+    out.push({ pilot, positions: mileMarkerPositions(pilot, mk, stationPositions(st)) });
   }
   return out;
 }
@@ -103,10 +132,11 @@ export async function buildPilot(slug) {
   const pilot = PILOTS[slug];
   if (!pilot) return null;
 
-  const [codes, stationFeatures, loopFeatures] = await Promise.all([
+  const [codes, stationFeatures, loopFeatures, markerFeatures] = await Promise.all([
     fetchAllQRCodes(),
     designLabLayer(pilot.designLabCityId, 'Trail Line Stations'),
     designLabLayer(pilot.designLabCityId, 'Trail Line Loops'),
+    pilot.mileMarkers ? designLabLayer(pilot.designLabCityId, 'Trail Line Markers') : [],
   ]);
 
   const trailCodes = codes.filter((c) => c.name.toLowerCase().startsWith(pilot.prefix.toLowerCase()) && c.state === 'A');
@@ -127,7 +157,7 @@ export async function buildPilot(slug) {
       : [],
   ]);
 
-  const positions = stationPositions(stationFeatures);
+  const positions = mileMarkerPositions(pilot, markerFeatures, stationPositions(stationFeatures));
 
   const launch = pilot.launchDate;
   const byCode = new Map(trailCodes.map((c) => [String(c.id), []]));

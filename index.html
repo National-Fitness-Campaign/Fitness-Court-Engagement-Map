@@ -488,6 +488,9 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .eng-mode .rw-ai-body, .eng-mode .rw-ai-body p { color: var(--soft); }
 .eng-mode .rw-ai-body b { color: #1e293b; }
 .eng-mode .eng-chip b { color: #334155; }
+.eq-row-raw { grid-template-columns: 1fr auto 1fr auto 1.2fr; }
+.rw-of2 { font-size: 1.3rem; font-weight: 700; color: var(--softer); letter-spacing: 0; }
+@media (max-width: 1100px) { .eq-row-raw { grid-template-columns: 1fr 1fr; } }
 .eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.55; }
 .eng-notes summary { cursor: pointer; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
 .eng-notes ul { margin-top: 8px; }
@@ -1500,6 +1503,9 @@ const cityKey = (c) => c.city + (c.state ? ', ' + c.state : '');
 // Trail line codes read better as "B6 · Map" than "L B6 Map".
 function displayName(c) {
   if (c.kind !== 'trail') return c.location;
+  // One mile-marker code per line: …-S-redline, …-S-yellowline.
+  const mm = c.name.match(/^TL-[A-Z]{2}-[A-Za-z]+-S-([a-z]+)line$/i);
+  if (mm) return `${mm[1][0].toUpperCase()}${mm[1].slice(1).toLowerCase()} line mile markers`;
   const m = c.name.match(/^TL-[A-Z]{2}-[A-Za-z]+-([LMS])(?:-([A-Z]{1,2}\d+))?(?:-(Map|CTA))?$/i);
   if (!m) return c.location;
   const tier = { L: 'Gateway', M: 'Midway', S: 'Trail Marker' }[m[1].toUpperCase()];
@@ -1962,19 +1968,24 @@ function renderCityBreakdown() {
   const activeN = [...courts.ranked, ...trail.ranked].filter((r) => r.n > 0).length;
   const share = (n) => (cityTotal ? Math.round((n / cityTotal) * 100) : 0);
   body.innerHTML = `
-    <div class="eng-hero">
-      <div class="eh-stats rw-stats">
-        <div class="eh-stat"><span>QR scans · ${esc(RANGE_LABELS[state.range].toLowerCase())}</span><b>${cityTotal.toLocaleString()}</b><em>${bounds ? `${chip(cityTotal, prevAll) || 'n/a'} vs prior period (${prevAll.toLocaleString()})` : `${all ? 'across the network' : 'in ' + esc(state.anCity.split(',')[0])}, all time`}</em></div>
-        <div class="eh-stat"><span>Last 7 days</span><b>${tw.toLocaleString()}</b><em>${tw === lw ? 'same as' : tw > lw ? `up ${(tw - lw).toLocaleString()} on` : `down ${(lw - tw).toLocaleString()} on`} the week before (${lw.toLocaleString()})</em></div>
-        <div class="eh-stat"><span>Codes scanned</span><b>${activeN}<small class="rw-of"> / ${codesN}</small></b><em>${codesN - activeN ? `${codesN - activeN} with no scans in this range` : 'every code has scans'}</em></div>
-      </div>
-      <div class="eh-pie">
-        <div class="eh-bar">${cityTotal ? [[courts.total, '#3b82f6', 'Fitness Courts'], [trail.total, '#e0369f', 'Trail Lines']].filter((p) => p[0]).map((p) => `<i style="width:${(p[0] / cityTotal) * 100}%;background:${p[1]}" title="${p[2]}: ${p[0].toLocaleString()}"></i>`).join('') : ''}</div>
-        <div class="eh-keys"><span><i style="background:#3b82f6"></i>Fitness Courts <b>${share(courts.total)}%</b></span><span><i style="background:#e0369f"></i>Trail Lines <b>${share(trail.total)}%</b></span></div>
+    <div class="eq-card">
+      <div class="eq-head"><h3>QR code scans <span>${esc(RANGE_LABELS[state.range].toLowerCase())}</span></h3><p>Every scan of a Fitness Court or Trail Line QR code${all ? ' across the network' : ' in ' + esc(state.anCity)}.</p></div>
+      <div class="eq-row eq-row-raw">
+        <div class="eq-tile" style="--c:${NEON.court}"><b>${courts.total.toLocaleString()}</b><div class="eq-lbl">Fitness Court QR scans</div><div class="eq-sub">${courts.ranked.length} Fitness Court code${courts.ranked.length === 1 ? '' : 's'}</div></div>
+        <div class="eq-op">+</div>
+        <div class="eq-tile" style="--c:${NEON.trail}"><b>${trail.total.toLocaleString()}</b><div class="eq-lbl">Trail Line QR scans</div><div class="eq-sub">${trail.ranked.length} Trail Line sign code${trail.ranked.length === 1 ? '' : 's'}, test scans included</div></div>
+        <div class="eq-op">=</div>
+        <div class="eq-total"><b>${cityTotal.toLocaleString()}</b><div class="eq-lbl">Total QR scans</div><div class="eq-sub">${bounds ? `${chip(cityTotal, prevAll) || 'n/a'} vs the prior period (${prevAll.toLocaleString()})` : 'all time'}</div></div>
       </div>
     </div>
+    <div class="eq-pair">
+      <div class="eq-stat"><div class="eq-lbl">QR scans in the last 7 days</div><b>${tw.toLocaleString()}</b>
+        <div class="eq-sub">${tw === lw ? 'the same as' : tw > lw ? `up ${(tw - lw).toLocaleString()} on` : `down ${(lw - tw).toLocaleString()} on`} the week before (${lw.toLocaleString()})</div></div>
+      <div class="eq-stat"><div class="eq-lbl">QR codes scanned ${esc(RANGE_LABELS[state.range].toLowerCase())}</div><b>${activeN} <small class="rw-of2">of ${codesN}</small></b>
+        <div class="eq-sub">${codesN - activeN ? `${codesN - activeN} code${codesN - activeN === 1 ? '' : 's'} with no scans in this range` : 'every code has scans'}</div></div>
+    </div>
     ${all ? '' : `<div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="cp-overview rw-ai-body" id="an-overview"><div class="cp-label">Overview</div>${cityOverview(state.anCity, courts, trail)}</div></div>`}
-    <div class="acb-grid">${side('court', 'Fitness Courts', '#2563eb', courts)}${side('trail', 'Trail Lines', TL_MAGENTA, trail)}</div>
+    <div class="acb-grid">${side('court', 'Fitness Courts', NEON.court, courts)}${side('trail', 'Trail Lines', NEON.trail, trail)}</div>
     <div class="acb-row2">
       <div class="acb-chart"><h4>Daily scans · ${esc(RANGE_LABELS[state.range])}</h4><canvas id="chart-city" height="90"></canvas></div>
       <div class="acb-chart"><h4>By day of week</h4><div class="acb-dow">${[1, 2, 3, 4, 5, 6, 0].map((i) => `
@@ -2521,7 +2532,7 @@ function renderAnalytics() {
   });
   document.getElementById('an-city-eyebrow').textContent = eng ? 'Engagement' : 'City breakdown';
   document.getElementById('an-raw-extra').style.display = eng ? 'none' : '';
-  document.querySelector('.an-city').classList.toggle('eng-mode', eng);
+  document.querySelector('.an-city').classList.add('eng-mode');
   renderCityBreakdown();
   if (eng) return;
   renderPilotSection();
