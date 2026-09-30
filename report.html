@@ -127,6 +127,33 @@ h2 { font-weight: 700; font-size: 2.1rem; letter-spacing: -0.01em; margin-top: 6
 .measure b { font-weight: 700; }
 .measure p { font-size: 0.9rem; color: var(--ink-2); margin-top: 4px; line-height: 1.4; }
 
+/* By the numbers */
+.an-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 22px; margin-top: 24px; }
+.months { display: flex; align-items: flex-end; gap: 10px; height: 170px; }
+.months .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
+.months .col i { width: 100%; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--powder), var(--dark)); min-height: 3px; }
+.months .col.partial i { background: var(--accent); }
+.months .col b { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 1.25rem; color: var(--dark); }
+.months .col span { font-size: 0.72rem; color: var(--ink-2); font-weight: 600; }
+.months .col em { font-style: normal; font-size: 0.68rem; font-weight: 700; }
+.up { color: #1b8a4b; } .down { color: #c2410c; } .flat { color: var(--ink-2); }
+.dow { display: grid; gap: 8px; }
+.dow .row { display: grid; grid-template-columns: 38px 1fr 44px; gap: 10px; align-items: center; font-size: 0.86rem; }
+.dow .row b { font-weight: 700; }
+.dow .row .bar { height: 12px; border-radius: 6px; background: var(--light); overflow: hidden; }
+.dow .row .bar i { display: block; height: 100%; background: var(--powder); border-radius: 6px; }
+.dow .row.top .bar i { background: var(--dark); }
+.dow .row span:last-child { text-align: right; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.tbl { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 0.9rem; }
+.tbl th { text-align: left; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); padding: 0 10px 10px; border-bottom: 2px solid var(--light); }
+.tbl td { padding: 11px 10px; border-bottom: 1px solid #e3f0f6; vertical-align: middle; }
+.tbl td.n, .tbl th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.tbl td.big { font-family: 'Bebas Neue', sans-serif; font-size: 1.35rem; color: var(--dark); }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl .share { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.tbl .share i { display: block; height: 6px; border-radius: 3px; background: var(--powder); }
+.spark { width: 110px; height: 28px; display: block; }
+.note { margin-top: 18px; font-size: 0.8rem; color: var(--ink-2); line-height: 1.5; }
 .foot { display: flex; align-items: center; gap: 16px; padding: 22px 52px; background: var(--ink); color: rgba(255,255,255,0.85); font-size: 0.85rem; }
 .foot img { width: 46px; }
 .foot b { color: #fff; }
@@ -139,6 +166,8 @@ h2 { font-weight: 700; font-size: 2.1rem; letter-spacing: -0.01em; margin-top: 6
 .loading { padding: 80px; text-align: center; color: var(--ink-2); font-size: 1.05rem; }
 
 @media (max-width: 900px) {
+  .an-grid { grid-template-columns: 1fr; }
+  .tbl .hide-sm { display: none; }
   .pad { padding: 30px 22px; }
   .cover .pad, .grid2 { grid-template-columns: 1fr; }
   .band, .callout, .measure { grid-template-columns: 1fr 1fr; }
@@ -231,6 +260,41 @@ async function build() {
   const launch = data.pilot.launchDate, install = data.pilot.installStart;
   const live = launch && today >= launch;
   const maxW = Math.max(1, ...wk.map((w) => w.n));
+  // By the numbers. Complete per-scan history starts 2026-04-07.
+  const TRACK_START = '2026-04-07';
+  const allDays = new Map();
+  for (const c of courts) for (const [d, v] of Object.entries(c.days || {})) if (d >= TRACK_START) allDays.set(d, (allDays.get(d) || 0) + v);
+  const months = [];
+  for (let m = new Date(Date.UTC(2026, 3, 1)); m.toISOString().slice(0, 7) <= today.slice(0, 7); m.setUTCMonth(m.getUTCMonth() + 1)) {
+    const key = m.toISOString().slice(0, 7);
+    let n = 0;
+    for (const [d, v] of allDays) if (d.startsWith(key)) n += v;
+    months.push({ key, n, label: m.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }), partial: key === TRACK_START.slice(0, 7) || key === today.slice(0, 7) });
+  }
+  const maxM = Math.max(1, ...months.map((m) => m.n));
+  const pct = (a, b) => (b ? Math.round(((a - b) / b) * 100) : null);
+  const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const DOW_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dowTot = Array(7).fill(0);
+  for (const [d, v] of allDays) dowTot[new Date(d + 'T12:00:00Z').getUTCDay()] += v;
+  const dowSum = dowTot.reduce((a, b) => a + b, 0) || 1;
+  const dowTop = dowTot.indexOf(Math.max(...dowTot));
+  const order = [1, 2, 3, 4, 5, 6, 0];
+  const weekendShare = Math.round(((dowTot[0] + dowTot[6]) / dowSum) * 100);
+  const rangeSum = (c, from, to) => Object.entries(c.days || {}).filter(([d]) => d >= from && d <= to).reduce((t, [, v]) => t + v, 0);
+  const d30 = addDays(today, -29), p30a = addDays(today, -59), p30b = addDays(today, -30);
+  const perCourt = ranked.map((c) => {
+    const last30 = rangeSum(c, d30, today), prev30 = rangeSum(c, p30a, p30b);
+    const spark = weekly([c], 12).map((w) => w.n);
+    return { ...c, last30, prev30, change: last30 === 0 && prev30 === 0 ? 'none' : pct(last30, prev30), share: allTime ? Math.round((c.allTime / allTime) * 100) : 0, spark };
+  });
+  const cityLast30 = perCourt.reduce((t, c) => t + c.last30, 0), cityPrev30 = perCourt.reduce((t, c) => t + c.prev30, 0);
+  const sparkSVG = (vals) => {
+    const w = 110, h = 28, mx = Math.max(1, ...vals), st = w / (vals.length - 1);
+    const pts = vals.map((v, i) => `${(i * st).toFixed(1)},${(h - 3 - (v / mx) * (h - 6)).toFixed(1)}`).join(' ');
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="0,${h} ${pts} ${w},${h}" fill="#4ac2f2" fill-opacity="0.18" stroke="none"/><polyline points="${pts}" fill="none" stroke="#006ca3" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+  };
+  const chg = (v) => (v === 'none' ? '<span class="flat">none</span>' : v == null ? '<span class="flat">new</span>' : `<span class="${v > 0 ? 'up' : v < 0 ? 'down' : 'flat'}">${v > 0 ? '▲' : v < 0 ? '▼' : ''} ${Math.abs(v)}%</span>`);
   const asOf = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Los_Angeles' });
 
   document.getElementById('report').innerHTML = `
@@ -283,6 +347,42 @@ async function build() {
         <div><div class="k">Best week</div><div class="v">${fmt(best.n)} scans</div><div class="d">Week of ${niceDay(best.start)}, in the last 12 weeks.</div></div>
         <div><div class="k">Network</div><div class="v">${courts.length} courts, ${ranked.filter((c) => c.allTime > 0).length} active</div><div class="d">Each has QR codes leading to coached workouts.</div></div>
       </div>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="pad">
+      <div class="eyebrow">By the numbers</div>
+      <h2>How use is changing</h2>
+      <p class="lede">Scans in the last 30 days: <b>${fmt(cityLast30)}</b>, ${cityPrev30 ? `${chg(pct(cityLast30, cityPrev30))} compared with the 30 days before (${fmt(cityPrev30)}).` : 'the first full period of tracking.'} ${esc(DOW_FULL[dowTop])} is the busiest day of the week, and weekends account for ${weekendShare}% of scans.</p>
+      <div class="an-grid">
+        <div class="card">
+          <h3>Scans by month</h3>
+          <div class="months">${months.map((m, i) => {
+            const prev = months[i - 1];
+            const c = prev && !m.partial && !prev.partial ? pct(m.n, prev.n) : null;
+            return `<div class="col${m.partial ? ' partial' : ''}"><em>${c == null ? '&nbsp;' : chg(c)}</em><b>${fmt(m.n)}</b><i style="height:${Math.round((m.n / maxM) * 100)}%"></i><span>${m.label}${m.partial ? '*' : ''}</span></div>`;
+          }).join('')}</div>
+        </div>
+        <div class="card">
+          <h3>When people scan</h3>
+          <div class="dow">${order.map((i) => `
+            <div class="row${i === dowTop ? ' top' : ''}"><b>${DOW[i]}</b><span class="bar"><i style="width:${Math.round((dowTot[i] / Math.max(...dowTot)) * 100)}%"></i></span><span>${Math.round((dowTot[i] / dowSum) * 100)}%</span></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:22px">
+        <h3>Court by court</h3>
+        <table class="tbl">
+          <thead><tr><th>Fitness Court</th><th class="n">All time</th><th class="n">Last 30 days</th><th class="n">vs. prior 30</th><th class="n hide-sm">Share</th><th class="hide-sm">12-week trend</th><th class="hide-sm">Last scan</th></tr></thead>
+          <tbody>${perCourt.map((c) => `
+            <tr><td><b>${esc(c.name)}</b></td><td class="n big">${fmt(c.allTime)}</td><td class="n">${fmt(c.last30)}</td><td class="n">${chg(c.change)}</td>
+              <td class="n hide-sm"><div class="share"><i style="width:${Math.max(3, c.share * 1.2)}px"></i>${c.share}%</div></td>
+              <td class="hide-sm">${sparkSVG(c.spark)}</td><td class="hide-sm">${c.lastScan ? niceDay(c.lastScan) : 'None yet'}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <p class="note">* Partial month. Scans are QR code scans at each Fitness Court, counted by Pacific day. Every scan is recorded from April 7, 2026; all-time totals come from the QR platform and include earlier history. Monthly and 30-day figures count people, excluding automated traffic.</p>
     </div>
   </section>
 

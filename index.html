@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fitness Court Tracking — National Fitness Campaign</title>
+<title>FC + TL Tracking | National Fitness Campaign</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
@@ -40,6 +40,7 @@ header {
   background: var(--card); border-bottom: 1px solid var(--border);
   padding: 14px 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
 }
+.brand-logo-img { width: 52px; height: auto; flex: none; filter: drop-shadow(0 1px 2px rgba(15,31,61,0.15)); }
 .brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
 .brand-logo {
   width: 46px; height: 46px; border-radius: 10px; flex: none;
@@ -376,12 +377,10 @@ header {
 
 <header>
   <div class="brand">
-    <div class="brand-logo">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="8" height="8" rx="1.5"/></svg>
-    </div>
+    <img class="brand-logo-img" src="/assets/nfc-logo.png" alt="National Fitness Campaign">
     <div>
       <div class="brand-eyebrow">National Fitness Campaign</div>
-      <div class="brand-title">Fitness Court Tracking</div>
+      <div class="brand-title">FC + TL Tracking</div>
     </div>
   </div>
   <nav class="tabs">
