@@ -10,7 +10,7 @@
 //   Purpose Map = "scan for the city map", CTA = "your personal trainers" (app);
 //           a Midway's unsuffixed code is its CTA
 
-import { fetchAllQRCodes, supabaseSelect, laToday } from './_lib.js';
+import { fetchAllQRCodes, supabaseSelect, laToday, parseName } from './_lib.js';
 
 export const PILOTS = {
   'las-vegas': {
@@ -110,10 +110,22 @@ export async function buildPilot(slug) {
   ]);
 
   const trailCodes = codes.filter((c) => c.name.toLowerCase().startsWith(pilot.prefix.toLowerCase()) && c.state === 'A');
+  // The city's Fitness Courts ride along so the pilot view can show both.
+  const courtCodes = codes.filter((c) => {
+    if (c.state !== 'A' || !c.name.startsWith('QR')) return false;
+    const n = parseName(c.name);
+    return n.state === pilot.state && n.city.toLowerCase() === pilot.name.toLowerCase();
+  });
   const ids = trailCodes.map((c) => c.id);
-  const daily = ids.length
-    ? await supabaseSelect(`scan_daily?select=qr_id,scan_date_la,is_bot,scans&qr_id=in.(${ids.join(',')})&order=scan_date_la.asc,qr_id.asc,is_bot.asc`)
-    : [];
+  const allIds = [...ids, ...courtCodes.map((c) => c.id)];
+  const [daily, courtLinks] = await Promise.all([
+    allIds.length
+      ? supabaseSelect(`scan_daily?select=qr_id,scan_date_la,is_bot,scans&qr_id=in.(${allIds.join(',')})&order=scan_date_la.asc,qr_id.asc,is_bot.asc`)
+      : [],
+    courtCodes.length
+      ? supabaseSelect(`qr_site_links?select=qr_id,lat,lon,sf_site_name&qr_id=in.(${courtCodes.map((c) => c.id).join(',')})&lat=not.is.null&order=qr_id.asc`).catch(() => [])
+      : [],
+  ]);
 
   const positions = stationPositions(stationFeatures);
 
@@ -164,9 +176,25 @@ export async function buildPilot(slug) {
       geometry: f.geometry,
     }));
 
+  // Fitness Courts: position from Salesforce / hand override (qr_site_links),
+  // all-time = Uniqode's official count, days = human scans by Pacific day.
+  const linkById = new Map(courtLinks.map((l) => [String(l.qr_id), l]));
+  const courts = courtCodes.map((c) => {
+    const link = linkById.get(String(c.id));
+    const days = {};
+    let last = null;
+    for (const r of daily) {
+      if (String(r.qr_id) !== String(c.id) || r.is_bot) continue;
+      days[r.scan_date_la] = (days[r.scan_date_la] || 0) + r.scans;
+      if (!last || r.scan_date_la > last) last = r.scan_date_la;
+    }
+    return { id: c.id, name: parseName(c.name).location, lat: link?.lat ?? null, lon: link?.lon ?? null, allTime: c.scans ?? 0, days, lastScan: last };
+  }).sort((a, b) => b.allTime - a.allTime);
+
   return {
     pilot: { slug, name: pilot.name, state: pilot.state, launchDate: launch, installStart: pilot.installStart || null, installWindow: pilot.installWindow || null, center: pilot.center },
     stations: list,
+    courts,
     unplaced,
     loops: { type: 'FeatureCollection', features: loops },
     firstCodeCreated: trailCodes.map((c) => c.created).filter(Boolean).sort()[0] || null,

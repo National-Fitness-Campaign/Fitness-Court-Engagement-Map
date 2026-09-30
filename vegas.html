@@ -76,6 +76,19 @@ main { padding: 20px 28px 40px; display: grid; gap: 16px; max-width: 1500px; mar
 .split { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; }
 .map-card { position: relative; overflow: hidden; }
 #map { height: 560px; }
+/* Layer toggles, top right of the map */
+.vg-layers { position: absolute; top: 12px; right: 12px; z-index: 500; display: flex; gap: 4px; padding: 4px;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(15,31,61,0.08); border-radius: 11px; box-shadow: 0 2px 12px rgba(15,31,61,0.12); }
+.vg-layers button { display: flex; align-items: center; gap: 6px; border: none; background: none; font: 600 0.76rem 'Inter', sans-serif;
+  color: var(--text-2); padding: 5px 10px; border-radius: 7px; cursor: pointer; }
+.vg-layers button i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid #9aa6bb; }
+.vg-layers button.on { color: var(--text); background: #eef4ff; }
+.vg-layers button[data-layer="trail"].on i { background: #c3268a; border-color: #c3268a; }
+.vg-layers button[data-layer="courts"].on i { background: #2563eb; border-color: #2563eb; border-radius: 3px; }
+.fc-pin { background: #2563eb; border: 2px solid #fff; border-radius: 5px; box-shadow: 0 1px 4px rgba(15,31,61,0.35); }
+.fc-pin.zero { background: #fff; border-color: #94a3b8; }
+.st-badge.fc { background: #2563eb; font-size: 0.62rem; letter-spacing: 0.02em; }
 .legend { position: absolute; left: 12px; bottom: 12px; z-index: 500; background: var(--card); border: 1px solid var(--border);
   border-radius: 10px; padding: 10px 12px; font-size: 0.75rem; box-shadow: var(--shadow); display: grid; gap: 5px; }
 .legend-row { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
@@ -159,14 +172,19 @@ main { padding: 20px 28px 40px; display: grid; gap: 16px; max-width: 1500px; mar
   <div class="split">
     <div class="card map-card">
       <div id="map"></div>
+      <div class="vg-layers" role="group" aria-label="Map layers">
+        <button type="button" class="on" data-layer="trail" aria-pressed="true"><i></i>Trail Line</button>
+        <button type="button" class="on" data-layer="courts" aria-pressed="true"><i></i>Fitness Courts</button>
+      </div>
       <div class="legend">
         <div class="legend-row"><span class="legend-dot" style="width:18px;height:18px;background:var(--gateway)"></span>Gateway station</div>
         <div class="legend-row"><span class="legend-dot" style="width:13px;height:13px;background:var(--midway)"></span>Midway station</div>
         <div class="legend-row"><span class="legend-dot" style="width:13px;height:13px;background:#fff;box-shadow:0 0 0 2px #94a3b8"></span>No scans yet</div>
+        <div class="legend-row" id="legend-fc"><span style="width:13px;height:13px;border-radius:4px;background:#2563eb;box-shadow:0 0 0 1px rgba(15,31,61,0.25)"></span>Fitness Court</div>
       </div>
     </div>
     <div class="card panel">
-      <h2>Stations</h2>
+      <h2 id="panel-title">Stations &amp; Fitness Courts</h2>
       <div class="stations" id="stations"></div>
     </div>
   </div>
@@ -205,6 +223,62 @@ if (L.maplibreGL) {
 }
 const loopLayer = L.layerGroup().addTo(map);
 const stationLayer = L.layerGroup().addTo(map);
+const courtLayer = L.layerGroup().addTo(map);
+const courtMarkers = new Map();
+const show = { trail: true, courts: true };
+
+const laDay = (t) => new Date(t).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+function courtWeek(c) {
+  const today = laDay(Date.now());
+  const from = laDay(Date.parse(today + 'T12:00:00Z') - 6 * 864e5);
+  return Object.entries(c.days || {}).filter(([d]) => d >= from && d <= today).reduce((n, [, v]) => n + v, 0);
+}
+
+function drawCourts() {
+  courtLayer.clearLayers();
+  courtMarkers.clear();
+  const list = (data.courts || []).filter((c) => c.lat != null);
+  const max = Math.max(1, ...list.map((c) => c.allTime));
+  for (const c of list) {
+    const size = c.allTime ? Math.round(14 + 14 * Math.sqrt(c.allTime / max)) : 12;
+    const m = L.marker([c.lat, c.lon], {
+      icon: L.divIcon({ className: '', html: `<div class="fc-pin${c.allTime ? '' : ' zero'}" style="width:${size}px;height:${size}px"></div>`, iconSize: [size, size], iconAnchor: [size / 2, size / 2] }),
+      keyboard: true, title: c.name,
+    }).addTo(courtLayer);
+    m.bindTooltip(esc(c.name), { direction: 'top', offset: [0, -size / 2] });
+    m.bindPopup(`<div class="popup"><h3>${esc(c.name)}</h3><div class="sub">Fitness Court${c.lastScan ? ` · last scan ${fmtDate(c.lastScan)}` : ''}</div>
+      <table><tr><td>All time</td><td>${c.allTime.toLocaleString()}</td></tr><tr><td>Last 7 days</td><td>${courtWeek(c)}</td></tr></table></div>`);
+    m.on('click', () => select('fc-' + c.id, false));
+    courtMarkers.set('fc-' + c.id, m);
+  }
+}
+
+function applyLayers() {
+  for (const [layer, on] of [[loopLayer, show.trail], [stationLayer, show.trail], [courtLayer, show.courts]]) {
+    if (on && !map.hasLayer(layer)) layer.addTo(map);
+    if (!on && map.hasLayer(layer)) map.removeLayer(layer);
+  }
+  document.getElementById('legend-fc').style.display = show.courts ? '' : 'none';
+  document.querySelectorAll('.legend-row:not(#legend-fc)').forEach((r) => { r.style.display = show.trail ? '' : 'none'; });
+  document.getElementById('panel-title').textContent =
+    show.trail && show.courts ? 'Stations & Fitness Courts' : show.courts ? 'Fitness Courts' : show.trail ? 'Stations' : 'Nothing selected';
+  renderList();
+}
+
+document.querySelector('.vg-layers').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button[data-layer]');
+  if (!b || !data) return;
+  show[b.dataset.layer] = !show[b.dataset.layer];
+  b.classList.toggle('on', show[b.dataset.layer]);
+  b.setAttribute('aria-pressed', show[b.dataset.layer]);
+  applyLayers();
+  // Frame whatever is visible.
+  const pts = [
+    ...(show.trail ? data.stations.map((s) => [s.lat, s.lon]) : []),
+    ...(show.courts ? (data.courts || []).filter((c) => c.lat != null).map((c) => [c.lat, c.lon]) : []),
+  ];
+  if (pts.length) map.fitBounds(pts, { padding: [40, 40], maxZoom: 16 });
+});
 
 function drawLoops(fc) {
   loopLayer.clearLayers();
@@ -252,7 +326,7 @@ function popup(s) {
 /* ── Station list ────────────────────────────────────────────────────── */
 function renderList() {
   const el = document.getElementById('stations');
-  const groups = ['gateway', 'midway', 'marker'];
+  const groups = show.trail ? ['gateway', 'midway', 'marker'] : [];
   let html = '';
   for (const t of groups) {
     const list = data.stations.filter((s) => s.tier === t);
@@ -277,13 +351,26 @@ function renderList() {
       </div>`;
     }
   }
-  el.innerHTML = html;
+  const courts = show.courts ? (data.courts || []) : [];
+  if (courts.length) {
+    const all = courts.reduce((n, c) => n + c.allTime, 0), week = courts.reduce((n, c) => n + courtWeek(c), 0);
+    html += `<div class="tier-head">Fitness Courts · ${courts.length} · ${all.toLocaleString()} all time · ${week} last 7 days</div>`;
+    for (const c of courts) {
+      const key = 'fc-' + c.id;
+      html += `<div class="st${key === activeId ? ' active' : ''}" data-id="${key}" onclick="select('${key}', true)">
+        <div class="st-badge fc">FC</div>
+        <div><div class="st-line">${esc(c.name)}</div><div class="st-codes">${courtWeek(c)} in the last 7 days</div></div>
+        <div><div class="st-n${c.allTime ? '' : ' zero'}">${c.allTime.toLocaleString()}</div><div class="st-last">${c.lastScan ? fmtDate(c.lastScan) : 'none yet'}</div></div>
+      </div>`;
+    }
+  }
+  el.innerHTML = html || '<div class="tier-head">Turn on a layer to see its list.</div>';
 }
 
 function select(id, fromList) {
   activeId = id;
   document.querySelectorAll('.st').forEach((r) => r.classList.toggle('active', r.dataset.id === id));
-  const m = markers.get(id);
+  const m = markers.get(id) || courtMarkers.get(id);
   if (m && fromList) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 16)); m.openPopup(); }
   if (!fromList) document.querySelector(`.st[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
@@ -361,6 +448,8 @@ async function load(refresh) {
 
     drawLoops(data.loops);
     drawStations();
+    drawCourts();
+    applyLayers();
     const pts = data.stations.map((s) => [s.lat, s.lon]);
     if (!refresh) pts.length ? map.fitBounds(pts, { padding: [40, 40], maxZoom: 16 }) : map.setView(data.pilot.center, 14);
     renderList();
