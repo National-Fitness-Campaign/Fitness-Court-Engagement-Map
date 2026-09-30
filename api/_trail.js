@@ -7,7 +7,8 @@
 //
 // Code names: TL-{ST}-{City}-{Size}[-{Station}][-{Purpose}]
 //   Size    L = Gateway (Station Max), M = Midway (Station Plus), S = Trail Marker
-//   Purpose Map = "scan for the city map", CTA = "your personal trainers" (app)
+//   Purpose Map = "scan for the city map", CTA = "your personal trainers" (app);
+//           a Midway's unsuffixed code is its CTA
 
 import { fetchAllQRCodes, supabaseSelect } from './_lib.js';
 
@@ -39,8 +40,12 @@ const lineFor = (station) => (LINES.find(([p]) => station && station.startsWith(
 export function parseTrailCode(name, prefix) {
   const rest = name.slice(prefix.length).split('-');
   const size = rest[0];
-  const purpose = /^(map|cta)$/i.test(rest.at(-1)) ? rest.pop().toUpperCase().replace('MAP', 'Map') : null;
+  const suffix = /^(map|cta)$/i.test(rest.at(-1)) ? rest.pop().toUpperCase().replace('MAP', 'Map') : null;
   const station = rest[1] || null;
+  // Midway signs carry the station's original code as the app / personal
+  // trainer QR and a "-Map" code in the map key (checked against the print
+  // files 2026-09-30), so an unsuffixed station code is the CTA.
+  const purpose = suffix || (station ? 'CTA' : null);
   return { tier: TIERS[size] || 'unknown', station, purpose };
 }
 
@@ -167,8 +172,7 @@ export function digest(data, today = new Date().toISOString().slice(0, 10)) {
   const thisWeek = sumDays(shift(today, -6), today);
   const lastWeek = sumDays(shift(today, -13), shift(today, -7));
   const scanned = data.stations.filter((s) => s.publicScans + s.testScans > 0);
-  // Only Gateways carry both a Map and a CTA code, so that's the fair comparison.
-  const byPurpose = (p) => all.filter((c) => c.tier === 'gateway' && c.purpose === p).reduce((n, c) => n + c.publicScans + c.testScans, 0);
+  const byPurpose = (p) => all.filter((c) => c.purpose === p).reduce((n, c) => n + c.publicScans + c.testScans, 0);
   const byTier = (t) => all.filter((c) => c.tier === t).reduce((n, c) => n + c.publicScans + c.testScans, 0);
   const ranked = [...data.stations].sort((a, b) => (b.publicScans + b.testScans) - (a.publicScans + a.testScans));
   return {
