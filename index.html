@@ -316,7 +316,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
   color: var(--text-2); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .an-mode button small { font-weight: 500; font-size: 0.76rem; color: var(--text-3); letter-spacing: 0; }
 .an-mode button:hover { background: #f3f6fb; color: var(--text); }
-.an-mode button.on { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.25); }
+.an-mode button.on { background: #0f1f3d; color: #fff; box-shadow: 0 2px 8px rgba(15,31,61,0.18); }
 .an-mode button.on small { color: rgba(255,255,255,0.82); }
 .an-pilot { padding: 20px 22px; margin-bottom: 16px; }
 .an-pilot-head { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -386,8 +386,8 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .rw-bars { margin-top: 16px; }
 .rw-bars .nm em { font-style: normal; font-weight: 800; color: var(--text-3); margin-right: 8px; font-size: 0.72rem; }
 .rw-bars .nm small { color: var(--text-3); font-size: 0.72rem; }
-.rw-ai { display: flex; gap: 14px; align-items: flex-start; margin-top: 14px; padding: 16px 18px; border-radius: 16px; border: 1px solid #e3e3fb;
-  background: linear-gradient(135deg, #f1f5ff 0%, #f8f1fb 100%); }
+.rw-ai { display: flex; gap: 14px; align-items: flex-start; margin-top: 14px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--border);
+  background: var(--card); }
 .rw-ai-icon { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: #fff; font-weight: 800;
   background: linear-gradient(135deg, #1ea7e1, #c3268a); box-shadow: 0 4px 12px rgba(195,38,138,0.25); }
 .rw-ai-body { margin: 0; padding: 0; background: none; font-size: 0.9rem; line-height: 1.55; }
@@ -415,6 +415,29 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .ep-empty { margin-top: 16px; padding: 14px; border-radius: 11px; border: 1px dashed #e7c3da; background: #fdf5fa; font-size: 0.8rem; color: var(--text-2); line-height: 1.5; }
 .acb-table tr.quiet-row td { color: var(--text-3); font-size: 0.78rem; cursor: default; }
 .bar-sub { grid-column: 1 / -1; font-size: 0.7rem; color: var(--text-3); margin-top: -1px; }
+.eq-card { margin-top: 16px; border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; background: var(--card); }
+.eq-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.eq-head h3 { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; }
+.eq-head h3 span { font-size: 0.8rem; font-weight: 600; color: var(--text-3); margin-left: 4px; }
+.eq-head p { font-size: 0.82rem; color: var(--text-2); }
+.eq-row { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1.15fr; gap: 10px; align-items: stretch; margin-top: 16px; }
+.eq-tile { border: 1px solid var(--border); border-radius: 12px; padding: 14px 14px 12px; position: relative; min-width: 0; }
+.eq-dot { position: absolute; top: 14px; right: 14px; width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.eq-tile b { display: block; font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; color: var(--c); }
+.eq-lbl { font-size: 0.8rem; font-weight: 800; color: var(--text); margin-top: 6px; }
+.eq-sub { font-size: 0.74rem; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
+.eq-op { display: grid; place-items: center; font-size: 1.4rem; font-weight: 800; color: var(--text-3); }
+.eq-total { border-radius: 12px; padding: 14px 16px 12px; background: #0f1f3d; color: #fff; }
+.eq-total b { display: block; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
+.eq-total .eq-lbl { color: #fff; }
+.eq-total .eq-sub { color: rgba(255,255,255,0.65); }
+.eq-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.eq-stat { border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; background: var(--card); }
+.eq-stat .eq-lbl { margin-top: 0; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); }
+.eq-stat b { display: block; font-size: 2.2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-top: 4px; }
+.eq-stat b.xx { font-size: 1rem; color: #9aa6bb; letter-spacing: 0.08em; }
+@media (max-width: 1100px) { .eq-row { grid-template-columns: 1fr 1fr; } .eq-op { display: none; } .eq-total { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .eq-row, .eq-pair { grid-template-columns: 1fr; } }
 .eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.55; }
 .eng-notes summary { cursor: pointer; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
 .eng-notes ul { margin-top: 8px; }
@@ -2246,7 +2269,7 @@ function renderEngagement(body) {
   const T = F.total.engagements;
   const lines = [];
   if (F.total.access != null) lines.push(`<b>${F.total.access.toLocaleString()} people</b> in ${place} live within a 10 minute walk of a Fitness Court or the Trail Line.`);
-  lines.push(`<b>${T.toLocaleString()} engagements</b> ${perYear ? 'all time' : rangeLc}: ${F.court.engagements.toLocaleString()} Fitness Court QR scans (${pctOf(F.court.engagements, T)}%), ${(F.trail.engagements || 0).toLocaleString()} public Trail Line scans (${pctOf(F.trail.engagements || 0, T)}%) and ${F.digital.engagements.toLocaleString()} from the app (${pctOf(F.digital.engagements, T)}%).`);
+  lines.push(`<b>${T.toLocaleString()} engagements</b> ${perYear ? 'all time' : rangeLc}: ${F.court.engagements.toLocaleString()} Fitness Court QR scans (${pctOf(F.court.engagements, T)}%), ${(F.trail.engagements || 0).toLocaleString()} public Trail Line scans (${pctOf(F.trail.engagements || 0, T)}%) and ${F.digital.checkins.toLocaleString()} app check-ins plus ${F.digital.newUsers.toLocaleString()} app downloads (${pctOf(F.digital.engagements, T)}%).`);
   if (courtRows[0]?.total) lines.push(`<b>${esc(displayName(courtRows[0].c))}</b> leads with ${courtRows[0].total.toLocaleString()} engagements${all ? ` (${esc(cityKey(courtRows[0].c))})` : ''}.`);
   const full = months.filter((m) => m < today.slice(0, 7));
   if (full.length >= 2) {
@@ -2297,16 +2320,16 @@ function renderEngagement(body) {
     cell('People within a 10 min walk', F.trailCodes.length ? F.trail.access : null, F.trail.access != null ? 'Residents living within 805 m either side of the line (2020 Census, inside city limits).' : noAcc)
     + cell(kcalLabel, null, TBD), trailSeries, trailList);
   const digitalP = pillar('digital', 'Digital', '#6d4de0', `The NFC app · at ${F.matched} of ${F.courtCodes.length} courts`,
-    F.digital.engagements, `= ${F.digital.checkins.toLocaleString()} app check-ins + ${F.digital.newUsers.toLocaleString()} new app users ${info(`New app users: people whose first ever check-in was at one of these courts, our stand-in for downloads.${F.digital.prorated ? ' Monthly totals, prorated to the range.' : ''}${F.bounds ? '' : ' App data starts Jan 2026.'}${F.bounds && F.bounds[1] > E.app.takenAt ? ` App data runs through ${E.app.takenAt}.` : ''} Nationally: ${F.digital.natUsers.toLocaleString()} new app users in this period.`)}`,
+    F.digital.engagements, `= ${F.digital.checkins.toLocaleString()} app check-ins + ${F.digital.newUsers.toLocaleString()} app downloads ${info(`App downloads: people whose first ever app check-in was at one of these courts. The app doesn't record where it was downloaded, so this is our stand-in.${F.digital.prorated ? ' Monthly totals, prorated to the range.' : ''}${F.bounds ? '' : ' App data starts Jan 2026.'}${F.bounds && F.bounds[1] > E.app.takenAt ? ` App data runs through ${E.app.takenAt}.` : ''} Nationally: ${F.digital.natUsers.toLocaleString()} new app accounts in this period.`)}`,
     cell('People within reach', null, TBD) + cell(kcalLabel, null, TBD),
-    digitalSeries, courtRows.some((r) => r.app) ? bars('Top courts · app activity', [...courtRows].filter((r) => r.app).sort((x, y) => y.app - x.app), '#6d4de0', (r) => r.app, (r) => `${r.ci} check-ins · ${r.nu} new users`) : '<div class="ep-empty">No app activity at these courts in this range.</div>');
+    digitalSeries, courtRows.some((r) => r.app) ? bars('Top courts · app activity', [...courtRows].filter((r) => r.app).sort((x, y) => y.app - x.app), '#6d4de0', (r) => r.app, (r) => `${r.ci} check-ins · ${r.nu} downloads`) : '<div class="ep-empty">No app activity at these courts in this range.</div>');
 
   // ── Sources breakdown ─────────────────────────────────────────────────
   const SRC = [
     ['Fitness Court QR scans', '#2563eb', F.court.engagements],
     ['Trail Line QR scans (public)', TL_MAGENTA, F.trail.engagements || 0],
     ['App check-ins', '#6d4de0', F.digital.checkins],
-    ['New app users', '#a78bfa', F.digital.newUsers],
+    ['App downloads', '#a78bfa', F.digital.newUsers],
   ];
   const srcMax = Math.max(1, ...SRC.map((x) => x[2]));
   const parts = [['Fitness Court', '#3b82f6', F.court.engagements], ['Trail Line', '#e0369f', F.trail.engagements || 0], ['Digital', '#8b6cf0', F.digital.engagements]];
@@ -2322,18 +2345,27 @@ function renderEngagement(body) {
       <td class="n"><b>${r.total.toLocaleString()}</b></td><td class="n">${pctOf(r.total, T)}%</td></tr>`).join('')
     + (quietSigns ? `<tr class="quiet-row"><td colspan="7">+ ${quietSigns} Trail Line sign code${quietSigns === 1 ? '' : 's'} with no public scans ${pilot && today < pilot.launchDate ? `yet (counting starts ${fmtD(pilot.launchDate)})` : 'in this range'}</td></tr>` : '');
 
+  const eqTile = (color, n, label, sub) => `<div class="eq-tile" style="--c:${color}"><span class="eq-dot"></span><b>${n.toLocaleString()}</b><div class="eq-lbl">${label}</div><div class="eq-sub">${sub}</div></div>`;
   body.innerHTML = `
-    <div class="eng-hero">
-      <div class="eh-stats">
-        <div class="eh-stat"><span>People within a 10 minute walk</span>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}<em>${F.total.access != null ? 'of a Fitness Court or the Trail Line · 2020 Census, each person counted once' : noAcc}</em></div>
-        <div class="eh-stat"><span>${kcalLabel}</span>${F.total.kcal == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(F.total.kcal)}</b>`}<em>NFC estimate for the courts · Trail Line and app to come</em></div>
-        <div class="eh-stat"><span>Total engagements · ${rangeLc}</span><b>${T.toLocaleString()}</b><em>QR scans + app check-ins + new app users</em></div>
+    <div class="eq-card">
+      <div class="eq-head"><h3>Total engagements <span>${perYear ? 'all time' : rangeLc}</span></h3><p>Every way someone used a Fitness Court, the Trail Line or the NFC app, added up.</p></div>
+      <div class="eq-row">
+        ${eqTile('#2563eb', F.court.engagements, 'Fitness Court QR scans', 'scans of the codes on the court signs')}
+        <div class="eq-op">+</div>
+        ${eqTile(TL_MAGENTA, F.trail.engagements || 0, 'Trail Line QR scans', pilot && today < pilot.launchDate ? `public scans only, counting starts ${fmtD(pilot.launchDate)}` : 'public scans on the trail signs')}
+        <div class="eq-op">+</div>
+        ${eqTile('#6d4de0', F.digital.checkins, 'App check-ins', 'workouts logged in the NFC app at these courts')}
+        <div class="eq-op">+</div>
+        ${eqTile('#a78bfa', F.digital.newUsers, 'App downloads', 'people whose first ever app check-in was here')}
+        <div class="eq-op">=</div>
+        <div class="eq-total"><b>${T.toLocaleString()}</b><div class="eq-lbl">Total engagements</div><div class="eq-sub">${T ? `${pctOf(F.court.engagements, T)}% Fitness Court · ${pctOf(F.trail.engagements || 0, T)}% Trail Line · ${pctOf(F.digital.engagements, T)}% app` : 'none in this range'}</div></div>
       </div>
-      <div class="eh-pie">
-        <div class="eh-pie-lbl">Where engagements come from</div>
-        <div class="eh-bar">${T ? parts.filter((x) => x[2]).map((x) => `<i style="width:${(x[2] / T) * 100}%;background:${x[1]}" title="${x[0]}: ${x[2].toLocaleString()}"></i>`).join('') : ''}</div>
-        <div class="eh-keys">${parts.map((x) => `<span><i style="background:${x[1]}"></i>${x[0]} <b>${pctOf(x[2], T)}%</b> <small>${x[2].toLocaleString()}</small></span>`).join('')}</div>
-      </div>
+    </div>
+    <div class="eq-pair">
+      <div class="eq-stat"><div class="eq-lbl">People within a 10 minute walk</div>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}
+        <div class="eq-sub">${F.total.access != null ? `residents near a Fitness Court (${F.court.access.toLocaleString()}) or the Trail Line (${(F.trail.access || 0).toLocaleString()}), each counted once · 2020 Census` : noAcc}</div></div>
+      <div class="eq-stat"><div class="eq-lbl">${kcalLabel}</div>${F.total.kcal == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(F.total.kcal)}</b>`}
+        <div class="eq-sub">NFC estimate for the Fitness Courts (1.3M per court per year) · Trail Line and app: XX until the formula is set</div></div>
     </div>
     <div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="rw-ai-body"><div class="cp-label">Overview · ${perYear ? 'all time' : rangeLc}</div><p>${lines.join(' ')}</p></div></div>
     <div class="eng-sec"><h3>The three pillars</h3><span>Each one shows who it reaches, what it burns and how people use it</span></div>
@@ -2347,14 +2379,14 @@ function renderEngagement(body) {
     </div>
     ${engMapCard(F)}
     ${all ? '' : `<div class="acb-table"><h4>Every court and sign <span class="rw-tod-note">engagements ${rangeLc}, click a row to see it on the map</span></h4><table>
-      <thead><tr><th>Name</th><th>Type</th><th class="n">QR scans</th><th class="n">App check-ins</th><th class="n">New app users</th><th class="n">Total engagements</th><th class="n">Share</th></tr></thead>
+      <thead><tr><th>Name</th><th>Type</th><th class="n">QR scans</th><th class="n">App check-ins</th><th class="n">App downloads</th><th class="n">Total engagements</th><th class="n">Share</th></tr></thead>
       <tbody>${tableRows}</tbody></table></div>`}
     <details class="eng-notes"><summary>How these are counted</summary><ul>
-      <li><b>Engagement</b>: one QR scan on a court or trail sign, one app check-in, or one new app user. Added up, that's the total.</li>
+      <li><b>Engagement</b>: one QR scan on a court or trail sign, one app check-in, or one app download. Added up, that's the total.</li>
       <li><b>People within a 10 minute walk</b>: 2020 Census block population inside an 805 m walk of a court, or of either side of the Trail Line, clipped to city limits. The total counts each person once.</li>
       <li><b>Calories</b>: NFC's estimate of 1.3M calories per Fitness Court per year. Trail Line and app calories show XX until the formula workshop sets them.</li>
       <li><b>Trail Line</b>: only public scans count, from the pilot's launch date. Test and install scans before that are left out.</li>
-      <li><b>App data</b>: ${esc(E.app.monthsFrom)} to ${esc(E.app.monthsThrough)} (snapshot ${esc(E.app.takenAt)}), monthly totals. A court counts when an app court sits within ${E.app.matchRadiusMeters} m of its QR sign. New app users are people whose first ever check-in was at that court.</li>
+      <li><b>App data</b>: ${esc(E.app.monthsFrom)} to ${esc(E.app.monthsThrough)} (snapshot ${esc(E.app.takenAt)}), monthly totals. A court counts when an app court sits within ${E.app.matchRadiusMeters} m of its QR sign. App downloads are people whose first ever check-in was at that court (the app doesn't record where it was downloaded).</li>
       <li>Internal view: raw figures, not the city-facing report.</li>
     </ul></details>`;
 
@@ -2365,7 +2397,7 @@ function renderEngagement(body) {
     data: { labels: months.map(monthLabel), datasets: [
       { label: 'Fitness Court QR scans', data: courtSeries, backgroundColor: '#2563eb', borderRadius: 3, stack: 's' },
       { label: 'Trail Line QR scans', data: trailSeries, backgroundColor: TL_MAGENTA, borderRadius: 3, stack: 's' },
-      { label: 'App check-ins + new users', data: digitalSeries, backgroundColor: '#6d4de0', borderRadius: 3, stack: 's' },
+      { label: 'App check-ins + downloads', data: digitalSeries, backgroundColor: '#6d4de0', borderRadius: 3, stack: 's' },
     ] },
     options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
       scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: 'engagements' } } } },
