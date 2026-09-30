@@ -246,6 +246,9 @@ header {
 .loc-badge { font-size: 0.66rem; font-weight: 700; border-radius: 99px; padding: 3px 9px; white-space: nowrap; }
 .loc-badge.verified { background: #e7f6ec; color: #15803d; }
 .loc-source { font-size: 0.72rem; color: var(--green); font-weight: 600; margin-top: 6px; }
+.type-badge { display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.type-badge.court { background: #e8effc; color: #1e40af; }
+.type-badge.trail { background: #fbe7f3; color: #9d1a6c; }
 .loc-badge.approx { background: #fef3c7; color: #92400e; }
 .loc-badge.missing { background: #fee2e2; color: #991b1b; }
 
@@ -489,7 +492,8 @@ header {
       <table class="list-table">
         <thead>
           <tr>
-            <th onclick="setSort('location')">Court <span class="arrow" id="ar-location"></span></th>
+            <th onclick="setSort('location')">Name <span class="arrow" id="ar-location"></span></th>
+            <th onclick="setSort('kind')">Type <span class="arrow" id="ar-kind"></span></th>
             <th onclick="setSort('city')">City <span class="arrow" id="ar-city"></span></th>
             <th onclick="setSort('state')">State <span class="arrow" id="ar-state"></span></th>
             <th onclick="setSort('scans')" style="text-align:right">Scans <span class="arrow" id="ar-scans"></span></th>
@@ -515,7 +519,7 @@ header {
         <canvas id="chart-daily" height="80"></canvas>
       </div>
       <div class="card an-card">
-        <h3>Top 10 Fitness Courts</h3>
+        <h3 id="an-top-title">Top 10</h3>
         <div class="sub">By scans in the selected range</div>
         <canvas id="chart-top"></canvas>
       </div>
@@ -1412,10 +1416,12 @@ function renderAnalytics() {
     options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
   });
 
+  document.getElementById('an-top-title').textContent =
+    { all: 'Top 10 codes', court: 'Top 10 Fitness Courts', trail: 'Top 10 Trail Line codes' }[state.kind];
   const ranked = courts.map((c) => ({ c, n: countFor(c, bounds) })).sort((a, b) => b.n - a.n).slice(0, 10);
   charts.top = new Chart(document.getElementById('chart-top'), {
     type: 'bar',
-    data: { labels: ranked.map((r) => r.c.location), datasets: [{ data: ranked.map((r) => r.n), backgroundColor: blue, borderRadius: 5 }] },
+    data: { labels: ranked.map((r) => displayName(r.c) + (r.c.kind === 'trail' ? ' (TL)' : '')), datasets: [{ data: ranked.map((r) => r.n), backgroundColor: ranked.map((r) => (r.c.kind === 'trail' ? TL_MAGENTA : blue)), borderRadius: 5 }] },
     options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } },
   });
 
@@ -1478,20 +1484,25 @@ function renderList() {
   rows.sort((a, b) => {
     let va, vb;
     if (k === 'scans') { va = a.scans; vb = b.scans; }
-    else if (k === 'status') { va = ord[a.status]; vb = ord[b.status]; }
+    else if (k === 'status') { va = ord[a.status] ?? 9; vb = ord[b.status] ?? 9; }
     else { va = (a.c[k] || '').toLowerCase(); vb = (b.c[k] || '').toLowerCase(); }
     return (va < vb ? -1 : va > vb ? 1 : 0) * dir;
   });
-  for (const col of ['location', 'city', 'state', 'scans', 'status']) {
+  for (const col of ['location', 'kind', 'city', 'state', 'scans', 'status']) {
     document.getElementById('ar-' + col).textContent = k === col ? (dir === 1 ? '▲' : '▼') : '';
   }
   const badge = { verified: '<span class="loc-badge verified">✓ Verified</span>',
                   approx: '<span class="loc-badge approx">≈ Approximate</span>',
-                  missing: '<span class="loc-badge missing">No location</span>' };
+                  missing: '<span class="loc-badge missing">No location</span>',
+                  mobile: '<span class="loc-badge">Pop-up / mobile</span>' };
+  const type = (c) => c.kind === 'trail'
+    ? '<span class="type-badge trail">Trail Line</span>'
+    : '<span class="type-badge court">Fitness Court</span>';
   const totalScans = rows.reduce((s, r) => s + r.scans, 0);
   document.getElementById('list-body').innerHTML = rows.map((r) => `
     <tr onclick="focusCourt(${r.c.id})">
       <td><b>${esc(displayName(r.c))}</b></td>
+      <td>${type(r.c)}</td>
       <td>${esc(r.c.city || '—')}</td>
       <td>${esc(r.c.state || '—')}</td>
       <td class="num">${r.scans.toLocaleString()}</td>
@@ -1499,7 +1510,8 @@ function renderList() {
     </tr>`).join('') + `
     <tr class="total-row">
       <td>Total</td>
-      <td>${rows.length} locations</td>
+      <td>${codeCountLabel(rows.map((r) => r.c))}</td>
+      <td>${rows.length} codes</td>
       <td>${esc(state.stateFilter || 'All states')}</td>
       <td class="num">${totalScans.toLocaleString()}</td>
       <td></td>
@@ -1530,9 +1542,16 @@ function onSearch(q) {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
     state.search = q;
+    const needle = q.trim().toLowerCase();
+    // Typing a city ("las vegas") opens that city's panel — the overview and
+    // the Fitness Court / Trail Line split — instead of just filtering pins.
+    const cities = [...new Set(visibleCourts().map(cityKey))];
+    const exact = needle ? cities.filter((k) => k.toLowerCase().startsWith(needle) || k.toLowerCase().split(',')[0] === needle) : [];
+    if (exact.length === 1) { state.cityPanel = exact[0]; if (state.view !== 'map') setView('map'); }
     renderAll();
     const match = visibleCourts().filter((c) => c.hasLocation);
-    if (q.trim() && match.length) {
+    if (exact.length === 1) openCityPanel(exact[0]);
+    else if (needle && match.length) {
       map.fitBounds(L.latLngBounds(match.map((c) => [c.lat, c.lon])).pad(0.3), { maxZoom: 11 });
     }
   }, 250);
