@@ -5,14 +5,10 @@
 // bubble falls back to a written-out version of the same facts, so it never
 // breaks. Model output is cached per digest, so refreshes don't re-bill it.
 
-import { generateText } from 'ai';
+import { writeWithAI } from './_ai.js';
 import { buildPilot, digest, PILOTS } from './_trail.js';
 import { sendError, setCache } from './_lib.js';
 
-const MODEL = 'anthropic/claude-haiku-4.5';
-const MODEL_TIMEOUT_MS = 8000;
-const AI_CACHE_TTL_MS = 30 * 60_000;
-const aiCache = new Map(); // JSON(digest) -> { at, text }
 
 const fmtDay = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 
@@ -37,29 +33,13 @@ function fallback(d) {
   return `${total} scan${total === 1 ? '' : 's'} so far at ${d.stationsWithScans} of ${d.stations} stations — ${d.thisWeek} this week, ${trend}.${top}${when}`;
 }
 
-async function aiText(d) {
-  const key = JSON.stringify(d);
-  const hit = aiCache.get(key);
-  if (hit && Date.now() - hit.at < AI_CACHE_TTL_MS) return hit.text;
-  const out = await generateText({
-    model: MODEL,
-    maxOutputTokens: 220,
-    maxRetries: 0,
-    abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
-    system:
-      'You write the one-glance status line for an internal dashboard tracking QR-code scans on a new outdoor trail signage pilot. '
-      + 'Use ONLY the numbers given. 2-3 short sentences, plain English, no headings, no bullet points, no emoji. '
-      + 'Say whether it is trending up or down week over week, name the strongest and any silent stations, and compare Map vs CTA codes when both have scans. '
-      + 'If there is too little data to call a trend, say so plainly. '
-      + 'Dates are YYYY-MM-DD in Pacific time. If today is before installStart, the signs are not installed yet and every scan is a test scan. '
-      + 'If today is between installStart and launchDate, signs are being installed and scans are installer checks. Public counting starts on launchDate.',
-    prompt: key,
-  });
-  const text = out.text.trim();
-  aiCache.set(key, { at: Date.now(), text });
-  if (aiCache.size > 50) aiCache.delete(aiCache.keys().next().value);
-  return text;
-}
+const SYSTEM =
+  'You write the one-glance status line for an internal dashboard tracking QR-code scans on a new outdoor trail signage pilot. '
+  + 'Use ONLY the numbers given. 2-3 short sentences, plain English, no headings, no bullet points, no emoji. '
+  + 'Say whether it is trending up or down week over week, name the strongest and any silent stations, and compare Map vs CTA codes when both have scans. '
+  + 'If there is too little data to call a trend, say so plainly. '
+  + 'Dates are YYYY-MM-DD in Pacific time. If today is before installStart, the signs are not installed yet and every scan is a test scan. '
+  + 'If today is between installStart and launchDate, signs are being installed and scans are installer checks. Public counting starts on launchDate.';
 
 export default async function handler(req, res) {
   try {
@@ -69,7 +49,7 @@ export default async function handler(req, res) {
 
     let text = null, source = 'computed';
     try {
-      text = await aiText(d);
+      text = await writeWithAI({ system: SYSTEM, facts: d });
       source = 'ai';
     } catch (err) {
       console.warn('trail-summary: model unavailable, using computed summary:', err.message);

@@ -1154,7 +1154,7 @@ function renderCityPanel() {
       <div><div class="cp-eyebrow">City breakdown</div><div class="cp-title">${escapeAttr(state.cityPanel)}</div></div>
       <button class="cp-close" onclick="closeCityPanel()" aria-label="Close city breakdown">✕</button>
     </div>
-    <div class="cp-overview"><div class="cp-label">Overview</div>${cityOverview(state.cityPanel, courts, trail)}</div>
+    <div class="cp-overview" id="cp-overview"><div class="cp-label">Overview</div>${cityOverview(state.cityPanel, courts, trail)}</div>
     <div class="cp-sides">
       ${sideHTML('Fitness Courts', 'var(--blue)', courts, 'No Fitness Court codes in this city.')}
       ${sideHTML('Trail Lines', TL_MAGENTA, trail, 'No Trail Line here yet.')}
@@ -1162,6 +1162,26 @@ function renderCityPanel() {
     ${trail.ranked.length && /^Las Vegas, NV$/.test(state.cityPanel) ? '<a class="cp-link" href="/vegas">Open the Las Vegas Trail Line pilot view →</a>' : ''}`;
   el.style.display = 'block';
   if (callout) callout.style.display = 'none';
+  loadCityAI(state.cityPanel);
+}
+
+// Swap in the AI-written overview when the server has one. Until AI Gateway
+// is enabled it answers { source: 'computed' } and the overview above stays.
+const cityAI = new Map(); // "City, ST" -> Promise<summary|null>
+function loadCityAI(key) {
+  const m = key.match(/^(.*),\s*([A-Z]{2})$/);
+  if (!m) return;
+  if (!cityAI.has(key)) {
+    cityAI.set(key, fetch(`/api/city-summary?city=${encodeURIComponent(m[1])}&state=${m[2]}`)
+      .then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  }
+  cityAI.get(key).then((s) => {
+    const box = document.getElementById('cp-overview');
+    if (!s || s.source !== 'ai' || state.cityPanel !== key || !box) return;
+    const part = (label, text) => (text ? `<p><b>${label}:</b> ${esc(text)}</p>` : '');
+    box.innerHTML = `<div class="cp-label">Overview · AI summary</div><p>${esc(s.city)}</p>`
+      + part('Fitness Courts', s.courts) + part('Trail Line', s.trail);
+  });
 }
 
 document.getElementById('citylist').addEventListener('click', (ev) => {
