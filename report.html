@@ -165,7 +165,7 @@ h2 { font-weight: 700; font-size: 2.1rem; letter-spacing: -0.01em; margin-top: 6
 
 .loading { padding: 80px; text-align: center; color: var(--ink-2); font-size: 1.05rem; }
 
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
   .an-grid { grid-template-columns: 1fr; }
   .tbl .hide-sm { display: none; }
   .pad { padding: 30px 22px; }
@@ -176,7 +176,7 @@ h2 { font-weight: 700; font-size: 2.1rem; letter-spacing: -0.01em; margin-top: 6
   .bars { display: none; }
   .foot { flex-wrap: wrap; padding: 22px; }
 }
-@media (max-width: 560px) {
+@media screen and (max-width: 560px) {
   .band, .callout, .measure { grid-template-columns: 1fr; }
   .band > div + div { border-left: none; border-top: 1px solid rgba(0,108,163,0.15); }
 }
@@ -186,12 +186,21 @@ h2 { font-weight: 700; font-size: 2.1rem; letter-spacing: -0.01em; margin-top: 6
 @media print {
   body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .toolbar { display: none; }
-  .page { width: 100%; margin: 0; border-radius: 0; box-shadow: none; break-after: page; page-break-after: always; }
-  .page:last-of-type { break-after: auto; }
-  .cover, .cover .pad { min-height: 7.4in; }
-  .mapbox { height: 3.9in; }
+  /* Desktop layout at a fixed width, scaled so each section fills one
+     letter-landscape page (about 989 x 749 css px inside the margins). */
+  .page { width: 1620px; zoom: 0.6; margin: 0; border-radius: 0; box-shadow: none; break-after: page; page-break-after: always; break-inside: avoid; }
+  .page:last-of-type { break-after: auto; page-break-after: auto; }
+  .cover, .cover .pad { min-height: 1240px; }
+  .pad { padding: 36px 48px; }
+  .mapbox { height: 300px; }
+  .trend { height: 95px; }
+  .months { height: 140px; }
+  .grid2, .an-grid { margin-top: 18px; }
+  .callout, .timeline, .measure { margin-top: 18px; }
+  .tbl td { padding: 8px 10px; }
   .leaflet-control-zoom { display: none; }
 }
+
 </style>
 </head>
 <body>
