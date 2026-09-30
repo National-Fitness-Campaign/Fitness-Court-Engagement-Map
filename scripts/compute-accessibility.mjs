@@ -69,8 +69,64 @@ if (args.boundary) {
   boundary = unionAll((b.features || [b]).filter((f) => /Polygon/.test(f.geometry?.type)));
 }
 
-const courtArea = clip(unionAll(courts.map((c) => turf.buffer(turf.point([c.lon, c.lat]), COURT_RADIUS_M, { units: 'meters' }))), boundary);
-const trailArea = lines.length ? clip(unionAll(lines.map((f) => turf.buffer(f, TRAIL_BUFFER_M, { units: 'meters' }))), boundary) : null;
+// ── Walk areas ────────────────────────────────────────────────────────────
+// Default: real 10 minute walking isochrones along the street network
+// (Mapbox Isochrone API, walking profile; the PD portal uses the same API).
+// The Trail Line's area is the union of isochrones from points every 150 m
+// along the line. --method=buffer falls back to straight-line circles.
+const METHOD = args.method === 'buffer' ? 'buffer' : 'isochrone';
+const WALK_MIN = Number(args.minutes || 10);
+function readVar(file, name) {
+  if (process.env[name]) return process.env[name];
+  if (!file || !fs.existsSync(file)) return null;
+  const line = fs.readFileSync(file, 'utf8').split('\n').find((l) => l.startsWith(name + '='));
+  return line ? line.slice(name.length + 1).trim().replace(/^"|"$/g, '') : null;
+}
+const mapboxToken = METHOD === 'isochrone' ? readVar(args['census-env'], 'NEXT_PUBLIC_MAPBOX_TOKEN') || readVar(args['census-env'], 'MAPBOX_TOKEN') : null;
+if (METHOD === 'isochrone' && !mapboxToken) throw new Error('Need NEXT_PUBLIC_MAPBOX_TOKEN in the --census-env file (or pass --method=buffer)');
+const cacheFile = path.join(ROOT, 'data', 'isochrone-cache.json');
+const isoCache = fs.existsSync(cacheFile) ? JSON.parse(fs.readFileSync(cacheFile, 'utf8')) : {};
+async function isochrone(lon, lat) {
+  const key = `walk${WALK_MIN}:${lon.toFixed(5)},${lat.toFixed(5)}`;
+  if (isoCache[key]) return isoCache[key];
+  const url = `https://api.mapbox.com/isochrone/v1/mapbox/walking/${lon.toFixed(5)},${lat.toFixed(5)}?contours_minutes=${WALK_MIN}&polygons=true&denoise=1&access_token=${mapboxToken}`;
+  for (let attempt = 0; ; attempt++) {
+    const r = await fetch(url, { signal: AbortSignal.timeout(30000) });
+    if (r.status === 429 && attempt < 5) { await new Promise((ok) => setTimeout(ok, 1500 * (attempt + 1))); continue; }
+    if (!r.ok) throw new Error(`Mapbox isochrone ${r.status}: ${(await r.text()).slice(0, 160)}`);
+    const f = (await r.json()).features?.[0];
+    if (!f) throw new Error('Mapbox isochrone returned no polygon');
+    isoCache[key] = { type: 'Feature', properties: {}, geometry: f.geometry };
+    return isoCache[key];
+  }
+}
+async function mapLimit(items, n, fn) {
+  const out = new Array(items.length);
+  let i = 0;
+  await Promise.all(Array.from({ length: n }, async () => { while (i < items.length) { const k = i++; out[k] = await fn(items[k]); } }));
+  return out;
+}
+const samplesAlong = (f, stepM = 150) => {
+  const len = turf.length(f, { units: 'meters' });
+  const pts = [];
+  for (let d = 0; d <= len; d += stepM) pts.push(turf.along(f, d, { units: 'meters' }).geometry.coordinates);
+  pts.push(f.geometry.coordinates.at(-1));
+  return pts;
+};
+let courtShapes, trailShapes;
+if (METHOD === 'isochrone') {
+  courtShapes = await mapLimit(courts, 4, (c) => isochrone(c.lon, c.lat));
+  const trailPts = lines.flatMap((f) => samplesAlong(f));
+  trailShapes = await mapLimit(trailPts, 4, ([lon, lat]) => isochrone(lon, lat));
+  fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
+  fs.writeFileSync(cacheFile, JSON.stringify(isoCache));
+  console.log(`isochrones: ${courtShapes.length} courts, ${trailPts.length} trail points (${WALK_MIN} min walk)`);
+} else {
+  courtShapes = courts.map((c) => turf.buffer(turf.point([c.lon, c.lat]), COURT_RADIUS_M, { units: 'meters' }));
+  trailShapes = lines.map((f) => turf.buffer(f, TRAIL_BUFFER_M, { units: 'meters' }));
+}
+const courtArea = clip(unionAll(courtShapes), boundary);
+const trailArea = lines.length ? clip(unionAll(trailShapes), boundary) : null;
 const combinedArea = unionAll([courtArea, trailArea].filter(Boolean));
 const trailMiles = lines.reduce((t, f) => t + turf.length(f, { units: 'miles' }), 0);
 
@@ -84,7 +140,7 @@ const areasOut = path.join(ROOT, 'api', '_data', 'accessibility-areas.json');
 const areas = fs.existsSync(areasOut) ? JSON.parse(fs.readFileSync(areasOut, 'utf8')) : {};
 areas[`${pilot.pilot.name}, ${pilot.pilot.state}`] = {
   boundary: slim(boundary), courts: slim(courtArea), trail: slim(trailArea),
-  courtRadiusMeters: COURT_RADIUS_M, trailBufferMeters: TRAIL_BUFFER_M,
+  courtRadiusMeters: COURT_RADIUS_M, trailBufferMeters: TRAIL_BUFFER_M, method: METHOD, walkMinutes: WALK_MIN,
 };
 fs.writeFileSync(areasOut, JSON.stringify(areas) + '\n');
 console.log(`areas → ${path.relative(ROOT, areasOut)} (${Math.round(fs.statSync(areasOut).size / 1024)} KB)`);
@@ -126,8 +182,8 @@ const result = {
   pilot: PILOT,
   city: `${pilot.pilot.name}, ${pilot.pilot.state}`,
   computedAt: new Date().toISOString(),
-  courts: { ...reach(courtArea), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: `Residents in 2020 Census blocks within ${COURT_RADIUS_M.toLocaleString()} m of a Fitness Court` },
-  trail: { ...reach(trailArea), trailMiles: Math.round(trailMiles * 10) / 10, bufferMeters: TRAIL_BUFFER_M, method: `Residents in 2020 Census blocks within ${TRAIL_BUFFER_M.toLocaleString()} m of the Trail Line` },
+  courts: { ...reach(courtArea), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of a Fitness Court` : `Residents in 2020 Census blocks within ${COURT_RADIUS_M.toLocaleString()} m of a Fitness Court`, walkMinutes: WALK_MIN, areaMethod: METHOD },
+  trail: { ...reach(trailArea), trailMiles: Math.round(trailMiles * 10) / 10, bufferMeters: TRAIL_BUFFER_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of the Trail Line` : `Residents in 2020 Census blocks within ${TRAIL_BUFFER_M.toLocaleString()} m of the Trail Line`, walkMinutes: WALK_MIN, areaMethod: METHOD },
   combined: { ...reach(combinedArea), method: 'Union of both areas, so nobody is counted twice' },
   clippedToCityLimits: Boolean(boundary),
 };

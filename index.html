@@ -376,6 +376,12 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .eng-layers label { display: flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap; }
 .eng-layers input { accent-color: #1e3a8a; }
 .eng-layers i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; flex: none; }
+.eng-pt { position: absolute; width: 12px; height: 12px; left: -6px; top: -6px; border-radius: 3px; background: #2563eb; border: 2px solid #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.35), 0 1px 4px rgba(0,0,0,0.4); }
+.eng-badge { position: absolute; left: 50%; bottom: 15px; transform: translateX(-50%); white-space: nowrap; background: #fff; color: #0f1f3d; font: 800 10.5px 'Inter', sans-serif;
+  padding: 2px 6px; border-radius: 6px; box-shadow: 0 1px 5px rgba(0,0,0,0.35); }
+.eng-map-base { position: absolute; top: 12px; right: 56px; z-index: 500; display: flex; gap: 2px; padding: 3px; background: rgba(255,255,255,0.95); border-radius: 9px; box-shadow: 0 2px 10px rgba(15,31,61,0.15); }
+.eng-map-base button { border: none; background: none; font: 700 0.74rem 'Inter', sans-serif; color: var(--text-2); padding: 5px 10px; border-radius: 7px; cursor: pointer; }
+.eng-map-base button.on { background: #0f1f3d; color: #fff; }
 .eng-fc { background: #2563eb; border: 2px solid #fff; border-radius: 4px; box-shadow: 0 1px 4px rgba(15,31,61,0.35); }
 .rw-spark { margin-left: auto; opacity: 0.9; }
 .rw-spark svg { width: 110px; height: 30px; display: block; }
@@ -421,7 +427,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .eq-head h3 span { font-size: 0.8rem; font-weight: 600; color: var(--text-3); margin-left: 4px; }
 .eq-head p { font-size: 0.82rem; color: var(--text-2); }
 .eq-row { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1.15fr; gap: 10px; align-items: stretch; margin-top: 16px; }
-.eq-tile { border: 1px solid var(--border); border-radius: 12px; padding: 14px 14px 12px; position: relative; min-width: 0; }
+.eq-tile { border: 1px solid color-mix(in srgb, var(--c) 22%, white); background: color-mix(in srgb, var(--c) 6%, white); border-radius: 12px; padding: 14px 14px 12px; position: relative; min-width: 0; }
 .eq-dot { position: absolute; top: 14px; right: 14px; width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
 .eq-tile b { display: block; font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; color: var(--c); }
 .eq-lbl { font-size: 0.8rem; font-weight: 800; color: var(--text); margin-top: 6px; }
@@ -2105,6 +2111,7 @@ function engagementFigures(city) {
    of the courts (2,414 m) and of the Trail Line (a 402 m walk either side),
    inside the city limits. Shapes come from scripts/compute-accessibility.mjs. */
 let engMap = null;
+let engDark = true; // the walk areas glow on the dark basemap; Light is one click away
 const engLayers = { courtReach: true, trailReach: true, boundary: true, lines: true, courts: true, stations: true };
 const pilotCache = new Map(); // slug -> Promise(/api/trail payload)
 function pilotData(slug) {
@@ -2119,13 +2126,14 @@ function engMapCard(F) {
   if (!A) return `<div class="eng-map-card"><div class="eng-map-head"><h4>Accessibility map</h4><span>Not drawn for ${esc(F.city)} yet. Run scripts/compute-accessibility.mjs for this city.</span></div></div>`;
   const row = (key, swatch, label) => `<label><input type="checkbox" data-eng-layer="${key}"${engLayers[key] ? ' checked' : ''}><i style="${swatch}"></i>${label}</label>`;
   return `<div class="eng-map-card">
-    <div class="eng-map-head"><h4>Who lives within a 10 minute walk</h4><span>shaded = 805 m walk from a court or the Trail Line · 2020 Census · inside city limits</span>
+    <div class="eng-map-head"><h4>Who lives within a 10 minute walk</h4><span>shaded = everywhere you can walk to a court or the Trail Line in 10 minutes along real streets · 2020 Census · inside city limits</span>
       <div class="eng-chips">
         <span class="eng-chip"><i style="background:rgba(37,99,235,0.3);border:1.5px solid #2563eb"></i>Courts <b>${F.court.access != null ? F.court.access.toLocaleString() : 'XX'}</b></span>
         ${A.trail ? `<span class="eng-chip"><i style="background:rgba(195,38,138,0.3);border:1.5px solid ${TL_MAGENTA}"></i>Trail Line <b>${F.trail.access != null ? F.trail.access.toLocaleString() : 'XX'}</b></span>` : ''}
         <span class="eng-chip"><i style="background:#0f1f3d"></i>Together <b>${F.total.access != null ? F.total.access.toLocaleString() : 'XX'}</b></span>
       </div></div>
     <div class="eng-map-wrap"><div id="eng-map"></div>
+      <div class="eng-map-base"><button type="button" class="${engDark ? 'on' : ''}" onclick="engDark = true; renderAnalytics()">Dark</button><button type="button" class="${engDark ? '' : 'on'}" onclick="engDark = false; renderAnalytics()">Light</button></div>
       <div class="eng-layers"><b>Layers</b>
         ${row('courtReach', 'background:rgba(37,99,235,0.22);border:1.5px solid #2563eb', 'Fitness Court reach')}
         ${row('trailReach', `background:rgba(195,38,138,0.28);border:1.5px solid ${TL_MAGENTA}`, 'Trail Line reach')}
@@ -2144,27 +2152,28 @@ async function drawEngMap(F) {
   L.control.zoom({ position: 'topright' }).addTo(m);
   engMap = m;
   if (L.maplibreGL) {
-    L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/positron', interactive: false,
+    L.maplibreGL({ style: `https://tiles.openfreemap.org/styles/${engDark ? 'dark' : 'positron'}`, interactive: false,
       attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }).addTo(m);
   }
   const groups = {
-    courtReach: L.geoJSON(A.courts, { style: { color: '#2563eb', weight: 1.5, opacity: 0.7, fillColor: '#2563eb', fillOpacity: 0.13 }, interactive: false }),
-    trailReach: L.geoJSON(A.trail, { style: { color: TL_MAGENTA, weight: 1.5, opacity: 0.8, fillColor: TL_MAGENTA, fillOpacity: 0.22 }, interactive: false }),
-    boundary: L.geoJSON(A.boundary, { style: { color: '#0f1f3d', weight: 2, opacity: 0.75, dashArray: '6 5', fill: false }, interactive: false }),
+    courtReach: L.geoJSON(A.courts, { style: { color: engDark ? '#60a5fa' : '#1d4ed8', weight: 2, opacity: 0.95, fillColor: '#3b82f6', fillOpacity: engDark ? 0.32 : 0.2, lineJoin: 'round' }, interactive: false }),
+    trailReach: L.geoJSON(A.trail, { style: { color: engDark ? '#f472b6' : TL_MAGENTA, weight: 2, opacity: 0.95, fillColor: '#e0369f', fillOpacity: engDark ? 0.34 : 0.2, lineJoin: 'round' }, interactive: false }),
+    boundary: L.geoJSON(A.boundary, { style: { color: engDark ? '#cbd5e1' : '#0f1f3d', weight: 1.6, opacity: 0.6, dashArray: '6 5', fill: false }, interactive: false }),
     lines: L.layerGroup(),
     courts: L.layerGroup(),
     stations: L.layerGroup(),
   };
   for (const c of F.courtCodes.filter((c) => c.lat != null && c.locationStatus !== 'mobile')) {
-    L.marker([c.lat, c.lon], { icon: L.divIcon({ className: '', html: '<div class="eng-fc" style="width:14px;height:14px"></div>', iconSize: [14, 14], iconAnchor: [7, 7] }), title: c.name })
-      .bindTooltip(esc(displayName(c)), { direction: 'top', offset: [0, -8] }).addTo(groups.courts);
+    const n = countFor(c, F.bounds);
+    L.marker([c.lat, c.lon], { icon: L.divIcon({ className: '', html: `<div class="eng-pt"><span class="eng-badge">${n.toLocaleString()}</span></div>`, iconSize: [0, 0], iconAnchor: [0, 0] }), title: c.name, zIndexOffset: 500 })
+      .bindTooltip(`<b>${esc(displayName(c))}</b><br>${n.toLocaleString()} QR scans · ${esc(RANGE_LABELS[state.range])}`, { direction: 'top', offset: [0, -14] }).addTo(groups.courts);
   }
   const placed = new Map(); // one dot per station, even with a Map + CTA code
   for (const c of F.trailCodes.filter((c) => c.lat != null)) {
     const k = `${c.lat.toFixed(5)},${c.lon.toFixed(5)}`;
     if (placed.has(k)) continue;
     placed.set(k, true);
-    L.circleMarker([c.lat, c.lon], { radius: 4.5, color: '#1e3a8a', weight: 2.5, fillColor: '#fff', fillOpacity: 1 })
+    L.circleMarker([c.lat, c.lon], { radius: 4.5, color: engDark ? '#f472b6' : '#1e3a8a', weight: 2.5, fillColor: '#fff', fillOpacity: 1 })
       .bindTooltip(esc(displayName(c)), { direction: 'top' }).addTo(groups.stations);
   }
   const apply = () => {
@@ -2198,6 +2207,21 @@ async function drawEngMap(F) {
   }
 }
 
+// Numbers roll up from zero on render (skips anything that isn't a plain count).
+function countUp(root) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  root.querySelectorAll('.eq-tile b, .eq-total b, .eq-stat b, .ep-big b').forEach((el) => {
+    const target = Number(el.textContent.replace(/,/g, ''));
+    if (!Number.isFinite(target) || target < 10 || /[A-Za-z]/.test(el.textContent)) return;
+    const t0 = performance.now(), dur = 700;
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(target * e).toLocaleString();
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
 function renderEngagement(body) {
   if (!engagementData) {
     body.innerHTML = '<div class="an-city-empty">Loading engagement data…</div>';
@@ -2309,7 +2333,7 @@ function renderEngagement(body) {
   const bots = state.includeBots ? 'Bot scans included (Settings).' : 'Human scans only.';
   const courtP = pillar('court', 'Fitness Court', '#2563eb', `The physical courts · ${F.installed} in ${all ? 'the network' : place}`,
     F.court.engagements, `= QR scans on the court signs ${info(bots)}`,
-    cell('People within a 10 min walk', F.court.access, F.court.access != null ? `Residents living within 805 m of a court (2020 Census, inside city limits).` : noAcc)
+    cell('People within a 10 min walk', F.court.access, F.court.access != null ? `Residents who can walk to a court in 10 minutes along the street network (2020 Census, inside city limits).` : noAcc)
     + cell(kcalLabel, F.court.kcal, `NFC estimate: ${F.installed} courts × 1.3M calories per court per year${perYear ? '' : `, prorated to ${F.days} days`}.`),
     courtSeries, courtRows.length ? bars('Top courts · QR scans', [...courtRows].sort((x, y) => y.qr - x.qr), '#2563eb', (r) => r.qr) : '');
   const trailList = !F.trailCodes.length ? `<div class="ep-foot">No Trail Line ${all ? 'yet' : 'in ' + place + ' yet'}.</div>`
@@ -2317,7 +2341,7 @@ function renderEngagement(body) {
     : `<div class="ep-empty">${pilot && today < pilot.launchDate ? `Public counting starts <b>${fmtD(pilot.launchDate)}</b>. The ${F.trailCodes.length} sign codes will rank here once people start scanning.` : 'No public scans in this range yet.'}</div>`;
   const trailP = pillar('trail', 'Trail Line', TL_MAGENTA, F.trailCodes.length ? `The physical signs · ${F.trail.trailMiles ? F.trail.trailMiles + ' miles, ' : ''}${F.trailCodes.length} codes` : 'The physical signs · none yet',
     F.trailCodes.length ? F.trail.engagements : null, F.trailCodes.length ? `= public QR scans on the trail signs${pilot ? `, counted from ${fmtD(pilot.launchDate)}` : ''}` : '',
-    cell('People within a 10 min walk', F.trailCodes.length ? F.trail.access : null, F.trail.access != null ? 'Residents living within 805 m either side of the line (2020 Census, inside city limits).' : noAcc)
+    cell('People within a 10 min walk', F.trailCodes.length ? F.trail.access : null, F.trail.access != null ? 'Residents who can walk to the Trail Line in 10 minutes along the street network (2020 Census, inside city limits).' : noAcc)
     + cell(kcalLabel, null, TBD), trailSeries, trailList);
   const digitalP = pillar('digital', 'Digital', '#6d4de0', `The NFC app · at ${F.matched} of ${F.courtCodes.length} courts`,
     F.digital.engagements, `= ${F.digital.checkins.toLocaleString()} app check-ins + ${F.digital.newUsers.toLocaleString()} app downloads ${info(`App downloads: people whose first ever app check-in was at one of these courts. The app doesn't record where it was downloaded, so this is our stand-in.${F.digital.prorated ? ' Monthly totals, prorated to the range.' : ''}${F.bounds ? '' : ' App data starts Jan 2026.'}${F.bounds && F.bounds[1] > E.app.takenAt ? ` App data runs through ${E.app.takenAt}.` : ''} Nationally: ${F.digital.natUsers.toLocaleString()} new app accounts in this period.`)}`,
@@ -2383,13 +2407,14 @@ function renderEngagement(body) {
       <tbody>${tableRows}</tbody></table></div>`}
     <details class="eng-notes"><summary>How these are counted</summary><ul>
       <li><b>Engagement</b>: one QR scan on a court or trail sign, one app check-in, or one app download. Added up, that's the total.</li>
-      <li><b>People within a 10 minute walk</b>: 2020 Census block population inside an 805 m walk of a court, or of either side of the Trail Line, clipped to city limits. The total counts each person once.</li>
+      <li><b>People within a 10 minute walk</b>: 2020 Census block population inside a real 10 minute walking isochrone (Mapbox, along the street network) from each court, and from points every 150 m along the Trail Line, clipped to city limits. The total counts each person once.</li>
       <li><b>Calories</b>: NFC's estimate of 1.3M calories per Fitness Court per year. Trail Line and app calories show XX until the formula workshop sets them.</li>
       <li><b>Trail Line</b>: only public scans count, from the pilot's launch date. Test and install scans before that are left out.</li>
       <li><b>App data</b>: ${esc(E.app.monthsFrom)} to ${esc(E.app.monthsThrough)} (snapshot ${esc(E.app.takenAt)}), monthly totals. A court counts when an app court sits within ${E.app.matchRadiusMeters} m of its QR sign. App downloads are people whose first ever check-in was at that court (the app doesn't record where it was downloaded).</li>
       <li>Internal view: raw figures, not the city-facing report.</li>
     </ul></details>`;
 
+  countUp(body);
   drawEngMap(F);
   const monthLabel = (m) => new Date(m + '-15T12:00:00Z').toLocaleDateString('en-US', { month: 'short', year: '2-digit', timeZone: 'UTC' });
   charts.eng = new Chart(document.getElementById('chart-eng'), {
