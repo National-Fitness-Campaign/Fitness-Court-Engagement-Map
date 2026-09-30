@@ -328,7 +328,7 @@ async function build() {
   <section class="page">
     <div class="band">
       <div><div class="num">${courts.length}</div><div class="lbl">Fitness Courts</div><div class="hint">Outdoor gyms across the city</div></div>
-      <div><div class="num">${fmt(allTime)}</div><div class="lbl">Scans all time</div><div class="hint">Every QR scan at a court</div></div>
+      <div><div class="num">${fmt(allTime)}</div><div class="lbl">Scans all time</div><div class="hint">Every QR scan at a Fitness Court</div></div>
       <div><div class="num">${fmt(thisWeek)}</div><div class="lbl">Scans this week</div><div class="hint">${lastWeek ? `${lastWeek} the week before` : 'Last 7 days'}</div></div>
       <div><div class="num">${fmt(avg)}</div><div class="lbl">Weekly average</div><div class="hint">Over the last 12 weeks</div></div>
     </div>
@@ -353,7 +353,7 @@ async function build() {
         </div>
       </div>
       <div class="callout">
-        <div><div class="k">Most used</div><div class="v">${esc(ranked[0]?.name || 'None yet')}</div><div class="d">${fmt(ranked[0]?.allTime)} scans, or ${Math.round(((ranked[0]?.allTime || 0) / Math.max(1, allTime)) * 100)}% of all court scans in the city.</div></div>
+        <div><div class="k">Most used</div><div class="v">${esc(ranked[0]?.name || 'None yet')}</div><div class="d">${fmt(ranked[0]?.allTime)} scans, or ${Math.round(((ranked[0]?.allTime || 0) / Math.max(1, allTime)) * 100)}% of all Fitness Court scans in the city.</div></div>
         <div><div class="k">Best week</div><div class="v">${fmt(best.n)} scans</div><div class="d">Week of ${niceDay(best.start)}, in the last 12 weeks.</div></div>
         <div><div class="k">Network</div><div class="v">${courts.length} courts, ${ranked.filter((c) => c.allTime > 0).length} active</div><div class="d">Each has QR codes leading to coached workouts.</div></div>
       </div>
@@ -382,7 +382,7 @@ async function build() {
         </div>
       </div>
       <div class="card" style="margin-top:22px">
-        <h3>Court by court</h3>
+        <h3>Fitness Court by Fitness Court</h3>
         <table class="tbl">
           <thead><tr><th>Fitness Court</th><th class="n">All time</th><th class="n">Last 30 days</th><th class="n">vs. prior 30</th><th class="n hide-sm">Share</th><th class="hide-sm">12-week trend</th><th class="hide-sm">Last scan</th></tr></thead>
           <tbody>${perCourt.map((c) => `
