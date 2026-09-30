@@ -11,5 +11,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.130.0",
     "ai": "^6.0.297"
+  },
+  "devDependencies": {
+    "@turf/turf": "^7.4.0"
   }
 }

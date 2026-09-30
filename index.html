@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FC + TL Tracking | National Fitness Campaign</title>
+<title>FC+TL QR Code Tracking | National Fitness Campaign</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
@@ -181,7 +181,7 @@ header {
 .cp-more { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; width: 100%; padding: 10px; border-radius: 10px; border: none;
   background: var(--blue); color: #fff; font: 700 0.84rem 'Inter', sans-serif; cursor: pointer; }
 .cp-more:hover { filter: brightness(1.08); }
-@media (max-width: 900px) { .acb-grid, .acb-row2 { grid-template-columns: 1fr; } .an-city-head { flex-wrap: wrap; } .an-city-pick { margin-left: 0; } }
+@media (max-width: 900px) { .acb-grid, .acb-row2 { grid-template-columns: 1fr; } .an-city-head { flex-wrap: wrap; } .an-city-pick { margin-left: 0; width: 100%; } .an-city-pick select { min-width: 0; width: 100%; } }
 .cp-head { display: flex; align-items: flex-start; gap: 10px; }
 .cp-eyebrow { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
 .cp-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; }
@@ -301,6 +301,42 @@ header {
 .heat-label::before { display: none; }
 
 /* Analytics */
+/* Analytics: Raw QR scans | Engagement */
+.an-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px; margin-bottom: 16px; }
+.an-mode button { border: none; background: none; font: 800 1.08rem 'Inter', sans-serif; letter-spacing: -0.01em; padding: 14px 18px; border-radius: 10px;
+  color: var(--text-2); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.an-mode button small { font-weight: 500; font-size: 0.76rem; color: var(--text-3); letter-spacing: 0; }
+.an-mode button:hover { background: #f3f6fb; color: var(--text); }
+.an-mode button.on { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.25); }
+.an-mode button.on small { color: rgba(255,255,255,0.82); }
+.an-pilot { padding: 20px 22px; margin-bottom: 16px; }
+.an-pilot-head { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.an-pilot-head h2 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.01em; margin-right: auto; }
+.an-pilot iframe { width: 100%; height: 1150px; border: 0; display: block; }
+.an-pilot-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.eng-total { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+.eng-total > div { border-radius: 14px; padding: 18px 20px; background: linear-gradient(135deg, #0f1f3d, #1e3a8a); color: #fff; }
+.eng-total span { font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase; opacity: 0.8; font-weight: 700; }
+.eng-total b { display: block; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-top: 4px; }
+.eng-total p { font-size: 0.76rem; opacity: 0.75; margin-top: 6px; line-height: 1.4; }
+.eng-pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+.eng-pillar { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; min-width: 0; }
+.ep-head { padding: 12px 16px; color: #fff; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.ep-head small { margin-left: auto; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0.85; font-size: 0.74rem; }
+.ep-metric { padding: 14px 16px; border-top: 1px solid #f0f3f8; }
+.ep-metric:first-of-type { border-top: none; }
+.ep-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+.ep-metric b { display: block; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-top: 3px; }
+b.xx { color: #b3bccb; letter-spacing: 0.08em; }
+.eng-total b.xx { color: rgba(255,255,255,0.45); }
+.ep-how { font-size: 0.74rem; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
+.ep-tag { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; padding: 2px 6px; border-radius: 5px; background: #eef1f6; color: var(--text-2); }
+.ep-tag.bench { background: #e8f0ff; color: #1e40af; }
+.ep-tag.tbd { background: #fff4e0; color: #9a5b00; }
+.eng-notes { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 0.8rem; color: var(--text-2); line-height: 1.5; }
+.eng-notes h4 { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); margin-bottom: 6px; }
+.eng-notes li { margin-left: 18px; }
+@media (max-width: 900px) { .eng-total, .eng-pillars { grid-template-columns: 1fr; } }
 .an-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .an-card { padding: 18px 20px; }
 .an-card.wide { grid-column: 1 / -1; }
@@ -420,7 +456,7 @@ header {
     <img class="brand-logo-img" src="/assets/nfc-logo.png" alt="National Fitness Campaign">
     <div>
       <div class="brand-eyebrow">National Fitness Campaign</div>
-      <div class="brand-title">FC + TL Tracking</div>
+      <div class="brand-title">FC+TL QR Code Tracking</div>
     </div>
   </div>
   <nav class="tabs">
@@ -432,7 +468,6 @@ header {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     <span id="header-date"></span>
   </div>
-  <a class="hbtn" href="/vegas" title="Las Vegas Trail Line pilot">▤ Las Vegas Trail Line</a>
     <button class="hbtn" id="refresh-btn" onclick="loadData(true)">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
     Refresh Scans
@@ -610,15 +645,21 @@ header {
 
   <!-- ANALYTICS VIEW -->
   <div id="view-analytics" style="display:none">
+    <div class="card an-mode" role="tablist" aria-label="Analytics mode">
+      <button type="button" role="tab" data-mode="raw" onclick="setAnMode('raw')">Raw QR code scans<small>Every scan, by code, city and day</small></button>
+      <button type="button" role="tab" data-mode="engagement" onclick="setAnMode('engagement')">Engagement<small>Fitness Court · Trail Line · Digital</small></button>
+    </div>
     <div class="card an-city">
       <div class="an-city-head">
-        <div><div class="cp-eyebrow">City breakdown</div><h2 id="an-city-title">All cities</h2></div>
+        <div><div class="cp-eyebrow" id="an-city-eyebrow">City breakdown</div><h2 id="an-city-title">All cities</h2></div>
         <label class="an-city-pick">City
           <select id="an-city-select" onchange="setAnCity(this.value)"></select>
         </label>
       </div>
       <div id="an-city-body"></div>
     </div>
+    <div id="an-raw-extra">
+    <div class="card an-pilot" id="an-pilot" style="display:none"></div>
     <div class="an-grid">
       <div class="card an-card wide">
         <h3>Daily Scans</h3>
@@ -640,6 +681,7 @@ header {
         <div class="sub">Growth since tracking began — partial backfill from June 2025, every scan from April 7, 2026</div>
         <canvas id="chart-cumulative" height="70"></canvas>
       </div>
+    </div>
     </div>
     <div class="refreshed">
       <span id="mode-line-2">Humans only — bot scans excluded</span>
@@ -721,6 +763,7 @@ const state = {
   cityPanel: null,       // "City, ST" when the city panel is open
   cityHidden: false,     // panel tucked away into a tab (still selected)
   anCity: '',            // Analytics city breakdown ('' = all cities)
+  anMode: 'raw',         // Analytics: 'raw' QR scans | 'engagement'
   openCities: new Set(),
   sortKey: 'scans', sortDir: -1,
 };
@@ -1031,7 +1074,7 @@ function popupHTML(court, count) {
   // Salesforce-sourced pins are corrected in Salesforce, not here — an edit
   // written to Uniqode would be overridden on the next sync.
   const approxBlock = court.locationSource === 'designlab'
-    ? `<div class="loc-source">✓ Station location from the Design Lab · <a href="/vegas">pilot view</a></div>`
+    ? `<div class="loc-source">✓ Station location from the Design Lab · <a href="#" onclick="openPilotAnalytics('Las Vegas, NV'); return false">pilot view</a></div>`
     : court.locationSource === 'override'
     ? `<div class="loc-source" title="${escapeAttr(court.sfSiteName || '')}">✓ Exact location · placed by hand (not in Salesforce)</div>`
     : court.locationSource === 'salesforce'
@@ -1361,7 +1404,7 @@ function renderCityPanel() {
       ${sideHTML('Trail Lines', TL_MAGENTA, trail, 'No Trail Line here yet.')}
     </div>
     <button type="button" class="cp-more" onclick="openCityAnalytics()">See full analytics →</button>
-    ${trail.ranked.length && /^Las Vegas, NV$/.test(state.cityPanel) ? '<a class="cp-link" href="/vegas">Open the Las Vegas Trail Line pilot view →</a>' : ''}`;
+    ${trail.ranked.length && /^Las Vegas, NV$/.test(state.cityPanel) ? '<a class="cp-link" href="#" onclick="openPilotAnalytics(state.cityPanel); return false">Open the Las Vegas Trail Line pilot →</a>' : ''}`;
   el.style.display = 'block';
   if (callout) callout.style.display = 'none';
   loadCityAI(state.cityPanel);
@@ -1564,6 +1607,7 @@ function renderCityBreakdown() {
   sel.innerHTML = '<option value="">All cities</option>' + cities.map(([k]) => `<option value="${esc(k)}"${k === state.anCity ? ' selected' : ''}>${esc(k)}</option>`).join('');
   const body = document.getElementById('an-city-body');
   document.getElementById('an-city-title').textContent = state.anCity || 'All cities';
+  if (state.anMode === 'engagement') { renderEngagement(body); return; }
   if (!state.anCity) {
     body.innerHTML = '<div class="an-city-empty">Pick a city for its full breakdown: an overview, Fitness Courts and Trail Lines side by side, trends, day-of-week pattern and every code. Or click a city on the map and choose "See full analytics".</div>';
     return;
@@ -1658,9 +1702,257 @@ function renderCityBreakdown() {
   loadCityAI(state.anCity, 'an-overview', () => state.view === 'analytics' && !!state.anCity);
 }
 
+/* ═════════════════════ Engagement + Trail Line pilots ═════════════════════ */
+// /api/engagement: accessibility, app check-ins / new users per court, pilot
+// dates, benchmarks. Loaded once, the first time Analytics needs it.
+let engagementData = null, engagementLoading = null;
+function loadEngagement() {
+  if (!engagementLoading) {
+    engagementLoading = fetch('/api/engagement')
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`engagement API ${r.status}`))))
+      .then((d) => (engagementData = d))
+      .catch((e) => { engagementLoading = null; throw e; });
+  }
+  return engagementLoading;
+}
+function setAnMode(m) {
+  state.anMode = m;
+  try { localStorage.setItem('nfc-an-mode', m); } catch {}
+  renderAnalytics();
+}
+try { const m = localStorage.getItem('nfc-an-mode'); if (m === 'raw' || m === 'engagement') state.anMode = m; } catch {}
+
+function openPilotAnalytics(city) {
+  state.anCity = city;
+  state.anMode = 'raw';
+  setView('analytics');
+  requestAnimationFrame(() => document.getElementById('an-pilot')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+}
+
+// The Trail Line pilot view (vegas.html) is the template for every pilot: it
+// renders inside Analytics for any city with a pilot in api/_trail.js PILOTS.
+addEventListener('message', (ev) => {
+  if (ev.origin !== location.origin || ev.data?.type !== 'pilot-height') return;
+  const f = document.getElementById('an-pilot-frame');
+  if (f && ev.source === f.contentWindow) f.style.height = Math.max(400, Math.ceil(ev.data.h)) + 'px';
+});
+function renderPilotSection() {
+  const el = document.getElementById('an-pilot');
+  if (!engagementData) {
+    el.style.display = 'none';
+    loadEngagement().then(() => { if (state.view === 'analytics' && state.anMode === 'raw') renderPilotSection(); }).catch(() => {});
+    return;
+  }
+  const pilots = engagementData.pilots || [];
+  const pilot = pilots.find((p) => p.city === state.anCity);
+  if (!state.anCity && pilots.length) {
+    el.style.display = '';
+    el.innerHTML = `<div class="an-pilot-head"><div><div class="cp-eyebrow">Trail Line pilots</div><h2>${pilots.length} pilot${pilots.length === 1 ? '' : 's'}</h2></div></div>
+      <div class="an-city-empty">Each pilot gets its own view: station map, loops, Map vs CTA codes, launch timeline and daily scans. Pick one to open it here.</div>
+      <div class="an-pilot-list">${pilots.map((p) => `<button class="hbtn" onclick="openPilotAnalytics('${esc(p.city)}')">▤ ${esc(p.city)}</button>`).join('')}</div>`;
+    return;
+  }
+  if (!pilot) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = '';
+  const src = `/vegas?pilot=${encodeURIComponent(pilot.slug)}&embed=1`;
+  const frame = document.getElementById('an-pilot-frame');
+  if (frame && frame.dataset.src === src) return; // already showing; don't reload it
+  el.innerHTML = `<div class="an-pilot-head"><div><div class="cp-eyebrow">Trail Line pilot</div><h2>${esc(pilot.city)}</h2></div>
+      <a class="hbtn" href="/vegas?pilot=${encodeURIComponent(pilot.slug)}" target="_blank" rel="noopener">Open full view ↗</a>
+      <a class="hbtn" href="/report?pilot=${encodeURIComponent(pilot.slug)}" target="_blank" rel="noopener" title="Internal only: raw numbers">Internal report ↗</a></div>
+    <iframe id="an-pilot-frame" data-src="${esc(src)}" src="${esc(src)}" title="${esc(pilot.city)} Trail Line pilot"></iframe>`;
+}
+
+// Share of month `mo` (YYYY-MM) that falls inside [from, to].
+function monthShare(mo, from, to) {
+  const start = mo + '-01';
+  const [y, m] = mo.split('-').map(Number);
+  const end = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+  const a = from > start ? from : start, b = to < end ? to : end;
+  if (a > b) return 0;
+  const days = (x, z) => Math.round((Date.parse(z) - Date.parse(x)) / 864e5) + 1;
+  return days(a, b) / days(start, end);
+}
+function fmtBig(n) {
+  if (n == null) return null;
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M';
+  if (n >= 1e4) return Math.round(n / 1e3) + 'K';
+  return Math.round(n).toLocaleString();
+}
+const numOrXX = (n, cls = '') => (n == null ? `<b class="xx ${cls}">XX</b>` : `<b class="${cls}">${fmtBig(n)}</b>`);
+
+// Every number in the Engagement view. `null` means the formula isn't set yet
+// and renders as XX.
+function engagementFigures(city) {
+  const E = engagementData, today = laToday(), bounds = rangeBounds();
+  const from = bounds ? bounds[0] : null, to = bounds ? bounds[1] : today;
+  const inCity = state.courts.filter((c) => !city || cityKey(c) === city);
+  const courtCodes = inCity.filter((c) => c.kind !== 'trail');
+  const trailCodes = inCity.filter((c) => c.kind === 'trail');
+  const installed = courtCodes.filter((c) => c.locationStatus !== 'mobile').length;
+  const pilotByCity = new Map((E.pilots || []).map((p) => [p.city, p]));
+
+  // Fitness Court: QR scans on court signs.
+  const courtScans = courtCodes.reduce((t, c) => t + countFor(c, bounds), 0);
+  // Trail Line: public scans only. Test and install scans before a pilot's
+  // launch date don't count.
+  let trailScans = 0, trailTest = 0;
+  for (const c of trailCodes) {
+    const launch = pilotByCity.get(cityKey(c))?.launchDate || '2000-01-01';
+    const a = from && from > launch ? from : launch;
+    if (a <= to) trailScans += countFor(c, [a, to]);
+    trailTest += countFor(c, bounds) - (a <= to ? countFor(c, [a, to]) : 0);
+  }
+  // Digital: app check-ins + first check-ins (new app users) at the city's
+  // courts, from monthly totals, prorated when the range cuts a month.
+  let checkins = 0, newUsers = 0, prorated = false, matched = 0;
+  for (const c of courtCodes) {
+    const e = E.app.byCode[c.id];
+    if (!e) continue;
+    matched++;
+    for (const [mo, [ci, nu]] of Object.entries(e.m)) {
+      const f = bounds ? monthShare(mo, from, to) : 1;
+      if (f > 0 && f < 1) prorated = true;
+      checkins += ci * f; newUsers += nu * f;
+    }
+  }
+  checkins = Math.round(checkins); newUsers = Math.round(newUsers);
+  let natUsers = 0, natCheckins = 0;
+  for (const r of E.app.national) {
+    const f = bounds ? monthShare(r.month, from, to) : 1;
+    natUsers += r.newUsers * f; natCheckins += r.checkins * f;
+  }
+
+  // Calories: NFC's per-court benchmark, prorated to the range (per year for all time).
+  const days = bounds ? Math.round((Date.parse(to) - Date.parse(from)) / 864e5) + 1 : null;
+  const courtKcal = installed * E.benchmarks.courtKcalPerYear * (days ? days / 365 : 1);
+
+  const acc = city ? E.accessibility[city] : null;
+  return {
+    city, bounds, days, installed, courtCodes, trailCodes, matched,
+    court: { access: acc?.courts?.population ?? null, accessMeters: acc?.courts?.radiusMeters, kcal: installed ? courtKcal : null, engagements: courtScans },
+    trail: { access: acc?.trail?.population ?? null, accessMeters: acc?.trail?.bufferMeters, trailMiles: acc?.trail?.trailMiles, kcal: null, engagements: trailCodes.length ? trailScans : null, test: trailTest, pilot: city ? pilotByCity.get(city) : null },
+    digital: { access: null, kcal: null, engagements: checkins + newUsers, checkins, newUsers, prorated, natUsers: Math.round(natUsers), natCheckins: Math.round(natCheckins) },
+    total: {
+      access: acc?.combined?.population ?? null,
+      kcal: installed ? courtKcal : null,
+      engagements: courtScans + (trailCodes.length ? trailScans : 0) + checkins + newUsers,
+    },
+  };
+}
+
+function renderEngagement(body) {
+  if (!engagementData) {
+    body.innerHTML = '<div class="an-city-empty">Loading engagement data…</div>';
+    loadEngagement()
+      .then(() => { if (state.view === 'analytics' && state.anMode === 'engagement') renderAnalytics(); })
+      .catch((e) => { body.innerHTML = `<div class="an-city-empty">Couldn't load engagement data: ${esc(e.message)}</div>`; });
+    return;
+  }
+  const F = engagementFigures(state.anCity || null);
+  const range = RANGE_LABELS[state.range];
+  const perYear = !F.bounds;
+  const kcalLabel = perYear ? 'Calories burned · per year' : `Calories burned · ${esc(range)}`;
+  const tag = (t, cls) => `<span class="ep-tag ${cls}">${t}</span>`;
+  const XXhow = 'Formula to be set in the formula workshop.';
+  const metric = (label, n, how, t = '') => `<div class="ep-metric"><div class="ep-lbl">${label}${t}</div>${numOrXX(n)}<div class="ep-how">${how}</div></div>`;
+  const where = state.anCity ? esc(state.anCity) : 'the network';
+  const accNote = state.anCity ? 'Not computed for this city yet (scripts/compute-accessibility.mjs).' : 'Computed per city: pick a city.';
+  const trailPilot = F.trail.pilot;
+  const bots = state.includeBots ? 'Bot scans included (Settings).' : 'Human scans only.';
+
+  const pillar = (title, color, sub, metrics) => `<div class="eng-pillar"><div class="ep-head" style="background:${color}">${title}<small>${sub}</small></div>${metrics}</div>`;
+  const courtP = pillar('Fitness Court', '#2563eb', `${F.installed} court${F.installed === 1 ? '' : 's'}`,
+    metric('Accessibility', F.court.access, F.court.access != null ? `Residents within ${(F.court.accessMeters || 0).toLocaleString()} m of a court (2020 Census).` : accNote) +
+    metric(kcalLabel, F.court.kcal, `${F.installed} courts × 1.3M calories per court per year${perYear ? '' : `, prorated to ${F.days} day${F.days === 1 ? '' : 's'}`}.`, tag('NFC BENCHMARK', 'bench')) +
+    metric(`Engagements · ${esc(range)}`, F.court.engagements, `QR scans on Fitness Court signs. ${bots}`));
+  const trailP = !F.trailCodes.length
+    ? pillar('Trail Line', TL_MAGENTA, 'none yet', `<div class="ep-metric"><div class="ep-how">No Trail Line in ${where} yet.</div></div>`)
+    : pillar('Trail Line', TL_MAGENTA, F.trail.trailMiles ? `${F.trail.trailMiles} miles` : `${F.trailCodes.length} codes`,
+      metric('Accessibility', F.trail.access, F.trail.access != null ? `Residents within a 5 minute walk (${F.trail.accessMeters} m) of the line (2020 Census).` : accNote) +
+      metric(kcalLabel, null, XXhow, tag('TBD', 'tbd')) +
+      metric(`Engagements · ${esc(range)}`, F.trail.engagements, `Public QR scans on Trail Line signs${trailPilot ? `, counted from ${new Date(trailPilot.launchDate + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}` : ''}.${F.trail.test ? ` ${F.trail.test} test or install scan${F.trail.test === 1 ? '' : 's'} before then are left out.` : ''}`));
+  const digitalP = pillar('Digital', '#6d4de0', 'NFC app',
+    metric('Accessibility', null, XXhow, tag('TBD', 'tbd')) +
+    metric(kcalLabel, null, XXhow, tag('TBD', 'tbd')) +
+    metric(`Engagements · ${esc(range)}`, F.digital.engagements,
+      `${F.digital.checkins.toLocaleString()} app check-ins + ${F.digital.newUsers.toLocaleString()} new app users (first check-in here) at ${F.matched} of ${F.courtCodes.length} courts matched to the app.${F.digital.prorated ? ' Monthly totals, prorated to the range.' : ''}${F.bounds ? '' : ' App data starts Jan 2026.'}${F.bounds && F.bounds[1] > engagementData.app.takenAt ? ` App data runs through ${esc(engagementData.app.takenAt)}, so later days aren't counted yet.` : ''} Nationally: ${F.digital.natUsers.toLocaleString()} new app users in this period.`));
+
+  const totalKcalNote = 'Fitness Courts only. Trail Line and Digital are XX until their formulas are set.';
+  body.innerHTML = `
+    <div class="eng-total">
+      <div><span>People within reach</span>${numOrXX(F.total.access)}<p>${F.total.access != null ? 'Courts and Trail Line together, nobody counted twice.' : accNote}</p></div>
+      <div><span>${kcalLabel}</span>${numOrXX(F.total.kcal)}<p>${totalKcalNote}</p></div>
+      <div><span>Engagements · ${esc(range)}</span>${numOrXX(F.total.engagements)}<p>Court scans + public Trail Line scans + app check-ins and new users.</p></div>
+    </div>
+    <div class="eng-pillars">${courtP}${trailP}${digitalP}</div>
+    <div class="acb-chart"><h4>Engagements by month · ${where}</h4><canvas id="chart-eng" height="80"></canvas></div>
+    <div class="eng-notes"><h4>How these are counted</h4><ul>
+      <li><b>Accessibility</b>: 2020 Census block population inside the service area, clipped to city limits. Courts use NFC's 2,414 m (10 minute) radius; the Trail Line uses a 402 m walk on either side of the line.</li>
+      <li><b>Calories</b>: NFC's benchmark of 1.3M calories per Fitness Court per year. Trail Line and Digital calories show XX until the formula workshop sets them.</li>
+      <li><b>Digital</b>: from the NFC app, ${esc(engagementData.app.monthsFrom)} to ${esc(engagementData.app.monthsThrough)} (snapshot ${esc(engagementData.app.takenAt)}). A court counts when an app court sits within ${engagementData.app.matchRadiusMeters} m of its QR sign. New app users are people whose first ever check-in was at that court, our stand-in for downloads it drove.</li>
+      <li>Internal view: these are raw figures, not the city-facing report.</li>
+    </ul></div>`;
+
+  // Monthly engagements, stacked by pillar. QR history is complete from Apr 7, 2026.
+  const E = engagementData, today = laToday();
+  const start = F.bounds ? (F.bounds[0] > '2026-04-07' ? F.bounds[0] : '2026-04-07') : '2026-04-07';
+  const end = F.bounds ? F.bounds[1] : today;
+  const months = [];
+  for (let m = start.slice(0, 7); m <= end.slice(0, 7);) {
+    months.push(m);
+    const [y, mm] = m.split('-').map(Number);
+    m = mm === 12 ? `${y + 1}-01` : `${y}-${String(mm + 1).padStart(2, '0')}`;
+  }
+  const mBounds = (m) => {
+    const [y, mm] = m.split('-').map(Number);
+    const a = m + '-01', b = new Date(Date.UTC(y, mm, 0)).toISOString().slice(0, 10);
+    return [a < start ? start : a, b > end ? end : b];
+  };
+  const pilotByCity = new Map((E.pilots || []).map((p) => [p.city, p]));
+  const courtSeries = months.map((m) => F.courtCodes.reduce((t, c) => t + countFor(c, mBounds(m)), 0));
+  const trailSeries = months.map((m) => {
+    const [a, b] = mBounds(m);
+    return F.trailCodes.reduce((t, c) => {
+      const launch = pilotByCity.get(cityKey(c))?.launchDate || '2000-01-01';
+      const s2 = a > launch ? a : launch;
+      return t + (s2 <= b ? countFor(c, [s2, b]) : 0);
+    }, 0);
+  });
+  const digitalSeries = months.map((m) => {
+    const [a, b] = mBounds(m);
+    let n = 0;
+    for (const c of F.courtCodes) {
+      const v = E.app.byCode[c.id]?.m[m];
+      if (v) n += (v[0] + v[1]) * monthShare(m, a, b);
+    }
+    return Math.round(n);
+  });
+  const monthLabel = (m) => new Date(m + '-15T12:00:00Z').toLocaleDateString('en-US', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+  charts.eng = new Chart(document.getElementById('chart-eng'), {
+    type: 'bar',
+    data: { labels: months.map(monthLabel), datasets: [
+      { label: 'Fitness Court scans', data: courtSeries, backgroundColor: '#2563eb', borderRadius: 3, stack: 's' },
+      { label: 'Trail Line scans', data: trailSeries, backgroundColor: TL_MAGENTA, borderRadius: 3, stack: 's' },
+      { label: 'Digital (app)', data: digitalSeries, backgroundColor: '#6d4de0', borderRadius: 3, stack: 's' },
+    ] },
+    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
+  });
+}
+
 function renderAnalytics() {
   destroyCharts();
+  const eng = state.anMode === 'engagement';
+  document.querySelectorAll('.an-mode button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.mode === state.anMode);
+    b.setAttribute('aria-selected', b.dataset.mode === state.anMode);
+  });
+  document.getElementById('an-city-eyebrow').textContent = eng ? 'Engagement' : 'City breakdown';
+  document.getElementById('an-raw-extra').style.display = eng ? 'none' : '';
   renderCityBreakdown();
+  if (eng) return;
+  renderPilotSection();
   const bounds = rangeBounds();
   // With a city picked, the network charts below scope to it too.
   const courts = state.anCity ? visibleCourts().filter((c) => cityKey(c) === state.anCity) : visibleCourts();

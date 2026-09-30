@@ -124,6 +124,10 @@ main { padding: 20px 28px 40px; display: grid; gap: 16px; max-width: 1500px; mar
 
 .error { padding: 14px 16px; border-radius: 10px; background: #fee2e2; color: #991b1b; display: none; }
 
+/* Embedded in the main page's Analytics tab (?embed=1): no header, no page chrome. */
+body.embed { background: transparent; }
+body.embed header { display: none; }
+body.embed main { padding: 0; max-width: none; }
 @media (max-width: 1100px) {
   .split { grid-template-columns: 1fr; }
   .panel { max-height: none; }
@@ -137,6 +141,16 @@ main { padding: 20px 28px 40px; display: grid; gap: 16px; max-width: 1500px; mar
 </style>
 </head>
 <body>
+<script>
+// ?embed=1: shown inside Analytics. Hide the header and tell the parent page
+// how tall we are so its frame fits without a second scrollbar.
+if (new URLSearchParams(location.search).get('embed') === '1') {
+  document.body.classList.add('embed');
+  const post = () => parent.postMessage({ type: 'pilot-height', h: document.documentElement.scrollHeight }, location.origin);
+  new ResizeObserver(post).observe(document.body);
+  addEventListener('load', post);
+}
+</script>
 <header>
   <div class="brand">
     <div class="bars"><i></i><i></i><i></i><i></i></div>
