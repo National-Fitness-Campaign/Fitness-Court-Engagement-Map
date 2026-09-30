@@ -2,24 +2,24 @@
  "las-vegas": {
   "pilot": "las-vegas",
   "city": "Las Vegas, NV",
-  "computedAt": "2026-09-30T21:30:16.289Z",
+  "computedAt": "2026-09-30T22:09:06.250Z",
   "courts": {
-   "population": 186847,
-   "blocks": 1505,
+   "population": 36111,
+   "blocks": 285,
    "sites": 7,
-   "radiusMeters": 2414,
-   "method": "Residents in 2020 Census blocks within 2,414 m (NFC 10-minute accessibility) of a Fitness Court"
+   "radiusMeters": 805,
+   "method": "Residents in 2020 Census blocks within 805 m of a Fitness Court"
   },
   "trail": {
-   "population": 14337,
-   "blocks": 101,
+   "population": 28410,
+   "blocks": 204,
    "trailMiles": 11.4,
-   "bufferMeters": 402,
-   "method": "Residents in 2020 Census blocks within a 5-minute walk (402 m) of the Trail Line"
+   "bufferMeters": 805,
+   "method": "Residents in 2020 Census blocks within 805 m of the Trail Line"
   },
   "combined": {
-   "population": 186847,
-   "blocks": 1505,
+   "population": 47427,
+   "blocks": 357,
    "method": "Union of both areas, so nobody is counted twice"
   },
   "clippedToCityLimits": true

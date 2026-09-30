@@ -9,10 +9,12 @@
 // Method (same as the PD portal's computeBlockPointReach, the number NFC uses
 // on real projects):
 //   1. Build the service area:
-//        Fitness Courts: each court buffered by 2,414 m (NFC's 10-minute
-//                        accessibility radius), unioned.
-//        Trail Line:     the trail lines buffered by 402 m (a 5-minute walk,
-//                        ~80 m/min) on either side, unioned.
+//        Fitness Courts: each court buffered by 805 m (a 10-minute walk at
+//                        ~80 m/min), unioned.
+//        Trail Line:     the trail lines buffered by the same 805 m walk on
+//                        either side, unioned. (Chosen 2026-09-30 so both use
+//                        one yardstick; NFC's older court radius is 2,414 m,
+//                        pass --court-radius=2414 to compare.)
 //        City total:     union of both, so nobody is counted twice.
 //      Each is clipped to the city boundary when one is given.
 //   2. Take every 2020 Census block whose internal point falls inside the area
@@ -30,8 +32,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = Object.fromEntries(process.argv.slice(2).map((a) => { const [k, v] = a.replace(/^--/, '').split('='); return [k, v ?? true]; }));
 const BASE = (args.base || 'https://fitness-court-engagement-map.vercel.app').replace(/\/+$/, '');
 const PILOT = args.pilot || 'las-vegas';
-const COURT_RADIUS_M = Number(args['court-radius'] || 2414);
-const TRAIL_BUFFER_M = Number(args['trail-buffer'] || 402);
+const COURT_RADIUS_M = Number(args['court-radius'] || 805);
+const TRAIL_BUFFER_M = Number(args['trail-buffer'] || 805);
 
 function readKey(file) {
   if (process.env.CENSUS_API_KEY) return process.env.CENSUS_API_KEY;
@@ -124,8 +126,8 @@ const result = {
   pilot: PILOT,
   city: `${pilot.pilot.name}, ${pilot.pilot.state}`,
   computedAt: new Date().toISOString(),
-  courts: { ...reach(courtArea), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: 'Residents in 2020 Census blocks within 2,414 m (NFC 10-minute accessibility) of a Fitness Court' },
-  trail: { ...reach(trailArea), trailMiles: Math.round(trailMiles * 10) / 10, bufferMeters: TRAIL_BUFFER_M, method: 'Residents in 2020 Census blocks within a 5-minute walk (402 m) of the Trail Line' },
+  courts: { ...reach(courtArea), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: `Residents in 2020 Census blocks within ${COURT_RADIUS_M.toLocaleString()} m of a Fitness Court` },
+  trail: { ...reach(trailArea), trailMiles: Math.round(trailMiles * 10) / 10, bufferMeters: TRAIL_BUFFER_M, method: `Residents in 2020 Census blocks within ${TRAIL_BUFFER_M.toLocaleString()} m of the Trail Line` },
   combined: { ...reach(combinedArea), method: 'Union of both areas, so nobody is counted twice' },
   clippedToCityLimits: Boolean(boundary),
 };
