@@ -524,7 +524,7 @@ header {
       </div>
       <div class="card an-card wide">
         <h3>Cumulative Scans</h3>
-        <div class="sub">Growth since tracking began (June 2025)</div>
+        <div class="sub">Growth since tracking began — partial backfill from June 2025, every scan from April 7, 2026</div>
         <canvas id="chart-cumulative" height="70"></canvas>
       </div>
     </div>
@@ -834,7 +834,9 @@ function popupHTML(court, count) {
   const recon = !court.reconciled
     ? `<span class="recon warn">⚠ Drift: ${court.delta > 0 ? '+' : ''}${court.delta} vs Uniqode</span>`
     : court.preArchive && court.delta > RECON_TOL
-      ? `<span class="recon ok" title="This code predates per-day tracking (June 2025); Uniqode's official total includes ${court.delta.toLocaleString()} earlier scans.">✓ Matches Uniqode · incl. ${court.delta.toLocaleString()} pre-Jun 2025 scans</span>`
+      ? `<span class="recon ok" title="This code predates live tracking (Apr 7, 2026); Uniqode's official total includes ${court.delta.toLocaleString()} earlier scans we have no per-day record of.">✓ Matches Uniqode · incl. ${court.delta.toLocaleString()} scans before Apr 2026</span>`
+    : court.preArchive && court.delta < -RECON_TOL
+      ? `<span class="recon ok" title="The one-off backfill of pre-April-2026 history counts ${(-court.delta).toLocaleString()} more than Uniqode shows today — within the 5% backfill tolerance.">✓ Matches Uniqode · within backfill tolerance</span>`
       : '<span class="recon ok">✓ Matches Uniqode</span>';
   // Location editing is tucked behind a small affordance so popups stay clean:
   // approx courts get a "Confirm location ▾" button; verified courts a subtle

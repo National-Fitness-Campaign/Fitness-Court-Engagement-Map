@@ -18,10 +18,13 @@ import {
 import { trailCodePositions } from './_trail.js';
 
 const RECONCILE_TOLERANCE = 2; // R11: delta ≤ 2 = matches Uniqode
-// Per-day webhook archive begins here. Codes created before this date have
-// official totals that legitimately include scans we have no event rows for —
-// that surplus is expected history, not drift.
-const ARCHIVE_START = '2025-06-04';
+// Complete per-scan history starts when the receive-scan webhook went live
+// (2026-04-07). Before that, scan_logs only has a one-off backfill (loaded
+// 2026-04-07, 41 codes), so a code created earlier can legitimately have
+// Uniqode history we don't hold — and that backfill ran up to ~4% high on a
+// few codes (Hernando County, Brownsville, Lake Merced) versus Uniqode today.
+const ARCHIVE_START = '2026-04-07';
+const BACKFILL_TOLERANCE = 0.05;
 
 export default async function handler(req, res) {
   try {
@@ -94,7 +97,8 @@ export default async function handler(req, res) {
           officialScans: official,
           humanScans: t.human_scans,
           botScans: t.bot_scans,
-          reconciled: Math.abs(delta) <= RECONCILE_TOLERANCE || (preArchive && delta > 0),
+          reconciled: Math.abs(delta) <= RECONCILE_TOLERANCE
+            || (preArchive && (delta > 0 || -delta <= Math.max(RECONCILE_TOLERANCE, official * BACKFILL_TOLERANCE))),
           preArchive,
           delta,
         };
