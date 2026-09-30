@@ -128,10 +128,18 @@ header {
 
 /* City panel (opens over the map) */
 .citypanel { top: 18px; right: 18px; bottom: 18px; width: 440px; max-width: calc(100% - 36px); overflow-y: auto; padding: 18px 18px 20px; z-index: 950; }
+.cp-tab { position: absolute; top: 64px; right: 0; z-index: 950; display: flex; align-items: stretch; background: var(--card);
+  border: 1px solid var(--border); border-right: none; border-radius: 10px 0 0 10px; box-shadow: var(--shadow); overflow: hidden; }
+.cp-tab-open { display: flex; align-items: center; gap: 6px; border: none; background: none; font: 700 0.8rem 'Inter', sans-serif; color: var(--text);
+  padding: 9px 10px 9px 12px; cursor: pointer; }
+.cp-tab-open:hover { background: #f3f6fb; color: var(--blue); }
+.cp-tab-close { border: none; border-left: 1px solid var(--border); background: none; color: var(--text-3); padding: 0 10px; cursor: pointer; font-size: 0.8rem; }
+.cp-tab-close:hover { color: var(--text); background: #f3f6fb; }
 .cp-head { display: flex; align-items: flex-start; gap: 10px; }
 .cp-eyebrow { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
 .cp-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; }
-.cp-close { margin-left: auto; border: none; background: #f1f4f9; border-radius: 8px; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; flex: none; }
+.cp-close { margin-left: auto; border: none; background: #f1f4f9; border-radius: 8px; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; flex: none; display: grid; place-items: center; color: var(--text-2); }
+.cp-close:hover { color: var(--blue); }
 .cp-overview { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: linear-gradient(135deg, #eef4ff, #f7f0fb); font-size: 0.84rem; line-height: 1.5; }
 .cp-overview p + p { margin-top: 6px; }
 .cp-overview b { font-weight: 700; }
@@ -507,6 +515,13 @@ header {
         <div id="map"></div>
         <div class="map-card legend" id="legend"></div>
         <div class="map-card citypanel" id="citypanel" style="display:none" aria-live="polite"></div>
+        <div class="cp-tab" id="cp-tab" style="display:none">
+          <button type="button" class="cp-tab-open" onclick="showCityPanel()" aria-label="Show city breakdown">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+            <span id="cp-tab-name"></span>
+          </button>
+          <button type="button" class="cp-tab-close" onclick="closeCityPanel()" aria-label="Close city breakdown" title="Close">✕</button>
+        </div>
       </div>
       <div class="refreshed">
         <span id="mode-line">Humans only — bot scans excluded</span>
@@ -645,6 +660,7 @@ const state = {
   allRankings: false,
   kind: 'all',           // 'all' | 'court' | 'trail'
   cityPanel: null,       // "City, ST" when the city panel is open
+  cityHidden: false,     // panel tucked away into a tab (still selected)
   openCities: new Set(),
   sortKey: 'scans', sortDir: -1,
 };
@@ -1135,6 +1151,7 @@ function codeCountLabel(list) {
 
 function openCityPanel(key) {
   state.cityPanel = key;
+  state.cityHidden = false;
   if (state.view !== 'map') setView('map');
   renderCityPanel();
   const pts = state.courts.filter((c) => cityKey(c) === key && plottable(c));
@@ -1147,8 +1164,11 @@ function openCityPanel(key) {
 }
 function closeCityPanel() {
   state.cityPanel = null;
+  state.cityHidden = false;
   renderCityPanel();
 }
+function hideCityPanel() { state.cityHidden = true; renderCityPanel(); }
+function showCityPanel() { state.cityHidden = false; renderCityPanel(); }
 
 function sideStats(list) {
   const bounds = rangeBounds();
@@ -1230,15 +1250,21 @@ function sideHTML(title, color, st, emptyText) {
 function renderCityPanel() {
   const el = document.getElementById('citypanel');
   const callout = document.querySelector('.callout');
-  el.parentElement.classList.toggle('cp-open', !!state.cityPanel);
-  if (!state.cityPanel) { el.style.display = 'none'; if (callout) callout.style.display = ''; return; }
+  const tab = document.getElementById('cp-tab');
+  const open = !!state.cityPanel && !state.cityHidden;
+  el.parentElement.classList.toggle('cp-open', open);
+  tab.style.display = state.cityPanel && state.cityHidden ? 'flex' : 'none';
+  if (state.cityPanel) document.getElementById('cp-tab-name').textContent = state.cityPanel;
+  if (!open) { el.style.display = 'none'; if (callout) callout.style.display = ''; return; }
   const inCity = state.courts.filter((c) => cityKey(c) === state.cityPanel);
   const courts = sideStats(inCity.filter((c) => c.kind !== 'trail'));
   const trail = sideStats(inCity.filter((c) => c.kind === 'trail'));
   el.innerHTML = `
     <div class="cp-head">
       <div><div class="cp-eyebrow">City breakdown</div><div class="cp-title">${escapeAttr(state.cityPanel)}</div></div>
-      <button class="cp-close" onclick="closeCityPanel()" aria-label="Close city breakdown">✕</button>
+      <button class="cp-close" onclick="hideCityPanel()" aria-label="Hide city breakdown" title="Hide (click the tab to reopen)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
     </div>
     <div class="cp-overview" id="cp-overview"><div class="cp-label">Overview</div>${cityOverview(state.cityPanel, courts, trail)}</div>
     <div class="cp-sides">
