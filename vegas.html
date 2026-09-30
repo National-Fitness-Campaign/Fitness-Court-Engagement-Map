@@ -381,7 +381,8 @@ async function load(refresh) {
     const el = document.getElementById('pulse-text');
     el.textContent = s.text;
     el.classList.remove('loading');
-    document.getElementById('pulse-label').textContent = s.source === 'ai' ? 'This week · AI summary' : 'This week';
+    const when = s.writtenAt ? ' · ' + new Date(s.writtenAt).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : '';
+    document.getElementById('pulse-label').textContent = s.source === 'ai' ? `This week · AI summary${when}` : 'This week';
     if (!data?.digest && s.digest) renderKpis(s.digest);
   } catch (err) {
     document.getElementById('pulse-text').textContent = 'Summary unavailable right now.';

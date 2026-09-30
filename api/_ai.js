@@ -7,6 +7,17 @@
 // file for AI Gateway, every call fails fast and the computed text shows.
 
 import { generateText } from 'ai';
+import { supabaseSelect } from './_lib.js';
+
+// Summaries written by the daily scheduled Claude task (scripts/save-summaries.mjs).
+// Used first, so AI text shows even without AI Gateway; stale after 36 h.
+const STORED_MAX_AGE_MS = 36 * 3600_000;
+export async function storedSummary(key) {
+  const rows = await supabaseSelect(`ai_summaries?select=texts,written_at&key=eq.${encodeURIComponent(key)}&limit=1`).catch(() => []);
+  const row = rows[0];
+  if (!row || Date.now() - Date.parse(row.written_at) > STORED_MAX_AGE_MS) return null;
+  return { ...row.texts, writtenAt: row.written_at };
+}
 
 const MODEL = 'anthropic/claude-haiku-4.5';
 const TIMEOUT_MS = 8000;

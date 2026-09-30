@@ -5,7 +5,7 @@
 // bubble falls back to a written-out version of the same facts, so it never
 // breaks. Model output is cached per digest, so refreshes don't re-bill it.
 
-import { writeWithAI } from './_ai.js';
+import { writeWithAI, storedSummary } from './_ai.js';
 import { buildPilot, digest, PILOTS } from './_trail.js';
 import { sendError, setCache } from './_lib.js';
 
@@ -47,8 +47,10 @@ export default async function handler(req, res) {
     if (!Object.hasOwn(PILOTS, slug)) { res.status(404).json({ error: `Unknown pilot: ${slug}` }); return; }
     const d = digest(await buildPilot(slug));
 
-    let text = null, source = 'computed';
-    try {
+    let text = null, source = 'computed', writtenAt = null;
+    const stored = await storedSummary(`pilot:${slug}`);
+    if (stored?.text) { text = stored.text; source = 'ai'; writtenAt = stored.writtenAt; }
+    else try {
       text = await writeWithAI({ system: SYSTEM, facts: d });
       source = 'ai';
     } catch (err) {
@@ -57,7 +59,7 @@ export default async function handler(req, res) {
 
     // Same freshness as /api/trail so the bubble never lags the KPI tiles.
     setCache(res);
-    res.status(200).json({ text: text || fallback(d), source, digest: d, generatedAt: new Date().toISOString() });
+    res.status(200).json({ text: text || fallback(d), source, writtenAt, digest: d, generatedAt: new Date().toISOString() });
   } catch (err) {
     sendError(res, err);
   }

@@ -8,7 +8,7 @@
 
 import { fetchAllQRCodes, supabaseSelect, parseName, laToday, sendError, setCache } from './_lib.js';
 import { PILOTS, parseTrailCode } from './_trail.js';
-import { writeWithAI } from './_ai.js';
+import { writeWithAI, storedSummary } from './_ai.js';
 
 const SYSTEM =
   'You write short overviews for an internal dashboard of QR-code scans at outdoor fitness sites in one city. '
@@ -100,7 +100,10 @@ export default async function handler(req, res) {
     }
 
     let out = { source: 'computed' };
-    try {
+    const stored = await storedSummary(`city:${facts.city}`);
+    if (stored?.city) {
+      out = { source: 'ai', city: stored.city, courts: stored.courts || '', trail: stored.trail || '', writtenAt: stored.writtenAt };
+    } else try {
       const text = await writeWithAI({ system: SYSTEM, facts, maxOutputTokens: 400 });
       const json = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, ''));
       const clean = (v) => (typeof v === 'string' ? v.trim().slice(0, 600) : '');
