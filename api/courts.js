@@ -24,21 +24,30 @@ const ARCHIVE_START = '2025-06-04';
 
 export default async function handler(req, res) {
   try {
-    const [codes, totals, suggestions] = await Promise.all([
+    // Totals come from the webhook archive; if that read fails (the views
+    // have been timing out), fall back to Uniqode's official per-code count
+    // so the map still loads instead of 502ing.
+    const warnings = [];
+    const soft = (p, label) => p.catch((err) => { warnings.push(`${label}: ${err.message}`); return null; });
+    const [codes, totalsRows, suggestionRows] = await Promise.all([
       fetchAllQRCodes(),
-      supabaseSelect('scan_totals?select=qr_id,human_scans,bot_scans'),
-      supabaseSelect('qr_location_suggestions?select=qr_id,lat,lon,source'),
+      soft(supabaseSelect('scan_totals?select=qr_id,human_scans,bot_scans'), 'scan_totals'),
+      soft(supabaseSelect('qr_location_suggestions?select=qr_id,lat,lon,source'), 'suggestions'),
     ]);
+    const archiveOk = totalsRows !== null;
+    const totals = totalsRows || [];
+    const suggestions = suggestionRows || [];
 
     const totalsById = new Map(totals.map((t) => [String(t.qr_id), t]));
     const suggestionById = new Map(suggestions.map((s) => [String(s.qr_id), s]));
 
     const courts = codes
-      .filter((c) => c.name.startsWith('QR') && c.state === 'A')
+      .filter((c) => (c.name.startsWith('QR') || c.name.startsWith('TL-')) && c.state === 'A')
       .map((c) => {
         const loc = parseLocation(c.metadata);
         const named = parseName(c.name);
-        const t = totalsById.get(String(c.id)) || { human_scans: 0, bot_scans: 0 };
+        const t = totalsById.get(String(c.id)) ||
+          (archiveOk ? { human_scans: 0, bot_scans: 0 } : { human_scans: c.scans ?? 0, bot_scans: 0 });
         const computedAll = t.human_scans + t.bot_scans;
         const official = c.scans ?? 0;
         const delta = official - computedAll;
@@ -53,6 +62,7 @@ export default async function handler(req, res) {
         return {
           id: c.id,
           name: c.name,
+          kind: c.name.startsWith('TL-') ? 'trail' : 'court',
           state: named.state,
           city: named.city,
           location: named.location,
@@ -92,6 +102,8 @@ export default async function handler(req, res) {
         reconciled: reconciledCount,
         reconciliationOk: reconciledCount === courts.length,
       },
+      archiveOk,
+      warnings,
       lastSynced: new Date().toISOString(),
     });
   } catch (err) {

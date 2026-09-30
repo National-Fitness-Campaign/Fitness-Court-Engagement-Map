@@ -601,9 +601,12 @@ async function loadData(isRefresh) {
       fetch(`/api/scans${bust}`),
     ]);
     if (!courtsResp.ok) throw new Error(`courts API ${courtsResp.status}`);
-    if (!scansResp.ok) throw new Error(`scans API ${scansResp.status}`);
     const courtsBody = await courtsResp.json();
-    const scansBody = await scansResp.json();
+    // Daily series is optional: without it the map still shows all-time totals.
+    const scansBody = scansResp.ok ? await scansResp.json() : { days: [] };
+    if (!scansResp.ok || courtsBody.archiveOk === false) {
+      console.warn('Scan archive unavailable — showing Uniqode all-time totals only', courtsBody.warnings);
+    }
 
     state.courts = courtsBody.courts;
     state.summary = courtsBody.summary;

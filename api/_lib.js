@@ -104,7 +104,7 @@ export function parseName(name) {
   if (parts.length === 3 && parts[0] === 'QR') {
     return { state: parts[1], city: spaced(parts[2]), location: spaced(parts[2]) };
   }
-  if (parts.length >= 4 && parts[0] === 'QR') {
+  if (parts.length >= 4 && (parts[0] === 'QR' || parts[0] === 'TL')) {
     return {
       state: parts[1],
       city: spaced(parts[2]),
