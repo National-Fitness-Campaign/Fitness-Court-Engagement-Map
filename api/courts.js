@@ -70,12 +70,16 @@ export default async function handler(req, res) {
         // locationStatus keeps the UI's three states: verified | approx | missing.
         const site = siteById.get(String(c.id)) || trailPos.get(String(c.id));
         const suggestion = suggestionById.get(String(c.id));
-        const locationSource = trailPos.has(String(c.id)) ? 'designlab' : site ? (site.sf_site_id ? 'salesforce' : 'override') : loc.hasLocation ? 'uniqode' : suggestion ? 'geocoded' : null;
+        // Name-geocoded guesses are no longer plotted: a confident pin in the
+        // wrong place (e.g. the SF Welcome Sign dropped on Union Square) is
+        // worse than none. They stay listed under Needs Location Verification,
+        // with the guess kept as suggestedLat/Lon for reference.
+        const locationSource = trailPos.has(String(c.id)) ? 'designlab' : site ? (site.sf_site_id ? 'salesforce' : 'override') : loc.hasLocation ? 'uniqode' : null;
         // Pop-ups and sandwich boards move around — nothing to verify.
         const mobile = /popup|sandwich/i.test(c.name);
-        const locationStatus = locationSource === 'geocoded' ? 'approx' : locationSource ? 'verified' : mobile ? 'mobile' : 'missing';
-        const lat = site ? site.lat : loc.hasLocation ? loc.lat : suggestion ? suggestion.lat : null;
-        const lon = site ? site.lon : loc.hasLocation ? loc.lon : suggestion ? suggestion.lon : null;
+        const locationStatus = locationSource ? 'verified' : mobile ? 'mobile' : 'missing';
+        const lat = site ? site.lat : loc.hasLocation ? loc.lat : null;
+        const lon = site ? site.lon : loc.hasLocation ? loc.lon : null;
         return {
           id: c.id,
           name: c.name,
@@ -91,6 +95,8 @@ export default async function handler(req, res) {
           hasLocation: locationStatus === 'verified',
           locationStatus,
           locationSource,
+          suggestedLat: !locationSource && suggestion ? suggestion.lat : null,
+          suggestedLon: !locationSource && suggestion ? suggestion.lon : null,
           sfSiteId: site?.sf_site_id ?? null,
           sfSiteName: site?.sf_site_name ?? null,
           officialScans: official,

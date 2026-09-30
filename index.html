@@ -169,6 +169,12 @@ header {
 #map { height: 660px; border-radius: var(--radius); }
 .map-card { position: absolute; z-index: 900; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
 .legend { left: 18px; bottom: 18px; padding: 14px 16px; }
+.layers-ctl { background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 8px 12px 10px; font-size: 0.78rem; min-width: 118px; }
+.layers-ctl .lc-title { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin: 4px 0 3px; }
+.layers-ctl .lc-title + label, .layers-ctl label + .lc-title { margin-top: 2px; }
+.layers-ctl label { display: flex; align-items: center; gap: 7px; padding: 2px 0; cursor: pointer; color: var(--text); font-weight: 500; }
+.layers-ctl label + .lc-title { margin-top: 8px; }
+.layers-ctl input { accent-color: var(--blue); margin: 0; }
 .legend h4 { font-size: 0.78rem; font-weight: 800; margin-bottom: 10px; }
 .legend h4 span { font-weight: 600; color: var(--text-3); font-size: 0.7rem; }
 .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; }
@@ -387,21 +393,6 @@ header {
       <label for="f-search">Search City</label>
       <input type="text" id="f-search" placeholder="Search city..." oninput="onSearch(this.value)">
     </div>
-    <div class="field" id="field-viz">
-      <label for="f-viz">Visualization</label>
-      <select id="f-viz" onchange="state.viz=this.value; renderAll()">
-        <option value="bubble">Bubble Map</option>
-        <option value="heat">Heatmap</option>
-      </select>
-    </div>
-    <div class="field" id="field-basemap">
-      <label for="f-basemap">Basemap</label>
-      <select id="f-basemap" onchange="setBasemap(this.value)">
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="aerial">Aerial</option>
-      </select>
-    </div>
     <div class="field">
       <label for="f-state">State</label>
       <select id="f-state" onchange="setStateFilter(this.value)">
@@ -590,7 +581,9 @@ const state = {
   includeBots: true,     // DEFAULT: include bots so totals match the Uniqode dashboard
   range: 'all',
   customFrom: null, customTo: null,
-  viz: 'bubble',
+  base: 'street',         // street | light | satellite
+  showPins: true,         // scan-sized court markers
+  showHeat: false,        // scan heat overlay
   view: 'map',
   search: '',
   stateFilter: '',
@@ -707,9 +700,9 @@ async function loadData(isRefresh) {
 // canvas tiles (same provider as aerial), with a separate labels overlay.
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
 const TILES = {
-  light:  { url: `${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, labels: `${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, native: 16, dark: false, attr: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors' },
-  dark:   { url: `${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`,  labels: `${ESRI}/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`,  native: 16, dark: true,  attr: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors' },
-  aerial: { url: `${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`, labels: null, native: 19, dark: true, attr: 'Tiles &copy; Esri' },
+  street:    { url: `${ESRI}/World_Street_Map/MapServer/tile/{z}/{y}/{x}`, labels: null, native: 19, dark: false, attr: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, USGS, &copy; OpenStreetMap contributors' },
+  light:     { url: `${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, labels: `${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, native: 16, dark: false, attr: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors' },
+  satellite: { url: `${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`, labels: `${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`, native: 19, dark: true, attr: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics' },
 };
 const map = L.map('map', { center: [38.5, -97.5], zoom: 4, zoomControl: true });
 const markersLayer = L.layerGroup().addTo(map);
@@ -728,8 +721,34 @@ function setBasemap(type) {
     ? L.tileLayer(t.labels, { maxNativeZoom: t.native, maxZoom: 19, pane: 'labels' }).addTo(map)
     : null;
 }
-setBasemap('light');
-map.on('zoomend', () => { if (state.viz === 'heat') renderMap(); });
+setBasemap(state.base);
+map.on('zoomend', () => { if (state.showHeat) renderMap(); });
+
+// Layer control on the map: one background + any mix of overlays.
+const LayersControl = L.Control.extend({
+  options: { position: 'topleft' },
+  onAdd() {
+    const el = L.DomUtil.create('div', 'layers-ctl');
+    L.DomEvent.disableClickPropagation(el);
+    L.DomEvent.disableScrollPropagation(el);
+    el.innerHTML = `
+      <div class="lc-title">Map</div>
+      ${[['street', 'Street'], ['light', 'Light'], ['satellite', 'Satellite']].map(([k, label]) =>
+        `<label><input type="radio" name="lc-base" value="${k}"${state.base === k ? ' checked' : ''}> ${label}</label>`).join('')}
+      <div class="lc-title">Layers</div>
+      <label><input type="checkbox" id="lc-pins"${state.showPins ? ' checked' : ''}> Pins</label>
+      <label><input type="checkbox" id="lc-heat"${state.showHeat ? ' checked' : ''}> Heat map</label>`;
+    el.addEventListener('change', (ev) => {
+      const t = ev.target;
+      if (t.name === 'lc-base') { state.base = t.value; setBasemap(t.value); renderMap(); }
+      if (t.id === 'lc-pins') state.showPins = t.checked;
+      if (t.id === 'lc-heat') state.showHeat = t.checked;
+      if (t.id === 'lc-pins' || t.id === 'lc-heat') { renderMap(); renderLegend(); }
+    });
+    return el;
+  },
+});
+new LayersControl().addTo(map);
 
 const BUCKETS = [
   { max: 0,        color: '#c9d2e0', label: '0',        r: 5  },
@@ -895,41 +914,35 @@ function renderMap() {
   const bounds = rangeBounds();
   const courts = visibleCourts().filter(plottable);
 
-  if (state.viz === 'heat') {
+  // Heat: one layer on one scale — hotter always means more scans. Log scale
+  // so a 6-scan court still shows next to an 862-scan one. maxZoom: 0 turns
+  // off leaflet.heat's built-in fade (it divides intensity by 2^(19 − zoom),
+  // which made the whole layer near-invisible at city and national zooms).
+  if (state.showHeat) {
     const counts = courts.map((c) => countFor(c, bounds));
     const maxN = Math.max(...counts, 1);
     const zoom = map.getZoom();
-    const base = zoom <= 5 ? 22 : zoom <= 7 ? 30 : zoom <= 9 ? 38 : 48;
-    // Volume-scaled radius: hotter courts throw a bigger blob, in three tiers.
-    const tiers = [
-      { test: (n) => n / maxN < 0.15, radius: Math.round(base * 0.6) },
-      { test: (n) => n / maxN < 0.5,  radius: base },
-      { test: () => true,             radius: Math.round(base * 1.7) },
-    ];
-    for (const tier of tiers) {
-      const pts = courts
-        .map((c, i) => [c.lat, c.lon, counts[i]])
-        .filter((p, i) => counts[i] > 0 && tier.test(counts[i]) &&
-          !tiers.slice(0, tiers.indexOf(tier)).some((t) => t.test(counts[i])));
-      if (!pts.length) continue;
+    const radius = zoom <= 5 ? 16 : zoom <= 8 ? 24 : zoom <= 11 ? 34 : zoom <= 14 ? 46 : 60;
+    const pts = courts.map((c, i) => [c.lat, c.lon, Math.log1p(counts[i]) / Math.log1p(maxN)]).filter((p) => p[2] > 0);
+    if (pts.length) {
       heatLayers.push(L.heatLayer(pts, {
-        radius: tier.radius, blur: Math.round(tier.radius * 0.55),
-        max: Math.max(maxN * 0.4, 1), minOpacity: 0.35,
-        gradient: { 0.0: '#ffffb2', 0.25: '#fd8d3c', 0.5: '#f03b20', 0.75: '#bd0026', 1.0: '#2d004b' },
+        radius, blur: Math.round(radius * 0.75), max: 1, maxZoom: 0, minOpacity: 0.2,
+        gradient: { 0.2: '#ffffb2', 0.4: '#fecc5c', 0.6: '#fd8d3c', 0.8: '#e31a1c', 1.0: '#800026' },
       }).addTo(map));
     }
-    if (map.getZoom() >= 7) {
+    // Names on the hot spots when zoomed in and pins are off.
+    if (!state.showPins && zoom >= 7) {
       heatLabels = L.layerGroup().addTo(map);
       courts.forEach((c, i) => {
-        L.circleMarker([c.lat, c.lon], {
-          radius: counts[i] === 0 ? 3 : 5, color: '#fff', fillOpacity: 0,
-          weight: counts[i] === 0 ? 1 : 2, opacity: counts[i] === 0 ? 0.35 : 0.9,
-        }).bindTooltip(esc(displayName(c)), { permanent: true, direction: 'top', offset: [0, -8], className: 'heat-label' })
+        if (!counts[i]) return;
+        L.circleMarker([c.lat, c.lon], { radius: 4, color: '#fff', fillOpacity: 0, weight: 2, opacity: 0.9 })
+          .bindTooltip(esc(displayName(c)), { permanent: true, direction: 'top', offset: [0, -8], className: 'heat-label' })
           .bindPopup(popupHTML(c, counts[i]), { maxWidth: 260 })
           .addTo(heatLabels);
       });
     }
-  } else {
+  }
+  if (state.showPins) {
     courts.forEach((c) => {
       const n = countFor(c, bounds);
       const b = bucketFor(n);
@@ -961,21 +974,21 @@ function focusCourt(id) {
 
 function renderLegend() {
   const el = document.getElementById('legend');
-  if (state.viz === 'heat') {
-    el.innerHTML = `<h4>SCAN INTENSITY <span>(${RANGE_LABELS[state.range]})</span></h4>
-      <div style="width:170px;height:12px;border-radius:6px;background:linear-gradient(to right,#ffffb2,#fd8d3c,#f03b20,#bd0026,#2d004b)"></div>
-      <div style="display:flex;justify-content:space-between;font-size:0.66rem;color:var(--text-3);margin-top:5px"><span>Low</span><span>High</span></div>`;
-  } else {
-    el.innerHTML = `<h4>QR SCANS <span>(${RANGE_LABELS[state.range]})</span></h4>
+  const heat = `<h4>SCAN INTENSITY <span>(${RANGE_LABELS[state.range]})</span></h4>
+      <div style="width:170px;height:12px;border-radius:6px;background:linear-gradient(to right,#ffffb2,#fecc5c,#fd8d3c,#e31a1c,#800026)"></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.66rem;color:var(--text-3);margin-top:5px"><span>Fewer scans</span><span>More scans</span></div>`;
+  const pins = `<h4>QR SCANS <span>(${RANGE_LABELS[state.range]})</span></h4>
       <div class="legend-grid">` +
       BUCKETS.map((b, i) => {
         const size = 9 + i * 2;
         return `<div class="legend-row"><span class="legend-dot" style="width:${size}px;height:${size}px;background:${b.color}"></span>${b.label}</div>`;
       }).join('') +
       `<div class="legend-row" style="grid-column:1/-1;margin-top:4px;padding-top:6px;border-top:1px solid var(--border)">
-        <span class="legend-dot" style="width:12px;height:12px;background:rgba(245,158,11,0.35);border:2px dashed #b45309"></span>Approximate — needs verification
+        <span class="legend-dot" style="width:12px;height:12px;background:#fff;border:2.5px solid ${TL_MAGENTA}"></span>Trail Line sign
       </div></div>`;
-  }
+  const parts = [state.showPins && pins, state.showHeat && heat].filter(Boolean);
+  el.innerHTML = parts.join('<div style="height:12px"></div>');
+  el.style.display = parts.length ? '' : 'none';
 }
 
 function renderRankings() {
@@ -1414,8 +1427,6 @@ function setView(v) {
     document.getElementById('tab-' + t).classList.toggle('active', v === t);
     document.getElementById('view-' + t).style.display = v === t ? '' : 'none';
   }
-  document.getElementById('field-viz').style.display = v === 'map' ? '' : 'none';
-  document.getElementById('field-basemap').style.display = v === 'map' ? '' : 'none';
   if (v === 'map') { map.invalidateSize(); renderMap(); }
   else if (v === 'list') renderList();
   else renderAnalytics();
