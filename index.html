@@ -198,6 +198,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .an-city { padding: 20px 22px; margin-bottom: 16px; }
 .an-city-head { display: flex; align-items: flex-end; gap: 16px; }
 .an-city-head h2 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.01em; }
+.an-scope { font-size: 0.8rem; color: var(--text-3); margin-top: 4px; }
 .an-city-clear { margin-left: 12px; align-self: center; border: 1px solid var(--border); background: var(--card); border-radius: 99px; padding: 6px 12px; font: 600 0.78rem 'Inter', sans-serif; color: var(--text-2); cursor: pointer; }
 .an-city-clear:hover { color: var(--blue); border-color: #c8d2e4; }
 .an-city-hint { margin-left: auto; align-self: center; font-size: 0.8rem; color: var(--text-3); }
@@ -884,9 +885,8 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
     </div>
     <div class="card an-city">
       <div class="an-city-head">
-        <div><div class="cp-eyebrow" id="an-city-eyebrow">City breakdown</div><h2 id="an-city-title">All cities</h2></div>
-        <button type="button" class="an-city-clear" id="an-city-clear" onclick="clearAnCity()" style="display:none">✕ All cities</button>
-        <span class="an-city-hint" id="an-city-hint">Search a city at the top to break it down</span>
+        <div><div class="cp-eyebrow" id="an-city-eyebrow">Showing</div><h2 id="an-city-title">All cities</h2>
+          <div class="an-scope" id="an-scope"></div></div>
       </div>
       <div id="an-city-body"></div>
     </div>
@@ -2024,10 +2024,34 @@ function destroyCharts() {
 
 function openCityAnalytics() {
   state.anCity = state.cityPanel || '';
+  syncSearchToCity(state.anCity);
   setView('analytics');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function setAnCity(key) { state.anCity = key; renderAnalytics(); pushRoute(); }
+function setAnCity(key) { state.anCity = key; syncSearchToCity(key); renderAll(); pushRoute(); }
+// Analytics shows exactly what the filters at the top select: search, Show,
+// State and Date Range. A search that names one city focuses that city.
+function analyticsCodes() {
+  return visibleCourts().filter((c) => !state.anCity || cityKey(c) === state.anCity);
+}
+function scopeTitle() {
+  if (state.anCity) return state.anCity;
+  if (state.search.trim()) return `Results for "${state.search.trim()}"`;
+  if (state.stateFilter) return `All of ${state.stateFilter}`;
+  return 'All cities';
+}
+function scopeLine() {
+  const kind = { all: 'Fitness Courts and Trail Lines', court: 'Fitness Courts only', trail: 'Trail Lines only' }[state.kind];
+  return `From the filters above: ${kind} · ${state.stateFilter || 'all states'} · ${RANGE_LABELS[state.range].toLowerCase()} · ${analyticsCodes().length} QR codes`;
+}
+// Opening a city from elsewhere (map panel, links) puts it in the search box,
+// so the top bar and Analytics always agree.
+function syncSearchToCity(key) {
+  const name = key ? key.split(',')[0] : '';
+  state.search = name;
+  const box = document.getElementById('f-search');
+  if (box) box.value = name;
+}
 function clearAnCity() {
   state.anCity = ''; state.search = '';
   document.getElementById('f-search').value = '';
@@ -2035,13 +2059,12 @@ function clearAnCity() {
 }
 
 function renderCityBreakdown() {
-  document.getElementById('an-city-clear').style.display = state.anCity ? '' : 'none';
-  document.getElementById('an-city-hint').style.display = state.anCity ? 'none' : '';
+  document.getElementById('an-scope').textContent = scopeLine();
   const body = document.getElementById('an-city-body');
-  document.getElementById('an-city-title').textContent = state.anCity || 'All cities';
+  document.getElementById('an-city-title').textContent = scopeTitle();
   if (state.anMode === 'engagement') { renderEngagement(body); return; }
   const all = !state.anCity;
-  const inCity = state.courts.filter((c) => all || cityKey(c) === state.anCity);
+  const inCity = analyticsCodes();
   const courts = sideStats(inCity.filter((c) => c.kind !== 'trail'));
   const trail = sideStats(inCity.filter((c) => c.kind === 'trail'));
   const bounds = rangeBounds();
@@ -2183,6 +2206,7 @@ function setAnMode(m) {
 
 function openPilotAnalytics(city) {
   state.anCity = city;
+  syncSearchToCity(city);
   state.anMode = 'raw';
   setView('analytics');
   requestAnimationFrame(() => document.getElementById('an-pilot')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
@@ -2374,7 +2398,7 @@ const numOrXX = (n, cls = '') => (n == null ? `<b class="xx ${cls}">XX</b>` : `<
 function engagementFigures(city) {
   const E = engagementData, today = laToday(), bounds = rangeBounds();
   const from = bounds ? bounds[0] : null, to = bounds ? bounds[1] : today;
-  const inCity = state.courts.filter((c) => !city || cityKey(c) === city);
+  const inCity = analyticsCodes();
   const courtCodes = inCity.filter((c) => c.kind !== 'trail');
   const trailCodes = inCity.filter((c) => c.kind === 'trail');
   const installed = courtCodes.filter((c) => c.locationStatus !== 'mobile').length;
@@ -2798,7 +2822,7 @@ function renderAnalytics() {
     b.classList.toggle('on', b.dataset.mode === state.anMode);
     b.setAttribute('aria-selected', b.dataset.mode === state.anMode);
   });
-  document.getElementById('an-city-eyebrow').textContent = eng ? 'Engagement' : 'City breakdown';
+  document.getElementById('an-city-eyebrow').textContent = eng ? 'Engagement · showing' : 'QR code scans · showing';
   document.getElementById('an-raw-extra').style.display = eng ? 'none' : '';
   document.querySelector('.an-city').classList.add('eng-mode');
   renderCityBreakdown();
@@ -2891,7 +2915,7 @@ function applyRoute() {
     const [v, c, part] = location.hash.slice(1).split(':');
     const view = ['map', 'list', 'analytics'].includes(v) ? v : 'map';
     const city = c ? decodeURIComponent(c) : '';
-    if (view === 'analytics') { state.anCity = city; state.cityPanel = null; renderCityPanel(); }
+    if (view === 'analytics') { state.anCity = city; syncSearchToCity(city); state.cityPanel = null; renderCityPanel(); }
     if (view === 'map') { if (city) openCityPanel(city); else closeCityPanel(); }
     if (part === 'pilot') state.anMode = 'raw';
     setView(view);
@@ -2904,7 +2928,7 @@ addEventListener('popstate', (ev) => {
   applyRoute();
 });
 function setView(v) {
-  if (v === 'analytics' && state.view !== 'analytics' && state.cityPanel && !state.anCity) state.anCity = state.cityPanel;
+  if (v === 'analytics' && state.view !== 'analytics' && state.cityPanel && !state.anCity) { state.anCity = state.cityPanel; syncSearchToCity(state.anCity); }
   state.view = v;
   for (const t of ['map', 'list', 'analytics']) {
     document.getElementById('tab-' + t).classList.toggle('active', v === t);
