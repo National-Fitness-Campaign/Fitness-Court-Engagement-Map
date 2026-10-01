@@ -204,6 +204,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .ext-ic { opacity: 0.55; flex: none; vertical-align: -2px; }
 a.hbtn { text-decoration: none; }
 .an-ext { border-color: #f6d58a; background: #fffaf0; }
+.pl-retry { display: inline-flex; margin-left: 8px; font-size: 0.8rem; padding: 5px 10px; }
 .pl-toggle { margin-left: auto; font-size: 0.8rem; padding: 7px 12px; }
 .an-city-clear { margin-left: 12px; align-self: center; border: 1px solid var(--border); background: var(--card); border-radius: 99px; padding: 6px 12px; font: 600 0.78rem 'Inter', sans-serif; color: var(--text-2); cursor: pointer; }
 .an-city-clear:hover { color: var(--blue); border-color: #c8d2e4; }
@@ -1127,6 +1128,7 @@ const escapeAttr = esc;
 
 /* ═════════════════════════════ Data loading ════════════════════════════ */
 async function loadData(isRefresh) {
+  if (isRefresh) resetPilotData();
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
   if (!isRefresh) document.getElementById('overlay').style.display = 'flex';
@@ -1850,7 +1852,9 @@ function syncCityBoundary() {
   const m = key && key.match(/^(.*),\s*([A-Z]{2})$/);
   if (!m) return;
   if (!boundaryCache.has(key)) {
-    boundaryCache.set(key, fetch(`/api/boundary?city=${encodeURIComponent(m[1])}&state=${m[2]}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+    const at = state.courts.find((c) => cityKey(c) === key && c.lat != null && c.kind !== 'trail') || state.courts.find((c) => cityKey(c) === key && c.lat != null);
+    const near = at ? `&lat=${at.lat.toFixed(5)}&lon=${at.lon.toFixed(5)}` : '';
+    boundaryCache.set(key, fetch(`/api/boundary?city=${encodeURIComponent(m[1])}&state=${m[2]}${near}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
   }
   boundaryCache.get(key).then((fc) => {
     if (boundaryKey !== key || !fc?.features?.length) return;
@@ -2134,8 +2138,8 @@ function renderCityBreakdown() {
   const rp = state.anCity && engagementData?.pilots?.find((p) => p.city === state.anCity);
   document.getElementById('an-actions').innerHTML = rp ? `
     <a class="hbtn" href="/report?pilot=${encodeURIComponent(rp.slug)}" target="_blank" rel="noopener" title="Raw numbers, for NFC only">Internal report <svg class="ext-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
-    <a class="hbtn an-ext" href="/report-external?pilot=${encodeURIComponent(rp.slug)}" target="_blank" rel="noopener" title="Draft of the city-facing report">External report · draft <svg class="ext-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>` : '';
-  if (state.anCity && !engagementData) loadEngagement().then(() => { if (state.view === 'analytics') renderCityBreakdown(); }).catch(() => {});
+    <a class="hbtn an-ext" href="/report-external?pilot=${encodeURIComponent(rp.slug)}&period=${state.perfPeriod === 'year' ? 'year' : 'all'}" target="_blank" rel="noopener" title="Draft of the city-facing report">External report · draft <svg class="ext-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>` : '';
+  if (state.anCity && !engagementData) loadEngagement().then(() => { if (state.view === 'analytics') renderAnalytics(); }).catch(() => {});
   const body = document.getElementById('an-city-body');
   document.getElementById('an-city-title').textContent = scopeTitle();
   if (state.anMode === 'engagement') { renderEngagement(body); return; }
@@ -2260,7 +2264,7 @@ function renderCityBreakdown() {
     options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
       scales: { x: { stacked: true, ticks: { maxTicksLimit: 10 } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
   });
-  loadTimeOfDay(all ? null : inCity.map((c) => c.id), bounds);
+  loadTimeOfDay(inCity.length === state.courts.length ? null : inCity.map((c) => c.id), bounds);
   if (!all) loadCityAI(state.anCity, 'an-overview', () => state.view === 'analytics' && state.anMode === 'raw' && !!state.anCity);
 }
 
@@ -2325,7 +2329,11 @@ function renderPilotSection() {
     <div id="pl-body" style="display:none"></div>`;
   pilotData(pilot.slug).then((d) => {
     const body = document.getElementById('pl-body');
-    if (!d || !body || state.anCity !== pilot.city) return;
+    if (!body || state.anCity !== pilot.city) return;
+    if (!d) {
+      document.getElementById('pl-loading').innerHTML = `Couldn't load the Trail Line pilot right now. <button class="hbtn pl-retry" onclick="renderPilotSection()">Try again</button>`;
+      return;
+    }
     drawPilot(d, pilot, body);
   });
 }
@@ -2549,20 +2557,26 @@ function engagementFigures(city) {
 let engMap = null;
 let engDark = false; // light by default (Emily: no black); Dark is one click away on the map
 const engLayers = { courtReach: true, trailReach: true, boundary: true, lines: true, courts: true, stations: true };
-const pilotCache = new Map(); // slug -> Promise(/api/trail payload)
+const pilotCache = new Map(); // slug -> Promise(/api/trail payload | null)
+const pilotReady = new Map(); // slug -> payload, or null when the last try failed
 function pilotData(slug) {
   if (!pilotCache.has(slug)) {
-    pilotCache.set(slug, fetch(`/api/trail?pilot=${encodeURIComponent(slug)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+    pilotCache.set(slug, fetch(`/api/trail?pilot=${encodeURIComponent(slug)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((d) => {
+      pilotReady.set(slug, d);
+      if (!d) pilotCache.delete(slug); // a failed fetch is retried next time it's asked for
+      return d;
+    }));
   }
   return pilotCache.get(slug);
 }
+function resetPilotData() { pilotCache.clear(); pilotReady.clear(); }
 function engMapCard(F) {
   const A = F.city && engagementData.areas?.[F.city];
   if (!F.city) return '';
   if (!A) return `<div class="eng-map-card"><div class="eng-map-head"><h4>Accessibility map</h4><span>Not drawn for ${esc(F.city)} yet. Run scripts/compute-accessibility.mjs for this city.</span></div></div>`;
   const row = (key, swatch, label) => `<label><input type="checkbox" data-eng-layer="${key}"${engLayers[key] ? ' checked' : ''}><i style="${swatch}"></i>${label}</label>`;
   return `<div class="eng-map-card">
-    <div class="eng-map-head"><h4>Who lives within a 10 minute walk</h4><span>shaded = everywhere you can walk to a Fitness Court or the Trail Line in 10 minutes along real streets · 2020 Census · inside city limits</span>
+    <div class="eng-map-head"><h4>Who lives within a 10 minute walk</h4><span>shaded = everywhere you can walk to a Fitness Court${A.trail ? ' or the Trail Line' : ''} in 10 minutes along real streets · 2020 Census${A.boundary ? ' · inside city limits' : ''}</span>
       <div class="eng-chips">
         <span class="eng-chip"><i style="background:rgba(37,99,235,0.3);border:1.5px solid #2563eb"></i>Fitness Courts <b>${F.court.access != null ? F.court.access.toLocaleString() : 'XX'}</b></span>
         ${A.trail ? `<span class="eng-chip"><i style="background:rgba(195,38,138,0.3);border:1.5px solid ${TL_MAGENTA}"></i>Trail Line <b>${F.trail.access != null ? F.trail.access.toLocaleString() : 'XX'}</b></span>` : ''}
@@ -2572,11 +2586,11 @@ function engMapCard(F) {
       <div class="eng-map-base"><button type="button" class="${engDark ? 'on' : ''}" onclick="engDark = true; renderAnalytics()">Dark</button><button type="button" class="${engDark ? '' : 'on'}" onclick="engDark = false; renderAnalytics()">Light</button></div>
       <div class="eng-layers"><b>Layers</b>
         ${row('courtReach', 'background:rgba(37,99,235,0.22);border:1.5px solid #2563eb', 'Fitness Court reach')}
-        ${row('trailReach', `background:rgba(195,38,138,0.28);border:1.5px solid ${TL_MAGENTA}`, 'Trail Line reach')}
+        ${A.trail ? '' : '<!-- no trail -->'}${!A.trail ? '' : row('trailReach', `background:rgba(195,38,138,0.28);border:1.5px solid ${TL_MAGENTA}`, 'Trail Line reach')}
         ${row('boundary', `border:2px dashed ${engDark ? '#cbd5e1' : '#0f1f3d'};height:0;width:14px;border-radius:0`, 'City limits')}
-        ${row('lines', 'background:linear-gradient(90deg,#1fa855,#f2c417,#c3268a,#1ea7e1);height:4px', 'Trail Line')}
+        ${A.trail ? '' : '<!-- no trail -->'}${!A.trail ? '' : row('lines', 'background:linear-gradient(90deg,#1fa855,#f2c417,#c3268a,#1ea7e1);height:4px', 'Trail Line')}
         ${row('courts', 'background:#2563eb;width:10px;height:10px', 'Fitness Courts')}
-        ${row('stations', `background:#fff;border:2.5px solid #1e3a8a;width:10px;height:10px;border-radius:50%`, 'Stations')}
+        ${A.trail ? '' : '<!-- no trail -->'}${!A.trail ? '' : row('stations', `background:#fff;border:2.5px solid #1e3a8a;width:10px;height:10px;border-radius:50%`, 'Stations')}
       </div>
     </div></div>`;
 }
@@ -2653,7 +2667,7 @@ async function drawEngMap(F) {
 const PERF_DEFAULTS = { courtScanMult: 1, downloadMult: 10, visitsPerYear: 25, kcalCourt: 250, trailMult: 10, kcalTrail: 100, uniqueShare: 92, savingsPerCourt: 70000 };
 let perfA = { ...PERF_DEFAULTS };
 try { Object.assign(perfA, JSON.parse(localStorage.getItem('nfc-perf-assumptions') || '{}')); } catch {}
-state.perfPeriod = state.perfPeriod || 'year';
+state.perfPeriod = state.perfPeriod || 'all';
 function setPerf(k, v) {
   const n = Number(v);
   if (!Number.isFinite(n) || n < 0) return;
@@ -2679,10 +2693,10 @@ function renderPerformance(body) {
   // Trail codes → red / yellow / park loops, from each code's station line.
   let groupOfCode = null;
   if (pilot && trailCodes.length) {
-    const cached = pilotCache.get(pilot.slug);
-    if (!cached) { pilotData(pilot.slug).then(() => { if (state.anMode === 'performance') renderAnalytics(); }); }
-    else if (!cached.__resolved) { cached.then((d) => { cached.__resolved = d; if (state.anMode === 'performance') renderAnalytics(); }); }
-    const d = cached && cached.__resolved;
+    // Ask once; re-render once when it lands. A failed fetch leaves the
+    // Trail Line columns empty instead of re-rendering in a loop.
+    if (!pilotReady.has(pilot.slug)) pilotData(pilot.slug).then(() => { if (state.anMode === 'performance') renderAnalytics(); });
+    const d = pilotReady.get(pilot.slug);
     if (d) {
       groupOfCode = new Map();
       for (const st of d.stations) {
@@ -2920,7 +2934,7 @@ function renderEngagement(body) {
     </div>
     <div class="eq-pair">
       <div class="eq-stat"><div class="eq-lbl">People within a 10 minute walk</div>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}
-        <div class="eq-sub">${F.total.access != null ? `of a Fitness Court (${F.court.access.toLocaleString()}) or the Trail Line (${(F.trail.access || 0).toLocaleString()}), each person counted once` : (all ? 'Search a city to see it.' : 'Not computed for this city yet.')}</div></div>
+        <div class="eq-sub">${F.total.access != null ? (F.trail.access != null ? `of a Fitness Court (${F.court.access.toLocaleString()}) or the Trail Line (${F.trail.access.toLocaleString()}), each person counted once` : `of a Fitness Court, each person counted once`) : (all ? 'Search a city to see it.' : 'Not computed for this city yet.')}</div></div>
       <div class="eq-stat"><div class="eq-lbl">Fitness Courts in the NFC app</div><b>${F.matched} <small class="rw-of2">of ${courtCodes.length}</small></b>
         <div class="eq-sub">${courtCodes.length - F.matched ? `${courtCodes.length - F.matched} not found in the app yet` : 'every Fitness Court is in the app'}</div></div>
     </div>
@@ -3239,8 +3253,9 @@ function runSearch(q) {
   // Search stays in the current view: Analytics switches its city, List
   // filters, and only the Map opens the city panel.
   if (state.view === 'analytics') {
-    if (exact.length === 1) state.anCity = exact[0];
-    else if (!needle) state.anCity = '';
+    // One city → focus it. Anything else (blank, partial, several matches)
+    // → no focused city; the breakdown shows whatever the search matches.
+    state.anCity = exact.length === 1 ? exact[0] : '';
     renderAll();
     if (exact.length === 1) pushRoute();
     return;

@@ -305,12 +305,21 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
   const A = { courtScanMult: 1, downloadMult: 10, visitsPerYear: 25, kcalCourt: 250, trailMult: 10, kcalTrail: 100, uniqueShare: 92, savingsPerCourt: 70000 };
   try { Object.assign(A, JSON.parse(localStorage.getItem('nfc-perf-assumptions') || '{}')); } catch {}
   const U = A.uniqueShare / 100;
+  // Same period as the Performance report it was opened from (?period=year|all).
+  const PERIOD = new URLSearchParams(location.search).get('period') === 'year' ? 'year' : 'all';
+  const yr = today.slice(0, 4);
   let dlAll = 0;
-  for (const c of courts) { const r = eng.app.allTime?.[c.id]; if (r) dlAll += r[1]; }
-  const fcUsers = Math.max(dlAll * A.downloadMult, courtScans * U * A.courtScanMult);
+  for (const c of courts) {
+    if (PERIOD === 'all') { const r = eng.app.allTime?.[c.id]; if (r) dlAll += r[1]; }
+    else { const e = eng.app.byCode[c.id]; if (e) for (const [m, [, y]] of Object.entries(e.m)) if (m.startsWith(yr)) dlAll += y; }
+  }
+  const scansP = PERIOD === 'all' ? courtScans : courts.reduce((t, c) => t + Object.entries(c.days || {}).filter(([d]) => d.startsWith(yr)).reduce((a, [, v]) => a + v, 0), 0);
+  const fcUsers = Math.max(dlAll * A.downloadMult, scansP * U * A.courtScanMult);
   const groupOf = (line) => (/bonanza|red line/i.test(line || '') ? 'red' : /lone mountain|yellow line/i.test(line || '') ? 'yellow' : 'loops');
   const gScans = { red: 0, yellow: 0, loops: 0 };
-  for (const st of trail.stations) for (const c of st.codes) gScans[groupOf(st.line)] += c.publicScans;
+  for (const st of trail.stations) for (const c of st.codes) {
+    gScans[groupOf(st.line)] += PERIOD === 'all' ? c.publicScans : Object.entries(c.days || {}).filter(([d]) => d.startsWith(yr) && d >= launch).reduce((a, [, v]) => a + v, 0);
+  }
   const G = acc?.trailGroups || {};
   const live = today >= launch;
   const mk = (label, color, sub, reachN, users, kcalPer, isTrail) => {
@@ -388,7 +397,7 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
   <section class="page"><div class="pad">
     <div class="eyebrow">Program performance</div>
     <h2>How each part of the program is performing</h2>
-    <p class="lede">The same three measures for every part of ${esc(P.name)}'s program: who can walk to it, how often it is used, and the calories burned.</p>
+    <p class="lede">The same three measures for every part of ${esc(P.name)}'s program: who can walk to it, how often it is used, and the calories burned. Based on ${PERIOD === 'all' ? 'all activity to date' : `activity in ${yr} so far`}.</p>
     <div class="perf-whole">
       <div class="pw-title"><b>Whole project</b><span>Fitness Courts and the Trail Line together</span></div>
       <div><div class="num">${fmt(whole.reach)}</div><div class="lbl">Residents within a 10 minute walk</div></div>
