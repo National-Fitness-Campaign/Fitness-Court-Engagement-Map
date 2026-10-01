@@ -495,6 +495,60 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 @media (max-width: 700px) { .eq-row, .eq-pair { grid-template-columns: 1fr; } }
 
 
+
+/* ── Raw: one-screen dashboard ──────────────────────────────────────────── */
+.db-ai { display: flex; align-items: flex-start; gap: 12px; margin-top: 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
+.db-ai .rw-ai-icon { width: 30px; height: 30px; border-radius: 9px; font-size: 0.8rem; }
+.db-ai-text { flex: 1; min-width: 0; font-size: 0.88rem; line-height: 1.5; color: #475569; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.db-ai-text .cp-label { display: none; }
+.db-ai-text p { display: inline; margin: 0 4px 0 0; }
+.db-ai.open .db-ai-text { -webkit-line-clamp: unset; display: block; }
+.db-ai.open .db-ai-text p { display: block; margin: 0 0 6px; }
+.db-ai-more { border: none; background: none; color: var(--blue); font: 700 0.78rem 'Inter', sans-serif; cursor: pointer; padding: 4px; flex: none; }
+.db-grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 310px; gap: 14px; margin-top: 14px; }
+.db-card { border: 1px solid var(--border); border-radius: 16px; background: #fff; padding: 14px 16px; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.db-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.db-head h4 { font-size: 0.92rem; font-weight: 800; color: #334155; letter-spacing: -0.01em; }
+.db-head span { margin-left: auto; font-size: 0.74rem; color: #7c8aa0; text-align: right; }
+.db-body { flex: 1; min-height: 0; position: relative; }
+.db-body > canvas { position: absolute; inset: 0; }
+.db-list { display: grid; gap: 6px; align-content: start; overflow: hidden; }
+.db-list .acb-bar .nm { color: #475569; }
+.db-rank { font-style: normal; font-weight: 800; color: #94a3b8; margin-right: 8px; font-size: 0.72rem; }
+.db-list .nm small { color: #94a3b8; font-size: 0.7rem; }
+.db-when { display: flex; flex-direction: column; gap: 8px; }
+.db-when .tod-row i { height: 13px; }
+.db-when .tod-sum { margin-bottom: 6px; font-size: 0.78rem; }
+.db-todbars { position: relative; flex: 1; min-height: 50px; }
+.db-todbars canvas { position: absolute; inset: 0; }
+.db-mix { display: grid; gap: 10px; }
+.db-mixrow { display: grid; grid-template-columns: 10px auto 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: center; }
+.db-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.db-mixrow b { font-size: 0.82rem; color: #334155; }
+.db-mixrow em { font-style: normal; font-size: 1.6rem; font-weight: 800; color: var(--c); letter-spacing: -0.03em; justify-self: end; grid-row: 1 / 3; grid-column: 3; }
+.db-mixrow > span:not(.db-dot) { grid-column: 2; font-size: 0.72rem; }
+.db-spark { grid-column: 1 / -1; }
+.db-spark svg { width: 100%; height: 26px; display: block; }
+.db-share { margin-top: 10px; font-size: 0.72rem; color: #7c8aa0; }
+.db-sharebar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: #eef1f6; gap: 2px; margin-bottom: 5px; }
+.db-sharebar i { display: block; height: 100%; }
+.db-attn { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 0.78rem; }
+.db-attn-h { font-weight: 700; color: #334155; margin-bottom: 4px; }
+.db-attn-row { display: flex; gap: 8px; cursor: pointer; padding: 2px 0; color: #475569; }
+.db-attn-row:hover span { color: var(--blue); }
+.db-attn-row small { color: #94a3b8; }
+.db-attn-row em { margin-left: auto; font-style: normal; color: #b45309; white-space: nowrap; }
+.db-attn-more { color: #94a3b8; font-size: 0.72rem; }
+.db-fold { margin-top: 14px; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
+.db-fold > summary { cursor: pointer; padding: 13px 16px; font-weight: 800; font-size: 0.9rem; color: #334155; list-style: none; display: flex; align-items: baseline; gap: 10px; }
+.db-fold > summary::-webkit-details-marker { display: none; }
+.db-fold > summary::before { content: '▸'; color: #94a3b8; transition: transform 0.15s ease; display: inline-block; }
+.db-fold[open] > summary::before { transform: rotate(90deg); }
+.db-fold > summary span { font-weight: 500; font-size: 0.78rem; color: #7c8aa0; }
+.db-fold > .acb-table, .db-fold > .an-grid, .db-fold > .an-pilot { margin: 0 14px 14px; border-radius: 12px; }
+.db-fold > .an-pilot { box-shadow: none; border: none; padding: 4px 2px 0; }
+.db-fold-out { margin-bottom: 0; }
+@media (max-width: 1000px) { .db-grid { grid-template-columns: 1fr; } }
 /* ── Engagement: big type, color-washed cards, softer text ─────────────── */
 .eng-mode { --soft: #475569; --softer: #7c8aa0; color: var(--soft); }
 .eng-mode .an-city-head h2 { color: #334155; }
@@ -891,13 +945,19 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
       <div id="an-city-body"></div>
     </div>
     <div id="an-raw-extra">
+    <details class="db-fold db-fold-out" id="fold-pilot" style="display:none" ontoggle="if (this.open && pilotMap) setTimeout(() => pilotMap.invalidateSize(), 50)">
+      <summary id="fold-pilot-sum">Trail Line pilot</summary>
+      <div class="card an-pilot eng-mode" id="an-pilot" style="display:none"></div>
+    </details>
+    <details class="db-fold db-fold-out">
+      <summary>More charts <span>QR scans by state · growth since tracking began</span></summary>
     <div class="an-grid">
-      <div class="card an-card wide">
+      <div class="card an-card wide" style="display:none">
         <h3>Daily Scans</h3>
         <div class="sub" id="an-daily-sub"></div>
         <canvas id="chart-daily" height="80"></canvas>
       </div>
-      <div class="card an-card">
+      <div class="card an-card" style="display:none">
         <h3 id="an-top-title">Top 10</h3>
         <div class="sub">By scans in the selected range</div>
         <canvas id="chart-top"></canvas>
@@ -913,7 +973,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
         <canvas id="chart-cumulative" height="70"></canvas>
       </div>
     </div>
-    <div class="card an-pilot" id="an-pilot" style="display:none; margin-top:16px"></div>
+    </details>
     </div>
     <div class="refreshed">
       <span id="mode-line-2">Humans only — bot scans excluded</span>
@@ -2129,37 +2189,62 @@ function renderCityBreakdown() {
   const codesN = courts.ranked.length + trail.ranked.length;
   const activeN = [...courts.ranked, ...trail.ranked].filter((r) => r.n > 0).length;
   const share = (n) => (cityTotal ? Math.round((n / cityTotal) * 100) : 0);
+  // Codes that need a look: live Fitness Court codes silent four weeks, or never scanned.
+  const today0 = laToday();
+  const quiet = inCity.filter((c) => c.kind !== 'trail' && c.locationStatus !== 'mobile').map((c) => {
+    const dd = state.daily.get(String(c.id));
+    const lastD = dd ? [...dd.entries()].filter(([, v]) => v.human + (state.includeBots ? v.bot : 0) > 0).map(([d]) => d).sort().at(-1) : null;
+    return { c, lastD };
+  }).filter((x) => neverScanned(x.c) || (x.lastD && Date.parse(today0) - Date.parse(x.lastD) > 28 * 864e5))
+    .sort((x, y) => (x.lastD || '').localeCompare(y.lastD || ''));
+  const top = [...courts.ranked, ...trail.ranked].sort((x, y) => y.n - x.n).slice(0, 8);
+  const topMax = Math.max(1, ...top.map((r) => r.n));
+  const fmtShort = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const rangeLc = esc(RANGE_LABELS[state.range].toLowerCase());
+  const wkChip = (a, b) => (a === b ? '<span class="ch-flat">same as last week</span>' : `<span class="${a > b ? 'ch-up' : 'ch-down'}">${a > b ? '▲' : '▼'} ${Math.abs(a - b)} vs last week</span>`);
   body.innerHTML = `
-    <div class="eq-card">
-      <div class="eq-head"><h3>QR code scans <span>${esc(RANGE_LABELS[state.range].toLowerCase())}</span></h3><p>Every scan of a Fitness Court or Trail Line QR code${all ? ' across the network' : ' in ' + esc(state.anCity)}.</p></div>
-      <div class="eq-row eq-row-raw">
-        <div class="eq-tile" style="--c:${NEON.court}"><b>${courts.total.toLocaleString()}</b><div class="eq-lbl">Fitness Court QR scans</div><div class="eq-sub">${courts.ranked.length} Fitness Court code${courts.ranked.length === 1 ? '' : 's'}</div></div>
-        <div class="eq-op">+</div>
-        <div class="eq-tile" style="--c:${NEON.trail}"><b>${trail.total.toLocaleString()}</b><div class="eq-lbl">Trail Line QR scans</div><div class="eq-sub">${trail.ranked.length} Trail Line sign code${trail.ranked.length === 1 ? '' : 's'}, test scans included</div></div>
-        <div class="eq-op">=</div>
-        <div class="eq-total"><b>${cityTotal.toLocaleString()}</b><div class="eq-lbl">Total QR scans</div><div class="eq-sub">${bounds ? `${chip(cityTotal, prevAll) || 'n/a'} vs the prior period (${prevAll.toLocaleString()})` : 'all time'}</div></div>
+    ${all ? '' : `<div class="db-ai" id="db-ai"><span class="rw-ai-icon">✦</span><div class="db-ai-text" id="an-overview">${cityOverview(state.anCity, courts, trail)}</div>
+      <button type="button" class="db-ai-more" onclick="this.parentElement.classList.toggle('open'); this.textContent = this.parentElement.classList.contains('open') ? 'Less' : 'More'">More</button></div>`}
+    <div class="db-grid">
+      <div class="db-card">
+        <div class="db-head"><h4>QR scans by day</h4><span>${rangeLc}${bounds ? ` · ${chip(cityTotal, prevAll) || 'n/a'} vs prior period` : ''}</span></div>
+        <div class="db-body"><canvas id="chart-city"></canvas></div>
+      </div>
+      <div class="db-card">
+        <div class="db-head"><h4>Top codes</h4><span>${rangeLc} · click one to see it on the map</span></div>
+        <div class="db-body db-list">${top.length ? top.map((r, i) => `
+          <div class="acb-bar" onclick="setView('map'); focusCourt(${Number(r.c.id)})" title="${esc(r.c.name)}">
+            <span class="nm"><em class="db-rank">${i + 1}</em>${esc(displayName(r.c))}${all ? ` <small>${esc(cityKey(r.c))}</small>` : ''}</span><span class="n">${r.n.toLocaleString()}</span>
+            <span class="track"><i style="width:${Math.max(2, Math.round((r.n / topMax) * 100))}%;background:${r.c.kind === 'trail' ? NEON.trail : NEON.court}"></i></span>
+          </div>`).join('') : '<div class="an-city-empty">No codes match the filters.</div>'}</div>
+      </div>
+      <div class="db-card">
+        <div class="db-head"><h4>When people scan</h4><span>Pacific time · live scans since Apr 7</span></div>
+        <div class="db-body db-when"><div id="tod-heat" class="tod-heat"><div class="an-city-empty">Loading…</div></div><div class="db-todbars"><canvas id="chart-tod"></canvas></div></div>
+      </div>
+      <div class="db-card">
+        <div class="db-head"><h4>This week</h4><span>last 7 days</span></div>
+        <div class="db-body">
+          <div class="db-mix">
+            <div class="db-mixrow" style="--c:${NEON.court}"><span class="db-dot"></span><b>Fitness Courts</b><em>${courts.thisWeek.toLocaleString()}</em>${wkChip(courts.thisWeek, courts.lastWeek)}<div class="db-spark">${sparkSVG(courts.spark, NEON.court)}</div></div>
+            <div class="db-mixrow" style="--c:${NEON.trail}"><span class="db-dot"></span><b>Trail Lines</b><em>${trail.thisWeek.toLocaleString()}</em>${wkChip(trail.thisWeek, trail.lastWeek)}<div class="db-spark">${sparkSVG(trail.spark, NEON.trail)}</div></div>
+          </div>
+          <div class="db-share"><div class="db-sharebar">${cityTotal ? `<i style="width:${share(courts.total)}%;background:${NEON.court}"></i><i style="width:${share(trail.total)}%;background:${NEON.trail}"></i>` : ''}</div>
+            <span>${rangeLc}: ${share(courts.total)}% Fitness Court · ${share(trail.total)}% Trail Line</span></div>
+          <div class="db-attn"><div class="db-attn-h">${quiet.length ? `⚠ ${quiet.length} Fitness Court code${quiet.length === 1 ? '' : 's'} to check` : '✓ Every Fitness Court code scanned in the last 4 weeks'}</div>
+            ${quiet.slice(0, 3).map((x) => `<div class="db-attn-row" onclick="setView('map'); focusCourt(${Number(x.c.id)})"><span>${esc(displayName(x.c))}${all ? ` <small>${esc(cityKey(x.c))}</small>` : ''}</span><em>${x.lastD ? 'last scan ' + fmtShort(x.lastD) : 'never scanned'}</em></div>`).join('')}
+            ${quiet.length > 3 ? `<div class="db-attn-more">+ ${quiet.length - 3} more in the List tab (Never scanned filter)</div>` : ''}</div>
+        </div>
       </div>
     </div>
-    <div class="eq-pair">
-      <div class="eq-stat"><div class="eq-lbl">QR scans in the last 7 days</div><b>${tw.toLocaleString()}</b>
-        <div class="eq-sub">${tw === lw ? 'the same as' : tw > lw ? `up ${(tw - lw).toLocaleString()} on` : `down ${(lw - tw).toLocaleString()} on`} the week before (${lw.toLocaleString()})</div></div>
-      <div class="eq-stat"><div class="eq-lbl">QR codes scanned ${esc(RANGE_LABELS[state.range].toLowerCase())}</div><b>${activeN} <small class="rw-of2">of ${codesN}</small></b>
-        <div class="eq-sub">${codesN - activeN ? `${codesN - activeN} code${codesN - activeN === 1 ? '' : 's'} with no scans in this range` : 'every code has scans'}</div></div>
-    </div>
-    ${all ? '' : `<div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="cp-overview rw-ai-body" id="an-overview"><div class="cp-label">Overview</div>${cityOverview(state.anCity, courts, trail)}</div></div>`}
-    <div class="acb-grid">${side('court', 'Fitness Courts', NEON.court, courts)}${side('trail', 'Trail Lines', NEON.trail, trail)}</div>
-    <div class="acb-row2">
-      <div class="acb-chart"><h4>Daily scans · ${esc(RANGE_LABELS[state.range])}</h4><canvas id="chart-city" height="90"></canvas></div>
-      <div class="acb-chart"><h4>By day of week</h4><div class="acb-dow">${[1, 2, 3, 4, 5, 6, 0].map((i) => `
-        <div><b>${dowNames[i]}</b><span class="track"><i style="width:${Math.round((dow[i] / dowMax) * 100)}%"></i></span><span>${Math.round((dow[i] / dowSum) * 100)}%</span></div>`).join('')}</div></div>
-    </div>
-    <div class="acb-chart rw-tod"><h4>Time of day · ${esc(RANGE_LABELS[state.range])} <span class="rw-tod-note">Pacific time · live scans since Apr 7, 2026</span></h4>
-      <div class="rw-tod-grid"><div><canvas id="chart-tod" height="150"></canvas></div><div id="tod-heat" class="tod-heat"><div class="an-city-empty">Loading…</div></div></div></div>
-    ${all ? '' : `<div class="acb-table"><h4>Every code</h4><table>
-      <thead><tr><th>Name</th><th>Type</th><th class="n">${esc(RANGE_LABELS[state.range])}</th>${bounds ? '<th class="n">Prior period</th><th class="n">Change</th>' : ''}<th class="n">Share</th><th class="n">All time</th><th>Last scan</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>`}`;
+    <details class="db-fold" ${state.openFolds?.codes ? 'open' : ''} ontoggle="(state.openFolds ||= {}).codes = this.open">
+      <summary>Every code <span>${codesN} codes · ${rangeLc}${all ? ' · top 50' : ''}</span></summary>
+      <div class="acb-table db-table"><table>
+        <thead><tr><th>Name</th><th>Type</th><th class="n">${esc(RANGE_LABELS[state.range])}</th>${bounds ? '<th class="n">Prior period</th><th class="n">Change</th>' : ''}<th class="n">Share</th><th class="n">All time</th><th>Last scan</th></tr></thead>
+        <tbody>${all ? rows.split('</tr>').slice(0, 50).join('</tr>') + '</tr>' : rows}</tbody></table></div>
+    </details>
+`;
 
-  // Stacked daily chart: courts vs trail lines.
   const series = new Map();
   for (const c of inCity) {
     const days = state.daily.get(String(c.id));
@@ -2179,10 +2264,10 @@ function renderCityBreakdown() {
       { label: 'Fitness Courts', data: labels.map((d) => series.get(d)?.court || 0), backgroundColor: '#2563eb', borderRadius: 3, stack: 's' },
       { label: 'Trail Lines', data: labels.map((d) => series.get(d)?.trail || 0), backgroundColor: TL_MAGENTA, borderRadius: 3, stack: 's' },
     ] },
-    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } } },
-      scales: { x: { stacked: true, ticks: { maxTicksLimit: 10 } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, boxHeight: 8, font: { size: 11 } } } },
+      scales: { x: { stacked: true, grid: { display: false }, ticks: { maxTicksLimit: 7, font: { size: 10 } } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0, font: { size: 10 } } } } },
   });
-  loadTimeOfDay(all ? null : inCity.map((c) => c.id), bounds);
+  loadTimeOfDay(inCity.map((c) => c.id), bounds);
   if (!all) loadCityAI(state.anCity, 'an-overview', () => state.view === 'analytics' && state.anMode === 'raw' && !!state.anCity);
 }
 
@@ -2209,7 +2294,7 @@ function openPilotAnalytics(city) {
   syncSearchToCity(city);
   state.anMode = 'raw';
   setView('analytics');
-  requestAnimationFrame(() => document.getElementById('an-pilot')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  requestAnimationFrame(() => { const f = document.getElementById('fold-pilot'); if (f) f.open = true; f?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 }
 
 // The Trail Line pilot view (vegas.html) is the template for every pilot: it
@@ -2233,13 +2318,17 @@ function renderPilotSection() {
   const pilot = pilots.find((p) => p.city === state.anCity);
   if (!state.anCity && pilots.length) {
     el.style.display = '';
+    const f0 = document.getElementById('fold-pilot');
+    if (f0) { f0.style.display = ''; document.getElementById('fold-pilot-sum').innerHTML = `Trail Line pilots <span>${pilots.length}</span>`; }
     el.innerHTML = `<div class="an-pilot-head"><div><div class="cp-eyebrow">Trail Line pilots</div><h2>${pilots.length} pilot${pilots.length === 1 ? '' : 's'}</h2></div></div>
       <div class="an-city-empty">Pick a pilot city to see its stations, map and daily scans here.</div>
       <div class="an-pilot-list">${pilots.map((p) => `<button class="hbtn" onclick="openPilotAnalytics('${esc(p.city)}')">${esc(p.city)}</button>`).join('')}</div>`;
     return;
   }
-  if (!pilot) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  const fold = document.getElementById('fold-pilot');
+  if (!pilot) { el.style.display = 'none'; el.innerHTML = ''; if (fold) fold.style.display = state.anCity ? 'none' : ''; return; }
   el.style.display = '';
+  if (fold) { fold.style.display = ''; document.getElementById('fold-pilot-sum').innerHTML = `Trail Line pilot <span>${esc(pilot.city)} · stations, map and daily scans</span>`; }
   el.innerHTML = `<div class="an-pilot-head"><div><div class="cp-eyebrow">Trail Line pilot</div><h2>${esc(pilot.city)}</h2></div>
       <span class="pl-status" id="pl-status"></span>
       <a class="hbtn" href="/report?pilot=${encodeURIComponent(pilot.slug)}" target="_blank" rel="noopener" title="Internal only: raw numbers">Internal report ↗</a></div>
@@ -2803,7 +2892,8 @@ function loadTimeOfDay(ids, bounds) {
       data: { labels: hours.map((_, h) => hl(h)), datasets: [{ data: hours, borderRadius: 3,
         backgroundColor: hours.map((_, h) => (h === peakH ? TL_MAGENTA : '#2563eb')) }] },
       options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.raw.toLocaleString()} scans (${Math.round((c.raw / total) * 100)}%)` } } },
-        scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: true, ticks: { precision: 0 } } } },
+        maintainAspectRatio: false,
+        scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10 } } }, y: { display: false, beginAtZero: true } } },
     });
     const max = Math.max(1, ...d.grid.flat());
     const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -2919,7 +3009,7 @@ function applyRoute() {
     if (view === 'map') { if (city) openCityPanel(city); else closeCityPanel(); }
     if (part === 'pilot') state.anMode = 'raw';
     setView(view);
-    if (part === 'pilot') setTimeout(() => document.getElementById('an-pilot')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 600);
+    if (part === 'pilot') setTimeout(() => { const f = document.getElementById('fold-pilot'); if (f) f.open = true; f?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 600);
   } finally { applyingRoute = false; }
 }
 addEventListener('popstate', (ev) => {
