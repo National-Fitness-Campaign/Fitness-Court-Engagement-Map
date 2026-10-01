@@ -231,7 +231,7 @@ h2 { font-weight: 700; font-size: 2.1rem; letter-spacing: -0.01em; margin-top: 6
 .mtrend b { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 1.05rem; color: var(--dark); }
 .legend-inline { display: flex; gap: 16px; font-size: 0.8rem; color: var(--ink-2); margin-top: 10px; flex-wrap: wrap; }
 .legend-inline i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
-.perf-whole { display: grid; grid-template-columns: 1.2fr repeat(4, 1fr); gap: 0; margin-top: 24px; background: var(--light); border-radius: 16px; overflow: hidden; }
+.perf-whole { display: grid; grid-template-columns: 1.2fr repeat(3, 1fr); gap: 0; margin-top: 24px; background: var(--light); border-radius: 16px; overflow: hidden; }
 .perf-whole > div { padding: 18px 20px; }
 .perf-whole > div + div { border-left: 1px solid rgba(0,108,163,0.15); }
 .perf-whole .pw-title b { display: block; font-size: 1.2rem; font-weight: 700; color: var(--ink); }
@@ -335,6 +335,16 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
   const mTrail = months.map((m) => trailCodes.reduce((t, c) => t + Object.entries(c.days || {}).filter(([d]) => d.startsWith(m) && launch && d >= launch).reduce((a, [, v]) => a + v, 0), 0));
   const mApp = months.map((m) => appByMonth[m] || 0);
   const mMax = Math.max(1, ...months.map((_, i) => mCourt[i] + mTrail[i] + mApp[i]));
+  // Monthly estimated uses: each month's counted activity × (yearly uses ÷
+  // counted activity per year, annualised over the complete months we have).
+  const fullIdx = months.map((m, i) => (m < today.slice(0, 7) ? i : -1)).filter((i) => i >= 0);
+  const perYr = (arr) => (fullIdx.length ? (fullIdx.reduce((t, i) => t + arr[i], 0) * 12) / fullIdx.length : 0);
+  const fcObs = months.map((_, i) => mCourt[i] + mApp[i]);
+  const kFc = perYr(fcObs) ? (fcUsers * A.visitsPerYear) / perYr(fcObs) : 0;
+  const kTl = perYr(mTrail) ? (trailUsersAll * A.visitsPerYear) / perYr(mTrail) : (live ? A.trailMult * U * A.visitsPerYear / 12 : 0);
+  const uCourt = fcObs.map((v) => v * kFc), uTrail = mTrail.map((v) => v * kTl);
+  const uMax = Math.max(1, ...months.map((_, i) => uCourt[i] + uTrail[i]));
+  const uTot = (m) => { const i = months.indexOf(m); return i < 0 ? 0 : uCourt[i] + uTrail[i]; };
   const full = months.filter((m) => m < today.slice(0, 7));
   const last = full.at(-1), prev = full.at(-2);
   const tot = (m) => { const i = months.indexOf(m); return mCourt[i] + mTrail[i] + mApp[i]; };
@@ -362,7 +372,7 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
       <div class="cover-stats">
         <div class="cstat"><div class="num">${fmt(reach)}</div><div class="lbl">Residents within a 10 minute walk</div><div class="hint">of a Fitness Court or the Trail Line</div></div>
         <div class="cstat"><div class="num">${big(kcal)}</div><div class="lbl">Calories burned per year</div><div class="hint">NFC estimate for ${nCourts} Fitness Courts</div></div>
-        <div class="cstat"><div class="num">${fmt(whole.users)}</div><div class="lbl">Estimated users</div><div class="hint">people using the Fitness Courts${live ? ' and the Trail Line' : ''} to date</div></div>
+        <div class="cstat"><div class="num">${big(whole.uses)}</div><div class="lbl">Estimated uses a year</div><div class="hint">visits to the Fitness Courts${live ? ' and the Trail Line' : ''}</div></div>
       </div>
     </div>
   </section>
@@ -378,11 +388,10 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
   <section class="page"><div class="pad">
     <div class="eyebrow">Program performance</div>
     <h2>How each part of the program is performing</h2>
-    <p class="lede">The same four measures for every part of ${esc(P.name)}'s program: who can walk to it, how many people use it, how often, and the calories they burn.</p>
+    <p class="lede">The same three measures for every part of ${esc(P.name)}'s program: who can walk to it, how often it is used, and the calories burned.</p>
     <div class="perf-whole">
       <div class="pw-title"><b>Whole project</b><span>Fitness Courts and the Trail Line together</span></div>
       <div><div class="num">${fmt(whole.reach)}</div><div class="lbl">Residents within a 10 minute walk</div></div>
-      <div><div class="num">${big(whole.users)}</div><div class="lbl">Estimated users</div></div>
       <div><div class="num">${big(whole.uses)}</div><div class="lbl">Estimated uses a year</div></div>
       <div><div class="num">${big(whole.kcal)}</div><div class="lbl">Calories burned a year</div></div>
     </div>
@@ -390,21 +399,20 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
       <div class="perf-col" style="--c:${c.color}">
         <div class="pc-head"><h3>${c.label}</h3><p>${esc(c.sub)}</p></div>
         <div class="pc-row"><div class="lbl">Residents within a 10 minute walk</div><div class="num">${fmt(c.reach)}</div></div>
-        ${c.users == null ? `<div class="pc-soon"><b>Counting begins ${fmtD(launch)}</b><span>Users, uses and calories for the ${esc(c.label.toLowerCase())} start with the public launch.</span></div>` : `
-        <div class="pc-row"><div class="lbl">Estimated users</div><div class="num">${big(c.users)}</div></div>
+        ${c.users == null ? `<div class="pc-soon"><b>Counting begins ${fmtD(launch)}</b><span>Uses and calories for the ${esc(c.label.toLowerCase())} start with the public launch.</span></div>` : `
         <div class="pc-row"><div class="lbl">Estimated uses a year</div><div class="num">${big(c.uses)}</div></div>
         <div class="pc-row"><div class="lbl">Calories burned a year</div><div class="num">${big(c.kcal)}</div></div>`}
       </div>`).join('')}
     </div>
-    <p class="xx-note" style="color:var(--ink-2)">Estimated users are the people NFC counts directly (new users in the NFC app and people scanning the QR code on each sign) scaled up for everyone who uses the site without the app or a scan. Uses assume ${A.visitsPerYear} visits a person a year. Calories: ${A.kcalCourt} per Fitness Court workout, ${A.kcalTrail} per Trail Line walk.</p>
+    <p class="xx-note" style="color:var(--ink-2)">Uses start from the activity NFC counts directly (new users in the NFC app and people scanning the QR code on each sign), scaled up for everyone who visits without the app or a scan, at ${A.visitsPerYear} visits a person a year. Calories: ${A.kcalCourt} per Fitness Court workout, ${A.kcalTrail} per Trail Line walk.</p>
   </div></section>
 
   <section class="page"><div class="pad">
-    <div class="eyebrow">Engagement over time</div>
-    <h2>${fmt(total)} engagements since tracking began</h2>
-    <p class="lede">${last && prev ? `${monthName(last, { month: 'long' })} brought ${fmt(tot(last))} engagements${tot(prev) ? `, ${tot(last) >= tot(prev) ? 'up' : 'down'} ${Math.abs(Math.round(((tot(last) - tot(prev)) / tot(prev)) * 100))}% on ${monthName(prev, { month: 'long' })}` : ''}.` : ''} Every scan of a Fitness Court or Trail Line sign, every app check-in and every new app user counts once.</p>
-    <div class="mtrend">${months.map((m, i) => { const t = mCourt[i] + mTrail[i] + mApp[i]; const h = (v) => Math.round((v / mMax) * 130); return `<div class="col"><b>${fmt(t)}</b><div class="stack" style="height:${Math.max(3, h(t))}px"><i style="height:${h(mCourt[i])}px;background:${C.court}"></i><i style="height:${h(mTrail[i])}px;background:${C.trail}"></i><i style="height:${h(mApp[i])}px;background:${C.app}"></i></div><span>${monthName(m)}${m === today.slice(0, 7) ? ' (to date)' : ''}</span></div>`; }).join('')}</div>
-    <div class="legend-inline"><span><i style="background:${C.court}"></i>Fitness Courts</span><span><i style="background:${C.trail}"></i>Trail Line</span><span><i style="background:${C.app}"></i>NFC app</span></div>
+    <div class="eyebrow">Use over time</div>
+    <h2>About ${big(whole.uses)} uses a year</h2>
+    <p class="lede">${last && prev && uTot(prev) ? `${monthName(last, { month: 'long' })} saw about ${fmt(uTot(last))} uses, ${uTot(last) >= uTot(prev) ? 'up' : 'down'} ${Math.abs(Math.round(((uTot(last) - uTot(prev)) / uTot(prev)) * 100))}% on ${monthName(prev, { month: 'long' })}. ` : ''}Each month follows the activity NFC counts on the signs and in the app, scaled to the yearly estimate.</p>
+    <div class="mtrend">${months.map((m, i) => { const fc = uCourt[i], tl = uTrail[i], t = fc + tl; const h = (v) => Math.round((v / uMax) * 130); return `<div class="col"><b>${big(t)}</b><div class="stack" style="height:${Math.max(3, h(t))}px"><i style="height:${h(fc)}px;background:${C.court}"></i><i style="height:${h(tl)}px;background:${C.trail}"></i></div><span>${monthName(m)}${m === today.slice(0, 7) ? ' (to date)' : ''}</span></div>`; }).join('')}</div>
+    <div class="legend-inline"><span><i style="background:${C.court}"></i>Fitness Courts</span><span><i style="background:${C.trail}"></i>Trail Line</span></div>
     <div class="eyebrow" style="margin-top:34px">Health impact</div>
     <div class="health">
       <div><div class="num">${big(kcal)}</div><div class="lbl">Calories burned / year</div><div class="hint">1.3M per Fitness Court</div></div>
@@ -427,9 +435,9 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
     <div class="eyebrow" style="margin-top:36px">How these numbers are measured</div>
     <ul class="notes" style="margin-top:10px">
       <li><b>Residents within a 10 minute walk</b>: 2020 U.S. Census population inside a 10 minute walk along the street network from each Fitness Court and along the Trail Line, within city limits. Each resident is counted once.</li>
-      <li><b>Engagements</b>: one QR scan of a Fitness Court or Trail Line sign, one workout check-in in the NFC app, or one new app user at a ${esc(P.name)} Fitness Court. Trail Line engagements count from the public launch.</li>
+      <li><b>Estimated uses</b>: NFC counts activity directly: new users in the NFC app at each Fitness Court and people scanning the QR code on each sign. Those counts are scaled up for everyone who visits without the app or a scan (about 10 people for every new app user), at ${A.visitsPerYear} visits a person a year. Trail Line use counts from the public launch.</li>
       <li><b>Health impact</b>: NFC program estimates per Fitness Court per year.</li>
-      <li>Figures shown as XX are still being finalized.</li>
+      <li><b>Calories</b>: ${A.kcalCourt} per Fitness Court workout (a 14 minute session) and ${A.kcalTrail} per Trail Line walk.</li>
     </ul>
   </div></section>`;
 
