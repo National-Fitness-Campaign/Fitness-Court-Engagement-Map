@@ -200,7 +200,9 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .an-city-head h2 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.01em; }
 .an-scope { font-size: 0.8rem; color: var(--text-3); margin-top: 4px; }
 .an-actions { margin-left: auto; display: flex; gap: 8px; align-self: center; }
-.an-actions .hbtn { font-size: 0.82rem; padding: 8px 13px; }
+.an-actions .hbtn { font-size: 0.82rem; padding: 8px 13px; text-decoration: none; gap: 7px; }
+.ext-ic { opacity: 0.55; flex: none; vertical-align: -2px; }
+a.hbtn { text-decoration: none; }
 .an-ext { border-color: #f6d58a; background: #fffaf0; }
 .pl-toggle { margin-left: auto; font-size: 0.8rem; padding: 7px 12px; }
 .an-city-clear { margin-left: 12px; align-self: center; border: 1px solid var(--border); background: var(--card); border-radius: 99px; padding: 6px 12px; font: 600 0.78rem 'Inter', sans-serif; color: var(--text-2); cursor: pointer; }
@@ -1602,7 +1604,7 @@ function renderSitePanel(el) {
     <div class="sp-facts">
       <div>${c.locationSource ? '✓' : '⚠'} ${src}</div>
       ${neverScanned(c) ? '<div class="sp-warn">⚠ Live two weeks or more with no scans: check the sign and the code.</div>' : ''}
-      ${c.url ? `<div><a href="${esc(c.url)}" target="_blank" rel="noopener">Open this QR code's link ↗</a></div>` : ''}
+      ${c.url ? `<div><a href="${esc(c.url)}" target="_blank" rel="noopener">Open this QR code's link <svg class="ext-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>` : ''}
     </div>
     <button type="button" class="cp-more" onclick="openCityPanel('${esc(city)}')">See the ${esc(city)} breakdown →</button>`;
   // Time of day for just this code.
@@ -2131,8 +2133,8 @@ function renderCityBreakdown() {
   // City reports (today: Trail Line pilot cities).
   const rp = state.anCity && engagementData?.pilots?.find((p) => p.city === state.anCity);
   document.getElementById('an-actions').innerHTML = rp ? `
-    <a class="hbtn" href="/report?pilot=${encodeURIComponent(rp.slug)}" target="_blank" rel="noopener" title="Raw numbers, for NFC only">Internal report ↗</a>
-    <a class="hbtn an-ext" href="/report-external?pilot=${encodeURIComponent(rp.slug)}" target="_blank" rel="noopener" title="Draft of the city-facing report">External report · draft ↗</a>` : '';
+    <a class="hbtn" href="/report?pilot=${encodeURIComponent(rp.slug)}" target="_blank" rel="noopener" title="Raw numbers, for NFC only">Internal report <svg class="ext-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
+    <a class="hbtn an-ext" href="/report-external?pilot=${encodeURIComponent(rp.slug)}" target="_blank" rel="noopener" title="Draft of the city-facing report">External report · draft <svg class="ext-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>` : '';
   if (state.anCity && !engagementData) loadEngagement().then(() => { if (state.view === 'analytics') renderCityBreakdown(); }).catch(() => {});
   const body = document.getElementById('an-city-body');
   document.getElementById('an-city-title').textContent = scopeTitle();
