@@ -3022,7 +3022,16 @@ function runSearch(q) {
   // the Fitness Court / Trail Line split — instead of just filtering pins.
   const cities = [...new Set(visibleCourts().map(cityKey))];
   const exact = needle ? cities.filter((k) => k.toLowerCase().startsWith(needle) || k.toLowerCase().split(',')[0] === needle) : [];
-  if (exact.length === 1) { state.cityPanel = exact[0]; if (state.view !== 'map') setView('map'); }
+  // Search stays in the current view: Analytics switches its city, List
+  // filters, and only the Map opens the city panel.
+  if (state.view === 'analytics') {
+    if (exact.length === 1) state.anCity = exact[0];
+    renderAll();
+    if (exact.length === 1) pushRoute();
+    return;
+  }
+  if (state.view === 'list') { renderAll(); return; }
+  if (exact.length === 1) state.cityPanel = exact[0];
   renderAll();
   const match = visibleCourts().filter((c) => c.hasLocation);
   if (exact.length === 1) openCityPanel(exact[0]);
