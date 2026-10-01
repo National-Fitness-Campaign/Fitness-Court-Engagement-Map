@@ -5,8 +5,8 @@
 //   - app: monthly app check-ins and first check-ins (the download proxy) per
 //     QR court, from a snapshot of the NFC app backend
 //     (api/_data/app-engagement.json, from sql/app-engagement-snapshot.sql)
-//   - areas: the reach shapes + city limits for the accessibility map
-//     (api/_data/accessibility-areas.json, same script)
+//   - ?areas=<City, ST>: one city's reach shapes + city limits for the map
+//     (api/_data/accessibility-areas.json, same scripts)
 //   - pilots: Trail Line pilot cities and their public start dates
 //   - benchmarks: the NFC per-court health figures the portal uses
 // Swapping the snapshot for a live read of the app database only changes this
@@ -25,6 +25,7 @@ const BENCHMARKS = {
 };
 
 let cached = null;
+let areasByCity = {};
 function build() {
   if (cached) return cached;
   const access = readJSON('accessibility.json');
@@ -46,9 +47,9 @@ function build() {
   const accessibility = {};
   for (const a of Object.values(access)) accessibility[a.city] = a;
 
+  areasByCity = areas;
   cached = {
     accessibility,
-    areas,
     app: {
       takenAt: app.takenAt,
       monthsFrom: app.monthsFrom,
@@ -75,7 +76,16 @@ function build() {
 export default function handler(req, res) {
   try {
     res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate, s-maxage=3600, stale-while-revalidate=86400');
-    res.status(200).json(build());
+    const data = build();
+    // ?areas=<City, ST>: that city's walk shapes and boundary (kept out of the
+    // main payload; with every city they add up to ~0.5 MB).
+    if (req.query?.areas != null) {
+      const a = areasByCity[String(req.query.areas)];
+      if (!a) { res.status(404).json({ error: 'No walk areas for that city' }); return; }
+      res.status(200).json(a);
+      return;
+    }
+    res.status(200).json(data);
   } catch (err) {
     sendError(res, err);
   }

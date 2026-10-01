@@ -17,8 +17,8 @@
 //                        pass --court-radius=2414 to compare.)
 //        City total:     union of both, so nobody is counted twice.
 //      Each is clipped to the city boundary when one is given.
-//   2. Take every 2020 Census block whose internal point falls inside the area
-//      and sum its 2020 Decennial population (P1_001N).
+//   2. Sum 2020 Census block population inside the area, area-weighted
+//      (a block half inside counts half; scripts/_census-reach.mjs).
 // Output: api/_data/accessibility.json (numbers) and api/_data/accessibility-areas.json
 // (the simplified shapes for the Engagement view's accessibility map), both read
 // by /api/engagement.
@@ -27,6 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as turf from '@turf/turf';
+import { blocksTouching, reachIn } from './_census-reach.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = Object.fromEntries(process.argv.slice(2).map((a) => { const [k, v] = a.replace(/^--/, '').split('='); return [k, v ?? true]; }));
@@ -43,7 +44,7 @@ function readKey(file) {
 }
 const AREAS_ONLY = Boolean(args['areas-only']);
 const censusKey = readKey(args['census-env']);
-if (!censusKey && !AREAS_ONLY) throw new Error('Need CENSUS_API_KEY (pass --census-env=<portal .env.local>)');
+
 
 const get = async (url) => {
   const r = await fetch(url, { signal: AbortSignal.timeout(60000) });
@@ -156,44 +157,16 @@ fs.writeFileSync(areasOut, JSON.stringify(areas) + '\n');
 console.log(`areas → ${path.relative(ROOT, areasOut)} (${Math.round(fs.statSync(areasOut).size / 1024)} KB)`);
 if (AREAS_ONLY) process.exit(0);
 
-// ── Census 2020 blocks (internal points) + population ───────────────────
-const [minX, minY, maxX, maxY] = turf.bbox(combinedArea);
-const blocks = [];
-for (let offset = 0; ; offset += 2000) {
-  const q = new URLSearchParams({
-    where: '1=1', geometry: `${minX},${minY},${maxX},${maxY}`, geometryType: 'esriGeometryEnvelope', inSR: '4326',
-    spatialRel: 'esriSpatialRelIntersects', outFields: 'GEOID,STATE,COUNTY,INTPTLAT,INTPTLON', returnGeometry: 'false',
-    resultOffset: String(offset), resultRecordCount: '2000', f: 'json',
-  });
-  const page = await get(`https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Census2020/MapServer/10/query?${q}`);
-  if (page.error) throw new Error(`TIGERweb: ${page.error.message}`);
-  blocks.push(...(page.features || []).map((f) => f.attributes));
-  if (!page.exceededTransferLimit && (page.features || []).length < 2000) break;
-}
-const pop = new Map();
-for (const key of new Set(blocks.map((b) => `${b.STATE}|${b.COUNTY}`))) {
-  const [st, co] = key.split('|');
-  const rows = await get(`https://api.census.gov/data/2020/dec/pl?get=P1_001N&for=block:*&in=state:${st}%20county:${co}&key=${censusKey}`);
-  const h = rows[0];
-  for (const r of rows.slice(1)) pop.set(`${r[h.indexOf('state')]}${r[h.indexOf('county')]}${r[h.indexOf('tract')]}${r[h.indexOf('block')]}`, Number(r[h.indexOf('P1_001N')]) || 0);
-}
-
-function reach(area) {
-  if (!area) return { population: 0, blocks: 0 };
-  let population = 0, n = 0;
-  for (const b of blocks) {
-    const pt = turf.point([Number(b.INTPTLON), Number(b.INTPTLAT)]);
-    if (turf.booleanPointInPolygon(pt, area)) { population += pop.get(b.GEOID) || 0; n++; }
-  }
-  return { population, blocks: n };
-}
+// ── 2020 Census population, area-weighted (scripts/_census-reach.mjs) ────
+const blocks = await blocksTouching(combinedArea);
+const reach = (a) => reachIn(blocks, a);
 
 const result = {
   pilot: PILOT,
   city: `${pilot.pilot.name}, ${pilot.pilot.state}`,
   computedAt: new Date().toISOString(),
-  courts: { ...reach(courtArea), byCode: Object.fromEntries(courts.map((c, i) => [c.id, reach(clip(courtShapes[i], boundary)).population])), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of a Fitness Court` : `Residents in 2020 Census blocks within ${COURT_RADIUS_M.toLocaleString()} m of a Fitness Court`, walkMinutes: WALK_MIN, areaMethod: METHOD },
-  trail: { ...reach(trailArea), trailMiles: Math.round(trailMiles * 10) / 10, bufferMeters: TRAIL_BUFFER_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of the Trail Line` : `Residents in 2020 Census blocks within ${TRAIL_BUFFER_M.toLocaleString()} m of the Trail Line`, walkMinutes: WALK_MIN, areaMethod: METHOD },
+  courts: { ...reach(courtArea), byCode: Object.fromEntries(courts.map((c, i) => [c.id, reach(clip(courtShapes[i], boundary)).population])), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: METHOD === 'isochrone' ? `Residents (2020 Census blocks, area-weighted) inside a ${WALK_MIN} minute walk (street network) of a Fitness Court` : `Residents in 2020 Census blocks within ${COURT_RADIUS_M.toLocaleString()} m of a Fitness Court`, walkMinutes: WALK_MIN, areaMethod: METHOD },
+  trail: { ...reach(trailArea), trailMiles: Math.round(trailMiles * 10) / 10, bufferMeters: TRAIL_BUFFER_M, method: METHOD === 'isochrone' ? `Residents (2020 Census blocks, area-weighted) inside a ${WALK_MIN} minute walk (street network) of the Trail Line` : `Residents in 2020 Census blocks within ${TRAIL_BUFFER_M.toLocaleString()} m of the Trail Line`, walkMinutes: WALK_MIN, areaMethod: METHOD },
   combined: { ...reach(combinedArea), method: 'Union of both areas, so nobody is counted twice' },
   trailGroups: Object.fromEntries(Object.entries(groupAreas).map(([g, a]) => [g, { label: GROUP_LABEL[g], ...reach(a), miles: groupMiles[g] }])),
   clippedToCityLimits: Boolean(boundary),

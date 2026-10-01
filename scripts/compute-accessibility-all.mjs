@@ -10,7 +10,7 @@
 //   - clipped to the city's Census boundary (place, town/township or county; see
 //     api/_boundary-lookup.js). Universities and school districts have no Census
 //     boundary, so their walk areas are not clipped.
-//   - 2020 Census blocks whose internal point falls inside, summed (P1_001N)
+//   - 2020 Census block population, area-weighted (scripts/_census-reach.mjs)
 // Writes into api/_data/accessibility.json and accessibility-areas.json under
 // the city key the page uses ("San Francisco, CA"). Saves after every city, so
 // it can be stopped and re-run; finished cities are skipped unless --redo.
@@ -20,6 +20,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as turf from '@turf/turf';
 import { findBoundary } from '../api/_boundary-lookup.js';
+import { blocksTouching, reachIn } from './_census-reach.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = Object.fromEntries(process.argv.slice(2).map((a) => { const [k, ...v] = a.replace(/^--/, '').split('='); return [k, v.length ? v.join('=') : true]; }));
@@ -32,9 +33,8 @@ function readVar(file, name) {
   const line = fs.readFileSync(file, 'utf8').split('\n').find((l) => l.startsWith(name + '='));
   return line ? line.slice(name.length + 1).trim().replace(/^"|"$/g, '') : null;
 }
-const censusKey = readVar(args['census-env'], 'CENSUS_API_KEY');
 const mapboxToken = readVar(args['census-env'], 'NEXT_PUBLIC_MAPBOX_TOKEN') || readVar(args['census-env'], 'MAPBOX_TOKEN');
-if (!censusKey || !mapboxToken) throw new Error('Need CENSUS_API_KEY and NEXT_PUBLIC_MAPBOX_TOKEN (pass --census-env=<portal .env.local>)');
+if (!mapboxToken) throw new Error('Need NEXT_PUBLIC_MAPBOX_TOKEN (pass --census-env=<portal .env.local>)');
 
 const get = async (url, tries = 3) => {
   for (let i = 0; ; i++) {
@@ -58,8 +58,6 @@ const slim = (f) => (f ? { type: 'Feature', properties: {}, geometry: turf.trunc
 // ── Caches (shared with compute-accessibility.mjs) ─────────────────────────
 const isoFile = path.join(ROOT, 'data', 'isochrone-cache.json');
 const isoCache = fs.existsSync(isoFile) ? JSON.parse(fs.readFileSync(isoFile, 'utf8')) : {};
-const popDir = path.join(ROOT, 'data', 'census-pop-cache');
-fs.mkdirSync(popDir, { recursive: true });
 async function isochrone(lon, lat) {
   const key = `walk${WALK_MIN}:${lon.toFixed(5)},${lat.toFixed(5)}`;
   if (isoCache[key]) return isoCache[key];
@@ -69,38 +67,15 @@ async function isochrone(lon, lat) {
   isoCache[key] = { type: 'Feature', properties: {}, geometry: f.geometry };
   return isoCache[key];
 }
-async function countyPop(st, co) {
-  const file = path.join(popDir, `${st}${co}.json`);
-  if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'));
-  const rows = await get(`https://api.census.gov/data/2020/dec/pl?get=P1_001N&for=block:*&in=state:${st}%20county:${co}&key=${censusKey}`);
-  const h = rows[0], out = {};
-  for (const r of rows.slice(1)) out[`${r[h.indexOf('state')]}${r[h.indexOf('county')]}${r[h.indexOf('tract')]}${r[h.indexOf('block')]}`] = Number(r[h.indexOf('P1_001N')]) || 0;
-  fs.writeFileSync(file, JSON.stringify(out));
-  return out;
-}
-async function blocksIn(area) {
-  const [minX, minY, maxX, maxY] = turf.bbox(area);
-  const blocks = [];
-  for (let offset = 0; ; offset += 2000) {
-    const q = new URLSearchParams({
-      where: '1=1', geometry: `${minX},${minY},${maxX},${maxY}`, geometryType: 'esriGeometryEnvelope', inSR: '4326',
-      spatialRel: 'esriSpatialRelIntersects', outFields: 'GEOID,STATE,COUNTY,INTPTLAT,INTPTLON', returnGeometry: 'false',
-      resultOffset: String(offset), resultRecordCount: '2000', f: 'json',
-    });
-    const page = await get(`https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Census2020/MapServer/10/query?${q}`);
-    if (page.error) throw new Error(`TIGERweb: ${page.error.message}`);
-    blocks.push(...(page.features || []).map((f) => f.attributes));
-    if (!page.exceededTransferLimit && (page.features || []).length < 2000) break;
-  }
-  return blocks;
-}
-
 // ── Cities ─────────────────────────────────────────────────────────────────
 const outFile = path.join(ROOT, 'api', '_data', 'accessibility.json');
 const areasFile = path.join(ROOT, 'api', '_data', 'accessibility-areas.json');
 const accAll = fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, 'utf8')) : {};
 const areasAll = fs.existsSync(areasFile) ? JSON.parse(fs.readFileSync(areasFile, 'utf8')) : {};
 const done = new Set(Object.values(accAll).map((a) => a.city));
+// Trail Line pilot cities belong to compute-accessibility.mjs (it adds the
+// trail and its lines); never overwrite them here, even with --redo.
+const pilotCities = new Set(Object.values(accAll).filter((a) => a.pilot).map((a) => a.city));
 
 const courtsResp = await get(`${BASE}/api/courts?t=${Date.now()}`);
 const codes = (Array.isArray(courtsResp) ? courtsResp : courtsResp.courts || [])
@@ -109,6 +84,7 @@ const byCity = new Map();
 for (const c of codes) { const k = `${c.city}, ${c.state}`; if (!byCity.has(k)) byCity.set(k, []); byCity.get(k).push(c); }
 let cities = [...byCity.keys()].sort();
 if (args.only) cities = cities.filter((k) => k === args.only);
+cities = cities.filter((k) => !pilotCities.has(k));
 if (!args.redo) cities = cities.filter((k) => !done.has(k));
 console.log(`${cities.length} cities to do (${byCity.size} with Fitness Courts, ${done.size} already done)`);
 
@@ -131,17 +107,10 @@ for (const key of cities) {
     }
     const per = shapes.map((sh) => clip(sh, boundary) || sh);
     const area = unionAll(per);
-    const blocks = await blocksIn(area);
-    const pop = {};
-    for (const k of new Set(blocks.map((b) => `${b.STATE}|${b.COUNTY}`))) Object.assign(pop, await countyPop(...k.split('|')));
-    const reach = (a) => {
-      if (!a) return { population: 0, blocks: 0 };
-      let population = 0, nb = 0;
-      for (const b of blocks) if (turf.booleanPointInPolygon(turf.point([Number(b.INTPTLON), Number(b.INTPTLAT)]), a)) { population += pop[b.GEOID] || 0; nb++; }
-      return { population, blocks: nb };
-    };
+    const blocks = await blocksTouching(area);
+    const reach = (a) => reachIn(blocks, a);
     const total = reach(area);
-    const method = `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of a Fitness Court`;
+    const method = `Residents (2020 Census blocks, area-weighted) inside a ${WALK_MIN} minute walk (street network) of a Fitness Court`;
     accAll[key] = {
       city: key, computedAt: new Date().toISOString(),
       courts: { ...total, byCode: Object.fromEntries(list.map((c, i) => [c.id, reach(per[i]).population])), sites: list.length, method, walkMinutes: WALK_MIN, areaMethod: 'isochrone' },

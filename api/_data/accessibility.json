@@ -2,59 +2,3160 @@
  "las-vegas": {
   "pilot": "las-vegas",
   "city": "Las Vegas, NV",
-  "computedAt": "2026-10-01T16:43:44.711Z",
+  "computedAt": "2026-10-01T17:18:35.203Z",
   "courts": {
-   "population": 15406,
-   "blocks": 121,
+   "population": 16613,
+   "blocks": 206,
    "byCode": {
-    "11033889": 5269,
-    "11033908": 1622,
-    "11101128": 2192,
-    "11101162": 1874,
-    "11102180": 1272,
-    "11102199": 3177,
-    "11102213": 5856
+    "11033889": 5235,
+    "11033908": 2426,
+    "11101128": 2890,
+    "11101162": 2148,
+    "11102180": 540,
+    "11102199": 3373,
+    "11102213": 5513
    },
    "sites": 7,
    "radiusMeters": 805,
-   "method": "Residents in 2020 Census blocks inside a 10 minute walk (street network) of a Fitness Court",
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
    "walkMinutes": 10,
    "areaMethod": "isochrone"
   },
   "trail": {
-   "population": 15444,
-   "blocks": 112,
+   "population": 17580,
+   "blocks": 157,
    "trailMiles": 11.4,
    "bufferMeters": 805,
-   "method": "Residents in 2020 Census blocks inside a 10 minute walk (street network) of the Trail Line",
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of the Trail Line",
    "walkMinutes": 10,
    "areaMethod": "isochrone"
   },
   "combined": {
-   "population": 24177,
-   "blocks": 179,
+   "population": 26247,
+   "blocks": 270,
    "method": "Union of both areas, so nobody is counted twice"
   },
   "trailGroups": {
    "red": {
     "label": "Red line · Bonanza Trail",
-    "population": 5798,
-    "blocks": 58,
+    "population": 7799,
+    "blocks": 86,
     "miles": 1.6
    },
    "yellow": {
     "label": "Yellow line · Lone Mountain Trail",
-    "population": 6844,
-    "blocks": 48,
+    "population": 7329,
+    "blocks": 78,
     "miles": 0.7
    },
    "loops": {
     "label": "Park loops",
-    "population": 15444,
-    "blocks": 111,
+    "population": 17031,
+    "blocks": 155,
     "miles": 9.1
    }
   },
   "clippedToCityLimits": true
+ },
+ "Hayward, CA": {
+  "city": "Hayward, CA",
+  "computedAt": "2026-10-01T17:19:51.089Z",
+  "courts": {
+   "population": 21160,
+   "blocks": 173,
+   "byCode": {
+    "9016743": 6711,
+    "9016746": 4136,
+    "9016747": 981,
+    "11494022": 5986,
+    "11899039": 4924
+   },
+   "sites": 5,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 21160,
+   "blocks": 173,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Hayward city"
+ },
+ "Albany College, NY": {
+  "city": "Albany College, NY",
+  "computedAt": "2026-10-01T17:19:30.011Z",
+  "courts": {
+   "population": 2857,
+   "blocks": 38,
+   "byCode": {
+    "9164184": 2857
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 2857,
+   "blocks": 38,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Albany County, NY": {
+  "city": "Albany County, NY",
+  "computedAt": "2026-10-01T17:19:31.529Z",
+  "courts": {
+   "population": 72,
+   "blocks": 12,
+   "byCode": {
+    "9139786": 14,
+    "9164182": 57
+   },
+   "sites": 2,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 72,
+   "blocks": 12,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Albany County"
+ },
+ "Amarillo, TX": {
+  "city": "Amarillo, TX",
+  "computedAt": "2026-10-01T17:19:31.790Z",
+  "courts": {
+   "population": 92,
+   "blocks": 3,
+   "byCode": {
+    "11810201": 92
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 92,
+   "blocks": 3,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Amarillo city"
+ },
+ "Angelina College, TX": {
+  "city": "Angelina College, TX",
+  "computedAt": "2026-10-01T17:19:31.949Z",
+  "courts": {
+   "population": 71,
+   "blocks": 7,
+   "byCode": {
+    "11674748": 71
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 71,
+   "blocks": 7,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Ascension Parish, LA": {
+  "city": "Ascension Parish, LA",
+  "computedAt": "2026-10-01T17:19:32.951Z",
+  "courts": {
+   "population": 765,
+   "blocks": 14,
+   "byCode": {
+    "11951646": 765
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 765,
+   "blocks": 14,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Binghamton University, NY": {
+  "city": "Binghamton University, NY",
+  "computedAt": "2026-10-01T17:19:33.104Z",
+  "courts": {
+   "population": 2814,
+   "blocks": 11,
+   "byCode": {
+    "11947995": 2814
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 2814,
+   "blocks": 11,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Birmingham, AL": {
+  "city": "Birmingham, AL",
+  "computedAt": "2026-10-01T17:19:34.879Z",
+  "courts": {
+   "population": 1261,
+   "blocks": 100,
+   "byCode": {
+    "11161841": 363,
+    "11161858": 770,
+    "11225660": 127
+   },
+   "sites": 3,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1261,
+   "blocks": 100,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Birmingham city"
+ },
+ "Boroughof Oaklyn, NJ": {
+  "city": "Boroughof Oaklyn, NJ",
+  "computedAt": "2026-10-01T17:19:35.875Z",
+  "courts": {
+   "population": 3611,
+   "blocks": 66,
+   "byCode": {
+    "12065405": 3611
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 3611,
+   "blocks": 66,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Brownsville, TX": {
+  "city": "Brownsville, TX",
+  "computedAt": "2026-10-01T17:19:36.189Z",
+  "courts": {
+   "population": 1742,
+   "blocks": 25,
+   "byCode": {
+    "9850296": 1742
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1742,
+   "blocks": 25,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Brownsville city"
+ },
+ "California State University Fresno, CA": {
+  "city": "California State University Fresno, CA",
+  "computedAt": "2026-10-01T17:19:36.381Z",
+  "courts": {
+   "population": 2697,
+   "blocks": 15,
+   "byCode": {
+    "11994288": 2697
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 2697,
+   "blocks": 15,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Champlain, NY": {
+  "city": "Champlain, NY",
+  "computedAt": "2026-10-01T17:19:36.900Z",
+  "courts": {
+   "population": 6,
+   "blocks": 6,
+   "byCode": {
+    "11951520": 6
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 6,
+   "blocks": 6,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Champlain town"
+ },
+ "Channahon Park District, IL": {
+  "city": "Channahon Park District, IL",
+  "computedAt": "2026-10-01T17:19:37.065Z",
+  "courts": {
+   "population": 317,
+   "blocks": 15,
+   "byCode": {
+    "11442632": 317
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 317,
+   "blocks": 15,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Charlestown Township, PA": {
+  "city": "Charlestown Township, PA",
+  "computedAt": "2026-10-01T17:19:37.431Z",
+  "courts": {
+   "population": 45,
+   "blocks": 6,
+   "byCode": {
+    "11114280": 45
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 45,
+   "blocks": 6,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Charlestown township"
+ },
+ "Charter Township Of Union, MI": {
+  "city": "Charter Township Of Union, MI",
+  "computedAt": "2026-10-01T17:19:37.713Z",
+  "courts": {
+   "population": 246,
+   "blocks": 15,
+   "byCode": {
+    "11623366": 246
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 246,
+   "blocks": 15,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Union charter township"
+ },
+ "Chili, NY": {
+  "city": "Chili, NY",
+  "computedAt": "2026-10-01T17:19:38.231Z",
+  "courts": {
+   "population": 269,
+   "blocks": 12,
+   "byCode": {
+    "11948006": 269
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 269,
+   "blocks": 12,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Chili town"
+ },
+ "City Of Lowry Crossing, TX": {
+  "city": "City Of Lowry Crossing, TX",
+  "computedAt": "2026-10-01T17:19:38.501Z",
+  "courts": {
+   "population": 231,
+   "blocks": 13,
+   "byCode": {
+    "11114292": 231
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 231,
+   "blocks": 13,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Lowry Crossing city"
+ },
+ "Cityof Goliad, TX": {
+  "city": "Cityof Goliad, TX",
+  "computedAt": "2026-10-01T17:19:38.816Z",
+  "courts": {
+   "population": 636,
+   "blocks": 63,
+   "byCode": {
+    "10783851": 636
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 636,
+   "blocks": 63,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Goliad city"
+ },
+ "Cityof Hamtramck, MI": {
+  "city": "Cityof Hamtramck, MI",
+  "computedAt": "2026-10-01T17:19:39.140Z",
+  "courts": {
+   "population": 7142,
+   "blocks": 34,
+   "byCode": {
+    "12262054": 7142
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 7142,
+   "blocks": 34,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Hamtramck city"
+ },
+ "Cityof Milford, IA": {
+  "city": "Cityof Milford, IA",
+  "computedAt": "2026-10-01T17:19:39.448Z",
+  "courts": {
+   "population": 994,
+   "blocks": 54,
+   "byCode": {
+    "12065391": 994
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 994,
+   "blocks": 54,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Milford city"
+ },
+ "Cityof Schenectady, NY": {
+  "city": "Cityof Schenectady, NY",
+  "computedAt": "2026-10-01T17:19:39.784Z",
+  "courts": {
+   "population": 4825,
+   "blocks": 63,
+   "byCode": {
+    "9164188": 4825
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 4825,
+   "blocks": 63,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Schenectady city"
+ },
+ "Clay County, FL": {
+  "city": "Clay County, FL",
+  "computedAt": "2026-10-01T17:19:40.066Z",
+  "courts": {
+   "population": 767,
+   "blocks": 19,
+   "byCode": {
+    "11225696": 767
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 767,
+   "blocks": 19,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Clay County"
+ },
+ "Cleveland Public Schools, OK": {
+  "city": "Cleveland Public Schools, OK",
+  "computedAt": "2026-10-01T17:19:40.216Z",
+  "courts": {
+   "population": 296,
+   "blocks": 12,
+   "byCode": {
+    "11042495": 296
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 296,
+   "blocks": 12,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Columbia Falls, MT": {
+  "city": "Columbia Falls, MT",
+  "computedAt": "2026-10-01T17:19:40.595Z",
+  "courts": {
+   "population": 1667,
+   "blocks": 91,
+   "byCode": {
+    "12270533": 1667
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1667,
+   "blocks": 91,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Columbia Falls city"
+ },
+ "Cranberry Township, PA": {
+  "city": "Cranberry Township, PA",
+  "computedAt": "2026-10-01T17:19:40.901Z",
+  "courts": {
+   "population": 200,
+   "blocks": 10,
+   "byCode": {
+    "11612558": 200
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 200,
+   "blocks": 10,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Cranberry township"
+ },
+ "Crosby Township, OH": {
+  "city": "Crosby Township, OH",
+  "computedAt": "2026-10-01T17:19:41.192Z",
+  "courts": {
+   "population": 3,
+   "blocks": 2,
+   "byCode": {
+    "12138876": 3
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 3,
+   "blocks": 2,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Crosby township"
+ },
+ "DYouville University, NY": {
+  "city": "DYouville University, NY",
+  "computedAt": "2026-10-01T17:19:41.385Z",
+  "courts": {
+   "population": 5651,
+   "blocks": 68,
+   "byCode": {
+    "12065374": 5651
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 5651,
+   "blocks": 68,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Depew, NY": {
+  "city": "Depew, NY",
+  "computedAt": "2026-10-01T17:19:41.754Z",
+  "courts": {
+   "population": 1175,
+   "blocks": 30,
+   "byCode": {
+    "11951169": 1175
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1175,
+   "blocks": 30,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Depew village"
+ },
+ "Dublin USD, CA": {
+  "city": "Dublin USD, CA",
+  "computedAt": "2026-10-01T17:19:41.921Z",
+  "courts": {
+   "population": 2043,
+   "blocks": 24,
+   "byCode": {
+    "9813864": 2043
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 2043,
+   "blocks": 24,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Dutchess Community College, NY": {
+  "city": "Dutchess Community College, NY",
+  "computedAt": "2026-10-01T17:19:42.136Z",
+  "courts": {
+   "population": 149,
+   "blocks": 9,
+   "byCode": {
+    "9781524": 149
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 149,
+   "blocks": 9,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "East Tennessee State University, TN": {
+  "city": "East Tennessee State University, TN",
+  "computedAt": "2026-10-01T17:19:42.290Z",
+  "courts": {
+   "population": 764,
+   "blocks": 11,
+   "byCode": {
+    "11959196": 764
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 764,
+   "blocks": 11,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Eastern Camden County Regional School District, NJ": {
+  "city": "Eastern Camden County Regional School District, NJ",
+  "computedAt": "2026-10-01T17:19:42.437Z",
+  "courts": {
+   "population": 230,
+   "blocks": 5,
+   "byCode": {
+    "11959204": 230
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 230,
+   "blocks": 5,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Edinburg, TX": {
+  "city": "Edinburg, TX",
+  "computedAt": "2026-10-01T17:19:42.814Z",
+  "courts": {
+   "population": 965,
+   "blocks": 25,
+   "byCode": {
+    "12102639": 965
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 965,
+   "blocks": 25,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Edinburg city"
+ },
+ "El Monte, CA": {
+  "city": "El Monte, CA",
+  "computedAt": "2026-10-01T17:19:43.215Z",
+  "courts": {
+   "population": 7022,
+   "blocks": 79,
+   "byCode": {
+    "11430543": 7022
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 7022,
+   "blocks": 79,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "El Monte city"
+ },
+ "Farmers Branch, TX": {
+  "city": "Farmers Branch, TX",
+  "computedAt": "2026-10-01T17:19:43.552Z",
+  "courts": {
+   "population": 1146,
+   "blocks": 32,
+   "byCode": {
+    "10554578": 1146
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1146,
+   "blocks": 32,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Farmers Branch city"
+ },
+ "Farmington, MI": {
+  "city": "Farmington, MI",
+  "computedAt": "2026-10-01T17:19:43.840Z",
+  "courts": {
+   "population": 855,
+   "blocks": 19,
+   "byCode": {
+    "12329317": 855
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 855,
+   "blocks": 19,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Farmington city"
+ },
+ "Forest Hill, TX": {
+  "city": "Forest Hill, TX",
+  "computedAt": "2026-10-01T17:19:44.121Z",
+  "courts": {
+   "population": 1342,
+   "blocks": 32,
+   "byCode": {
+    "8535705": 1342
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1342,
+   "blocks": 32,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Forest Hill city"
+ },
+ "Fort Scott, KS": {
+  "city": "Fort Scott, KS",
+  "computedAt": "2026-10-01T17:19:44.488Z",
+  "courts": {
+   "population": 868,
+   "blocks": 75,
+   "byCode": {
+    "11430538": 868
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 868,
+   "blocks": 75,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Fort Scott city"
+ },
+ "Fort Stockton, TX": {
+  "city": "Fort Stockton, TX",
+  "computedAt": "2026-10-01T17:19:44.804Z",
+  "courts": {
+   "population": 1022,
+   "blocks": 73,
+   "byCode": {
+    "11721310": 1022
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1022,
+   "blocks": 73,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Fort Stockton city"
+ },
+ "Fulton, IL": {
+  "city": "Fulton, IL",
+  "computedAt": "2026-10-01T17:19:45.125Z",
+  "courts": {
+   "population": 752,
+   "blocks": 89,
+   "byCode": {
+    "10777635": 752
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 752,
+   "blocks": 89,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Fulton city"
+ },
+ "Glenwood, IL": {
+  "city": "Glenwood, IL",
+  "computedAt": "2026-10-01T17:19:45.638Z",
+  "courts": {
+   "population": 64,
+   "blocks": 10,
+   "byCode": {
+    "11225703": 64
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 64,
+   "blocks": 10,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Gloucester Township, NJ": {
+  "city": "Gloucester Township, NJ",
+  "computedAt": "2026-10-01T17:19:45.972Z",
+  "courts": {
+   "population": 1290,
+   "blocks": 28,
+   "byCode": {
+    "11541556": 1290
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1290,
+   "blocks": 28,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Gloucester township"
+ },
+ "Grand Prairie, TX": {
+  "city": "Grand Prairie, TX",
+  "computedAt": "2026-10-01T17:19:48.166Z",
+  "courts": {
+   "population": 9178,
+   "blocks": 143,
+   "byCode": {
+    "8535713": 1833,
+    "8535714": 737,
+    "8535715": 639,
+    "8535717": 1375,
+    "8535718": 1943,
+    "8535719": 2651
+   },
+   "sites": 6,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 9178,
+   "blocks": 143,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Grand Prairie city"
+ },
+ "Greater Egg Harbor Regional High School District, NJ": {
+  "city": "Greater Egg Harbor Regional High School District, NJ",
+  "computedAt": "2026-10-01T17:19:48.425Z",
+  "courts": {
+   "population": 75,
+   "blocks": 2,
+   "byCode": {
+    "11810208": 75
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 75,
+   "blocks": 2,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Greece, NY": {
+  "city": "Greece, NY",
+  "computedAt": "2026-10-01T17:19:48.969Z",
+  "courts": {
+   "population": 1266,
+   "blocks": 18,
+   "byCode": {
+    "11951178": 1266
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1266,
+   "blocks": 18,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Greece town"
+ },
+ "Greenfield Township, PA": {
+  "city": "Greenfield Township, PA",
+  "computedAt": "2026-10-01T17:19:49.247Z",
+  "courts": {
+   "population": 441,
+   "blocks": 24,
+   "byCode": {
+    "11390363": 441
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 441,
+   "blocks": 24,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Greenfield township"
+ },
+ "Hardyston Township, NJ": {
+  "city": "Hardyston Township, NJ",
+  "computedAt": "2026-10-01T17:19:49.600Z",
+  "courts": {
+   "population": 11,
+   "blocks": 3,
+   "byCode": {
+    "12065386": 11
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 11,
+   "blocks": 3,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Hardyston township"
+ },
+ "Haverstraw, NY": {
+  "city": "Haverstraw, NY",
+  "computedAt": "2026-10-01T17:19:49.895Z",
+  "courts": {
+   "population": 7017,
+   "blocks": 61,
+   "byCode": {
+    "11951188": 7017
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 7017,
+   "blocks": 61,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Haverstraw village"
+ },
+ "Henderson, NV": {
+  "city": "Henderson, NV",
+  "computedAt": "2026-10-01T17:19:51.597Z",
+  "courts": {
+   "population": 1189,
+   "blocks": 14,
+   "byCode": {
+    "11102176": 1189
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1189,
+   "blocks": 14,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Henderson city"
+ },
+ "Henry County, GA": {
+  "city": "Henry County, GA",
+  "computedAt": "2026-10-01T17:19:51.887Z",
+  "courts": {
+   "population": 297,
+   "blocks": 8,
+   "byCode": {
+    "9808422": 297
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 297,
+   "blocks": 8,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Henry County"
+ },
+ "Herkimer, NY": {
+  "city": "Herkimer, NY",
+  "computedAt": "2026-10-01T17:19:52.461Z",
+  "courts": {
+   "population": 309,
+   "blocks": 23,
+   "byCode": {
+    "11951199": 309
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 309,
+   "blocks": 23,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Herkimer town"
+ },
+ "Hernando County, FL": {
+  "city": "Hernando County, FL",
+  "computedAt": "2026-10-01T17:19:52.762Z",
+  "courts": {
+   "population": 237,
+   "blocks": 15,
+   "byCode": {
+    "9484548": 237
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 237,
+   "blocks": 15,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Hernando County"
+ },
+ "Highlands Ranch, CO": {
+  "city": "Highlands Ranch, CO",
+  "computedAt": "2026-10-01T17:19:53.308Z",
+  "courts": {
+   "population": 983,
+   "blocks": 23,
+   "byCode": {
+    "1003427": 983
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 983,
+   "blocks": 23,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Highlands Ranch CDP"
+ },
+ "Hillsborough County Public Schools, FL": {
+  "city": "Hillsborough County Public Schools, FL",
+  "computedAt": "2026-10-01T17:19:53.499Z",
+  "courts": {
+   "population": 1177,
+   "blocks": 42,
+   "byCode": {
+    "11994039": 1177
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1177,
+   "blocks": 42,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Horn Lake, MS": {
+  "city": "Horn Lake, MS",
+  "computedAt": "2026-10-01T17:19:53.804Z",
+  "courts": {
+   "population": 291,
+   "blocks": 8,
+   "byCode": {
+    "12111424": 291
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 291,
+   "blocks": 8,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Horn Lake city"
+ },
+ "Huntingburg, IN": {
+  "city": "Huntingburg, IN",
+  "computedAt": "2026-10-01T17:19:54.053Z",
+  "courts": {
+   "population": 40,
+   "blocks": 5,
+   "byCode": {
+    "11959045": 40
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 40,
+   "blocks": 5,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Huntingburg city"
+ },
+ "Jones County, NC": {
+  "city": "Jones County, NC",
+  "computedAt": "2026-10-01T17:19:54.347Z",
+  "courts": {
+   "population": 6,
+   "blocks": 6,
+   "byCode": {
+    "9785517": 6
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 6,
+   "blocks": 6,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Jones County"
+ },
+ "La Quinta, CA": {
+  "city": "La Quinta, CA",
+  "computedAt": "2026-10-01T17:19:54.629Z",
+  "courts": {
+   "population": 870,
+   "blocks": 19,
+   "byCode": {
+    "11766811": 870
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 870,
+   "blocks": 19,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "La Quinta city"
+ },
+ "Lavon, TX": {
+  "city": "Lavon, TX",
+  "computedAt": "2026-10-01T17:19:54.963Z",
+  "courts": {
+   "population": 181,
+   "blocks": 12,
+   "byCode": {
+    "8535720": 181
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 181,
+   "blocks": 12,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Lavon city"
+ },
+ "Le Mars, IA": {
+  "city": "Le Mars, IA",
+  "computedAt": "2026-10-01T17:19:55.249Z",
+  "courts": {
+   "population": 31,
+   "blocks": 5,
+   "byCode": {
+    "11623371": 31
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 31,
+   "blocks": 5,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Le Mars city"
+ },
+ "Le Roy, IL": {
+  "city": "Le Roy, IL",
+  "computedAt": "2026-10-01T17:19:55.549Z",
+  "courts": {
+   "population": 866,
+   "blocks": 79,
+   "byCode": {
+    "11959192": 866
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 866,
+   "blocks": 79,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Le Roy city"
+ },
+ "Lynwood, CA": {
+  "city": "Lynwood, CA",
+  "computedAt": "2026-10-01T17:19:55.948Z",
+  "courts": {
+   "population": 7005,
+   "blocks": 78,
+   "byCode": {
+    "11406886": 7005
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 7005,
+   "blocks": 78,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Lynwood city"
+ },
+ "Mc Allen, TX": {
+  "city": "Mc Allen, TX",
+  "computedAt": "2026-10-01T17:19:56.421Z",
+  "courts": {
+   "population": 1066,
+   "blocks": 19,
+   "byCode": {
+    "10909632": 1066
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1066,
+   "blocks": 19,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "McAllen city"
+ },
+ "Miami Township, OH": {
+  "city": "Miami Township, OH",
+  "computedAt": "2026-10-01T17:19:56.709Z",
+  "courts": {
+   "population": 55,
+   "blocks": 6,
+   "byCode": {
+    "12061693": 55
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 55,
+   "blocks": 6,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Miami township"
+ },
+ "Middletown, NY": {
+  "city": "Middletown, NY",
+  "computedAt": "2026-10-01T17:19:57.063Z",
+  "courts": {
+   "population": 983,
+   "blocks": 22,
+   "byCode": {
+    "11910412": 983
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 983,
+   "blocks": 22,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Middletown city"
+ },
+ "Mohonassen School, NY": {
+  "city": "Mohonassen School, NY",
+  "computedAt": "2026-10-01T17:19:57.213Z",
+  "courts": {
+   "population": 204,
+   "blocks": 4,
+   "byCode": {
+    "9164235": 204
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 204,
+   "blocks": 4,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Monticello, NY": {
+  "city": "Monticello, NY",
+  "computedAt": "2026-10-01T17:19:57.496Z",
+  "courts": {
+   "population": 653,
+   "blocks": 19,
+   "byCode": {
+    "11951201": 653
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 653,
+   "blocks": 19,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Monticello village"
+ },
+ "Moore, OK": {
+  "city": "Moore, OK",
+  "computedAt": "2026-10-01T17:19:57.773Z",
+  "courts": {
+   "population": 1401,
+   "blocks": 33,
+   "byCode": {
+    "10344997": 1401
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1401,
+   "blocks": 33,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Moore city"
+ },
+ "Moreno Valley, CA": {
+  "city": "Moreno Valley, CA",
+  "computedAt": "2026-10-01T17:19:58.131Z",
+  "courts": {
+   "population": 1134,
+   "blocks": 21,
+   "byCode": {
+    "12257306": 1134
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1134,
+   "blocks": 21,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Moreno Valley city"
+ },
+ "Mount Vernon, NY": {
+  "city": "Mount Vernon, NY",
+  "computedAt": "2026-10-01T17:19:58.435Z",
+  "courts": {
+   "population": 13221,
+   "blocks": 79,
+   "byCode": {
+    "11951203": 13221
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 13221,
+   "blocks": 79,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Mount Vernon city"
+ },
+ "Murray County, GA": {
+  "city": "Murray County, GA",
+  "computedAt": "2026-10-01T17:19:58.722Z",
+  "courts": {
+   "population": 23,
+   "blocks": 2,
+   "byCode": {
+    "11335179": 23
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 23,
+   "blocks": 2,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Murray County"
+ },
+ "Newburgh, NY": {
+  "city": "Newburgh, NY",
+  "computedAt": "2026-10-01T17:19:59.068Z",
+  "courts": {
+   "population": 4045,
+   "blocks": 42,
+   "byCode": {
+    "11951211": 4045
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 4045,
+   "blocks": 42,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Newburgh city"
+ },
+ "Normal, IL": {
+  "city": "Normal, IL",
+  "computedAt": "2026-10-01T17:19:59.386Z",
+  "courts": {
+   "population": 2493,
+   "blocks": 40,
+   "byCode": {
+    "12193498": 2493
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 2493,
+   "blocks": 40,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Normal town"
+ },
+ "Norristown, PA": {
+  "city": "Norristown, PA",
+  "computedAt": "2026-10-01T17:19:59.672Z",
+  "courts": {
+   "population": 746,
+   "blocks": 18,
+   "byCode": {
+    "12257282": 746
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 746,
+   "blocks": 18,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Norristown borough"
+ },
+ "North College Hill, OH": {
+  "city": "North College Hill, OH",
+  "computedAt": "2026-10-01T17:19:59.857Z",
+  "courts": {
+   "population": 2880,
+   "blocks": 62,
+   "byCode": {
+    "12309018": 2880
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 2880,
+   "blocks": 62,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Norton, VA": {
+  "city": "Norton, VA",
+  "computedAt": "2026-10-01T17:20:00.241Z",
+  "courts": {
+   "population": 758,
+   "blocks": 51,
+   "byCode": {
+    "12193493": 758
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 758,
+   "blocks": 51,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Norton city"
+ },
+ "Oakland County, MI": {
+  "city": "Oakland County, MI",
+  "computedAt": "2026-10-01T17:20:00.638Z",
+  "courts": {
+   "population": 2295,
+   "blocks": 52,
+   "byCode": {
+    "11623376": 2295
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 2295,
+   "blocks": 52,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Oakland County"
+ },
+ "Oswego, NY": {
+  "city": "Oswego, NY",
+  "computedAt": "2026-10-01T17:20:00.911Z",
+  "courts": {
+   "population": 844,
+   "blocks": 25,
+   "byCode": {
+    "11951216": 844
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 844,
+   "blocks": 25,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Oswego city"
+ },
+ "Park City, KS": {
+  "city": "Park City, KS",
+  "computedAt": "2026-10-01T17:20:01.291Z",
+  "courts": {
+   "population": 1319,
+   "blocks": 37,
+   "byCode": {
+    "9781490": 1319
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1319,
+   "blocks": 37,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Park City city"
+ },
+ "Penn Township, PA": {
+  "city": "Penn Township, PA",
+  "computedAt": "2026-10-01T17:20:01.671Z",
+  "courts": {
+   "population": 383,
+   "blocks": 12,
+   "byCode": {
+    "11442714": 383
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 383,
+   "blocks": 12,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Penn township"
+ },
+ "Phelps, NY": {
+  "city": "Phelps, NY",
+  "computedAt": "2026-10-01T17:20:01.958Z",
+  "courts": {
+   "population": 660,
+   "blocks": 33,
+   "byCode": {
+    "11951221": 660
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 660,
+   "blocks": 33,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Phelps village"
+ },
+ "Port Jervis City School District, NY": {
+  "city": "Port Jervis City School District, NY",
+  "computedAt": "2026-10-01T17:20:02.197Z",
+  "courts": {
+   "population": 613,
+   "blocks": 23,
+   "byCode": {
+    "11994225": 613
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 613,
+   "blocks": 23,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Porter, NY": {
+  "city": "Porter, NY",
+  "computedAt": "2026-10-01T17:20:02.690Z",
+  "courts": {
+   "population": 18,
+   "blocks": 2,
+   "byCode": {
+    "11951409": 18
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 18,
+   "blocks": 2,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Porter town"
+ },
+ "Princeton, TX": {
+  "city": "Princeton, TX",
+  "computedAt": "2026-10-01T17:20:03.003Z",
+  "courts": {
+   "population": 1598,
+   "blocks": 51,
+   "byCode": {
+    "8535722": 1598
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1598,
+   "blocks": 51,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Princeton city"
+ },
+ "Putnam Valley Central School District, NY": {
+  "city": "Putnam Valley Central School District, NY",
+  "computedAt": "2026-10-01T17:20:03.247Z",
+  "courts": {
+   "population": 263,
+   "blocks": 11,
+   "byCode": {
+    "12065396": 263
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 263,
+   "blocks": 11,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Riverdale, GA": {
+  "city": "Riverdale, GA",
+  "computedAt": "2026-10-01T17:20:03.525Z",
+  "courts": {
+   "population": 1015,
+   "blocks": 19,
+   "byCode": {
+    "12221648": 1015
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1015,
+   "blocks": 19,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Riverdale city"
+ },
+ "Rochester, NY": {
+  "city": "Rochester, NY",
+  "computedAt": "2026-10-01T17:20:04.421Z",
+  "courts": {
+   "population": 4765,
+   "blocks": 72,
+   "byCode": {
+    "9701730": 2312,
+    "11951415": 2453
+   },
+   "sites": 2,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 4765,
+   "blocks": 72,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Rochester city"
+ },
+ "Rosendale, NY": {
+  "city": "Rosendale, NY",
+  "computedAt": "2026-10-01T17:20:04.833Z",
+  "courts": {
+   "population": 185,
+   "blocks": 15,
+   "byCode": {
+    "11951421": 185
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 185,
+   "blocks": 15,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Rosendale CDP"
+ },
+ "Rye Brook, NY": {
+  "city": "Rye Brook, NY",
+  "computedAt": "2026-10-01T17:20:05.117Z",
+  "courts": {
+   "population": 577,
+   "blocks": 10,
+   "byCode": {
+    "12193488": 577
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 577,
+   "blocks": 10,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Rye Brook village"
+ },
+ "SUNYBroome Community College, NY": {
+  "city": "SUNYBroome Community College, NY",
+  "computedAt": "2026-10-01T17:20:05.327Z",
+  "courts": {
+   "population": 501,
+   "blocks": 8,
+   "byCode": {
+    "11951428": 501
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 501,
+   "blocks": 8,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "SUNYSchenectady, NY": {
+  "city": "SUNYSchenectady, NY",
+  "computedAt": "2026-10-01T17:20:05.470Z",
+  "courts": {
+   "population": 206,
+   "blocks": 5,
+   "byCode": {
+    "9164185": 206
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 206,
+   "blocks": 5,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Saginaw Valley State University, MI": {
+  "city": "Saginaw Valley State University, MI",
+  "computedAt": "2026-10-01T17:20:05.614Z",
+  "courts": {
+   "population": 708,
+   "blocks": 8,
+   "byCode": {
+    "11442638": 708
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 708,
+   "blocks": 8,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "San Francisco, CA": {
+  "city": "San Francisco, CA",
+  "computedAt": "2026-10-01T17:20:11.217Z",
+  "courts": {
+   "population": 62392,
+   "blocks": 226,
+   "byCode": {
+    "8664801": 6740,
+    "8664804": 429,
+    "11484205": 44300,
+    "11484240": 10924
+   },
+   "sites": 4,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 62392,
+   "blocks": 226,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "San Francisco city"
+ },
+ "San Jose, CA": {
+  "city": "San Jose, CA",
+  "computedAt": "2026-10-01T17:20:11.688Z",
+  "courts": {
+   "population": 4202,
+   "blocks": 45,
+   "byCode": {
+    "12270511": 4202
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 4202,
+   "blocks": 45,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "San Jose city"
+ },
+ "San Leandro, CA": {
+  "city": "San Leandro, CA",
+  "computedAt": "2026-10-01T17:20:12.031Z",
+  "courts": {
+   "population": 333,
+   "blocks": 8,
+   "byCode": {
+    "12138889": 333
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 333,
+   "blocks": 8,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "San Leandro city"
+ },
+ "Santa Rosa County, FL": {
+  "city": "Santa Rosa County, FL",
+  "computedAt": "2026-10-01T17:20:12.331Z",
+  "courts": {
+   "population": 300,
+   "blocks": 18,
+   "byCode": {
+    "10449439": 300
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 300,
+   "blocks": 18,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Santa Rosa County"
+ },
+ "Sardinia, NY": {
+  "city": "Sardinia, NY",
+  "computedAt": "2026-10-01T17:20:12.877Z",
+  "courts": {
+   "population": 7,
+   "blocks": 3,
+   "byCode": {
+    "11951423": 7
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 7,
+   "blocks": 3,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Sardinia town"
+ },
+ "Seminole Public Schools, OK": {
+  "city": "Seminole Public Schools, OK",
+  "computedAt": "2026-10-01T17:20:13.066Z",
+  "courts": {
+   "population": 9,
+   "blocks": 3,
+   "byCode": {
+    "11674757": 9
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 9,
+   "blocks": 3,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Severance Town, CO": {
+  "city": "Severance Town, CO",
+  "computedAt": "2026-10-01T17:20:13.931Z",
+  "courts": {
+   "population": 126,
+   "blocks": 9,
+   "byCode": {
+    "11766806": 126
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 126,
+   "blocks": 9,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Shawnee Public Schools, OK": {
+  "city": "Shawnee Public Schools, OK",
+  "computedAt": "2026-10-01T17:20:14.161Z",
+  "courts": {
+   "population": 2395,
+   "blocks": 90,
+   "byCode": {
+    "10669270": 2395
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 2395,
+   "blocks": 90,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Sidney, MT": {
+  "city": "Sidney, MT",
+  "computedAt": "2026-10-01T17:20:14.481Z",
+  "courts": {
+   "population": 1714,
+   "blocks": 83,
+   "byCode": {
+    "11442624": 1714
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1714,
+   "blocks": 83,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Sidney city"
+ },
+ "Southern Arkansas University, AR": {
+  "city": "Southern Arkansas University, AR",
+  "computedAt": "2026-10-01T17:20:14.646Z",
+  "courts": {
+   "population": 318,
+   "blocks": 6,
+   "byCode": {
+    "11225686": 318
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 318,
+   "blocks": 6,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Stanford University, CA": {
+  "city": "Stanford University, CA",
+  "computedAt": "2026-10-01T17:20:14.830Z",
+  "courts": {
+   "population": 12017,
+   "blocks": 49,
+   "byCode": {
+    "8702075": 12017
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 12017,
+   "blocks": 49,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Stone Mountain, GA": {
+  "city": "Stone Mountain, GA",
+  "computedAt": "2026-10-01T17:20:15.191Z",
+  "courts": {
+   "population": 1546,
+   "blocks": 38,
+   "byCode": {
+    "10915200": 1546
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1546,
+   "blocks": 38,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Stone Mountain city"
+ },
+ "Sumter, SC": {
+  "city": "Sumter, SC",
+  "computedAt": "2026-10-01T17:20:15.510Z",
+  "courts": {
+   "population": 563,
+   "blocks": 21,
+   "byCode": {
+    "11114265": 563
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 563,
+   "blocks": 21,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Sumter city"
+ },
+ "Sussex County Community College, NJ": {
+  "city": "Sussex County Community College, NJ",
+  "computedAt": "2026-10-01T17:20:15.705Z",
+  "courts": {
+   "population": 46,
+   "blocks": 7,
+   "byCode": {
+    "11721525": 46
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 46,
+   "blocks": 7,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Sweet Home, OR": {
+  "city": "Sweet Home, OR",
+  "computedAt": "2026-10-01T17:20:15.981Z",
+  "courts": {
+   "population": 474,
+   "blocks": 13,
+   "byCode": {
+    "11910425": 474
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 474,
+   "blocks": 13,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Sweet Home city"
+ },
+ "Texas State Technical College, TX": {
+  "city": "Texas State Technical College, TX",
+  "computedAt": "2026-10-01T17:20:16.223Z",
+  "courts": {
+   "population": 260,
+   "blocks": 13,
+   "byCode": {
+    "11161821": 260
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 260,
+   "blocks": 13,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Topeka Public Schools, KS": {
+  "city": "Topeka Public Schools, KS",
+  "computedAt": "2026-10-01T17:20:16.397Z",
+  "courts": {
+   "population": 1021,
+   "blocks": 48,
+   "byCode": {
+    "11483640": 1021
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1021,
+   "blocks": 48,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Town Of Somerset, MA": {
+  "city": "Town Of Somerset, MA",
+  "computedAt": "2026-10-01T17:20:16.874Z",
+  "courts": {
+   "population": 1370,
+   "blocks": 44,
+   "byCode": {
+    "9850291": 1370
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1370,
+   "blocks": 44,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Somerset CDP"
+ },
+ "Town Of Wallingford, CT": {
+  "city": "Town Of Wallingford, CT",
+  "computedAt": "2026-10-01T17:20:17.402Z",
+  "courts": {
+   "population": 342,
+   "blocks": 11,
+   "byCode": {
+    "11442634": 342
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 342,
+   "blocks": 11,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Wallingford town"
+ },
+ "Town Of Westerlo, NY": {
+  "city": "Town Of Westerlo, NY",
+  "computedAt": "2026-10-01T17:20:17.910Z",
+  "courts": {
+   "population": 38,
+   "blocks": 6,
+   "byCode": {
+    "11442615": 38
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 38,
+   "blocks": 6,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Westerlo town"
+ },
+ "Townof Billerica, MA": {
+  "city": "Townof Billerica, MA",
+  "computedAt": "2026-10-01T17:20:18.463Z",
+  "courts": {
+   "population": 1641,
+   "blocks": 50,
+   "byCode": {
+    "11335164": 1641
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1641,
+   "blocks": 50,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Billerica town"
+ },
+ "Townof Speedway, IN": {
+  "city": "Townof Speedway, IN",
+  "computedAt": "2026-10-01T17:20:18.863Z",
+  "courts": {
+   "population": 1650,
+   "blocks": 36,
+   "byCode": {
+    "11994066": 1650
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1650,
+   "blocks": 36,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Speedway town"
+ },
+ "Township Of Bethlehem, NJ": {
+  "city": "Township Of Bethlehem, NJ",
+  "computedAt": "2026-10-01T17:20:19.119Z",
+  "courts": {
+   "population": 6,
+   "blocks": 3,
+   "byCode": {
+    "11430534": 6
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 6,
+   "blocks": 3,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Bethlehem township"
+ },
+ "Troy, NY": {
+  "city": "Troy, NY",
+  "computedAt": "2026-10-01T17:20:19.994Z",
+  "courts": {
+   "population": 13239,
+   "blocks": 225,
+   "byCode": {
+    "9164189": 2441,
+    "9164193": 1801,
+    "9164194": 4214,
+    "9164196": 4885
+   },
+   "sites": 4,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 13239,
+   "blocks": 225,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Troy city"
+ },
+ "Union#1, NY": {
+  "city": "Union#1, NY",
+  "computedAt": "2026-10-01T17:20:20.577Z",
+  "courts": {
+   "population": 4316,
+   "blocks": 66,
+   "byCode": {
+    "11951434": 4316
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 4316,
+   "blocks": 66,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Union#2, NY": {
+  "city": "Union#2, NY",
+  "computedAt": "2026-10-01T17:20:21.093Z",
+  "courts": {
+   "population": 1840,
+   "blocks": 41,
+   "byCode": {
+    "11951460": 1840
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1840,
+   "blocks": 41,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Upper Township, NJ": {
+  "city": "Upper Township, NJ",
+  "computedAt": "2026-10-01T17:20:21.483Z",
+  "courts": {
+   "population": 150,
+   "blocks": 14,
+   "byCode": {
+    "11993974": 150
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 150,
+   "blocks": 14,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Upper township"
+ },
+ "Urisnus College, PA": {
+  "city": "Urisnus College, PA",
+  "computedAt": "2026-10-01T17:20:21.672Z",
+  "courts": {
+   "population": 1927,
+   "blocks": 26,
+   "byCode": {
+    "10777642": 1927
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1927,
+   "blocks": 26,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Valencia County, NM": {
+  "city": "Valencia County, NM",
+  "computedAt": "2026-10-01T17:20:21.990Z",
+  "courts": {
+   "population": 579,
+   "blocks": 14,
+   "byCode": {
+    "12309025": 579
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 579,
+   "blocks": 14,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Valencia County"
+ },
+ "Village Of Angola, NY": {
+  "city": "Village Of Angola, NY",
+  "computedAt": "2026-10-01T17:20:22.263Z",
+  "courts": {
+   "population": 227,
+   "blocks": 11,
+   "byCode": {
+    "11225673": 227
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 227,
+   "blocks": 11,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Angola village"
+ },
+ "Village Of Glenwood, IL": {
+  "city": "Village Of Glenwood, IL",
+  "computedAt": "2026-10-01T17:20:22.564Z",
+  "courts": {
+   "population": 902,
+   "blocks": 23,
+   "byCode": {
+    "11114269": 902
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 902,
+   "blocks": 23,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Glenwood village"
+ },
+ "Village Of Willow Springs, IL": {
+  "city": "Village Of Willow Springs, IL",
+  "computedAt": "2026-10-01T17:20:22.860Z",
+  "courts": {
+   "population": 805,
+   "blocks": 31,
+   "byCode": {
+    "11161801": 805
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 805,
+   "blocks": 31,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Willow Springs village"
+ },
+ "Villageof Brockport, NY": {
+  "city": "Villageof Brockport, NY",
+  "computedAt": "2026-10-01T17:20:23.172Z",
+  "courts": {
+   "population": 1322,
+   "blocks": 32,
+   "byCode": {
+    "11948001": 1322
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1322,
+   "blocks": 32,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Brockport village"
+ },
+ "Villageof Palos Park, IL": {
+  "city": "Villageof Palos Park, IL",
+  "computedAt": "2026-10-01T17:20:23.478Z",
+  "courts": {
+   "population": 453,
+   "blocks": 32,
+   "byCode": {
+    "11340354": 453
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 453,
+   "blocks": 32,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Palos Park village"
+ },
+ "Villageof Riverton, IL": {
+  "city": "Villageof Riverton, IL",
+  "computedAt": "2026-10-01T17:20:23.793Z",
+  "courts": {
+   "population": 214,
+   "blocks": 8,
+   "byCode": {
+    "11994139": 214
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 214,
+   "blocks": 8,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Riverton village"
+ },
+ "Washington County, MS": {
+  "city": "Washington County, MS",
+  "computedAt": "2026-10-01T17:20:24.080Z",
+  "courts": {
+   "population": 59,
+   "blocks": 4,
+   "byCode": {
+    "10955480": 59
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 59,
+   "blocks": 4,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Washington County"
+ },
+ "Wayne County, MI": {
+  "city": "Wayne County, MI",
+  "computedAt": "2026-10-01T17:20:24.368Z",
+  "courts": {
+   "population": 1428,
+   "blocks": 28,
+   "byCode": {
+    "11662616": 1428
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1428,
+   "blocks": 28,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Wayne County"
+ },
+ "Weirton, WV": {
+  "city": "Weirton, WV",
+  "computedAt": "2026-10-01T17:20:24.751Z",
+  "courts": {
+   "population": 547,
+   "blocks": 20,
+   "byCode": {
+    "12016750": 547
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 547,
+   "blocks": 20,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Weirton city"
+ },
+ "West Seneca, NY": {
+  "city": "West Seneca, NY",
+  "computedAt": "2026-10-01T17:20:25.261Z",
+  "courts": {
+   "population": 579,
+   "blocks": 14,
+   "byCode": {
+    "11951492": 579
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 579,
+   "blocks": 14,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "West Seneca CDP"
+ },
+ "Wichita, KS": {
+  "city": "Wichita, KS",
+  "computedAt": "2026-10-01T17:20:25.677Z",
+  "courts": {
+   "population": 3240,
+   "blocks": 76,
+   "byCode": {
+    "11556339": 3240
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 3240,
+   "blocks": 76,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Wichita city"
+ },
+ "Wylie ISD, TX": {
+  "city": "Wylie ISD, TX",
+  "computedAt": "2026-10-01T17:20:26.521Z",
+  "courts": {
+   "population": 402,
+   "blocks": 12,
+   "byCode": {
+    "10371042": 402
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 402,
+   "blocks": 12,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": false,
+  "boundaryName": null
+ },
+ "Yelm, WA": {
+  "city": "Yelm, WA",
+  "computedAt": "2026-10-01T17:20:26.877Z",
+  "courts": {
+   "population": 1620,
+   "blocks": 58,
+   "byCode": {
+    "10837654": 1620
+   },
+   "sites": 1,
+   "method": "Residents (2020 Census blocks, area-weighted) inside a 10 minute walk (street network) of a Fitness Court",
+   "walkMinutes": 10,
+   "areaMethod": "isochrone"
+  },
+  "trail": null,
+  "combined": {
+   "population": 1620,
+   "blocks": 58,
+   "method": "Fitness Courts only (no Trail Line here)"
+  },
+  "clippedToCityLimits": true,
+  "boundaryName": "Yelm city"
  }
 }

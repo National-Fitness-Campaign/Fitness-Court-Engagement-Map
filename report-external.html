@@ -282,7 +282,7 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
   ]);
   const P = trail.pilot, city = `${P.name}, ${P.state}`;
   const acc = eng.accessibility[city] || null;
-  const areas = eng.areas?.[city] || null;
+  const areas = await fetch(`/api/engagement?areas=${encodeURIComponent(city)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const courts = (trail.courts || []).filter((c) => c.lat != null);
   const today = laToday();
   const launch = P.launchDate;
@@ -443,7 +443,7 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
     </div>
     <div class="eyebrow" style="margin-top:36px">How these numbers are measured</div>
     <ul class="notes" style="margin-top:10px">
-      <li><b>Residents within a 10 minute walk</b>: 2020 U.S. Census population inside a 10 minute walk along the street network from each Fitness Court and along the Trail Line, within city limits. Each resident is counted once.</li>
+      <li><b>Residents within a 10 minute walk</b>: 2020 U.S. Census block population (a block partly inside counts by the share inside) within a 10 minute walk along the street network from each Fitness Court and along the Trail Line, within city limits. Each resident is counted once.</li>
       <li><b>Estimated uses</b>: NFC counts activity directly: new users in the NFC app at each Fitness Court and people scanning the QR code on each sign. Those counts are scaled up for everyone who visits without the app or a scan (about 10 people for every new app user), at ${A.visitsPerYear} visits a person a year. Trail Line use counts from the public launch.</li>
       <li><b>Health impact</b>: NFC program estimates per Fitness Court per year.</li>
       <li><b>Calories</b>: ${A.kcalCourt} per Fitness Court workout (a 14 minute session) and ${A.kcalTrail} per Trail Line walk.</li>

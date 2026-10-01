@@ -1604,6 +1604,7 @@ function renderSitePanel(el) {
     ${app ? `<div class="sp-block"><div class="cp-label">NFC app at this Fitness Court <span class="sp-note">Jan to Sep 2026</span></div>
       <div class="sp-stats sp-stats-2">${stat(ci.toLocaleString(), 'app check-ins')}${stat(dl.toLocaleString(), 'app downloads')}</div></div>` : ''}
     <div class="sp-facts">
+      ${(() => { const r = engagementData?.accessibility?.[city]?.courts?.byCode?.[c.id]; return r != null ? `<div><b>${r.toLocaleString()}</b> residents within a 10 minute walk</div>` : ''; })()}
       <div>${c.locationSource ? '✓' : '⚠'} ${src}</div>
       ${neverScanned(c) ? '<div class="sp-warn">⚠ Live two weeks or more with no scans: check the sign and the code.</div>' : ''}
       ${c.url ? `<div><a href="${esc(c.url)}" target="_blank" rel="noopener">Open this QR code's link <svg class="ext-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>` : ''}
@@ -2570,10 +2571,16 @@ function pilotData(slug) {
   return pilotCache.get(slug);
 }
 function resetPilotData() { pilotCache.clear(); pilotReady.clear(); }
+const areasCache = new Map(); // "City, ST" -> Promise(walk shapes | null)
+function cityAreas(city) {
+  if (!areasCache.has(city)) areasCache.set(city, fetch(`/api/engagement?areas=${encodeURIComponent(city)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  return areasCache.get(city);
+}
 function engMapCard(F) {
-  const A = F.city && engagementData.areas?.[F.city];
   if (!F.city) return '';
-  if (!A) return `<div class="eng-map-card"><div class="eng-map-head"><h4>Accessibility map</h4><span>Not drawn for ${esc(F.city)} yet. Run scripts/compute-accessibility.mjs for this city.</span></div></div>`;
+  const acc = engagementData.accessibility[F.city];
+  if (!acc) return `<div class="eng-map-card"><div class="eng-map-head"><h4>Accessibility map</h4><span>Not computed for ${esc(F.city)} yet (scripts/compute-accessibility-all.mjs).</span></div></div>`;
+  const A = { trail: acc.trail ? true : null, boundary: acc.clippedToCityLimits !== false };
   const row = (key, swatch, label) => `<label><input type="checkbox" data-eng-layer="${key}"${engLayers[key] ? ' checked' : ''}><i style="${swatch}"></i>${label}</label>`;
   return `<div class="eng-map-card">
     <div class="eng-map-head"><h4>Who lives within a 10 minute walk</h4><span>shaded = everywhere you can walk to a Fitness Court${A.trail ? ' or the Trail Line' : ''} in 10 minutes along real streets · 2020 Census${A.boundary ? ' · inside city limits' : ''}</span>
@@ -2595,9 +2602,10 @@ function engMapCard(F) {
     </div></div>`;
 }
 async function drawEngMap(F) {
+  if (!F.city || !engagementData.accessibility[F.city]) return;
+  const A = await cityAreas(F.city);
   const el = document.getElementById('eng-map');
-  const A = F.city && engagementData.areas?.[F.city];
-  if (!el || !A) return;
+  if (!el || !A || el._leaflet_id) return; // gone, failed, or already drawn
   const m = L.map(el, { zoomControl: false, scrollWheelZoom: false, attributionControl: true });
   L.control.zoom({ position: 'topright' }).addTo(m);
   engMap = m;
@@ -2961,7 +2969,7 @@ function renderEngagement(body) {
     <details class="eng-notes"><summary>How these are counted</summary><ul>
       <li><b>App downloads</b>: people whose first ever check-in was at that Fitness Court. <b>App check-ins</b>: workouts logged in the NFC app there.</li>
       <li>A Fitness Court counts when its listing in the app sits within ${E.app.matchRadiusMeters} m of its QR sign. App data: ${esc(E.app.monthsFrom)} to ${esc(E.app.monthsThrough)}, snapshot ${esc(E.app.takenAt)}; ranges that cut a month are prorated.</li>
-      <li><b>Accessibility</b>: 2020 Census block population inside a real 10 minute walking isochrone (Mapbox) from each Fitness Court and from points every 150 m along the Trail Line, clipped to city limits.</li>
+      <li><b>Accessibility</b>: 2020 Census block population (a block partly inside counts by the share inside) within a real 10 minute walking isochrone (Mapbox) from each Fitness Court and from points every 150 m along the Trail Line, clipped to city limits.</li>
       <li><b>Workout length</b> isn't shown: the app checks most people out automatically (sessions end at exactly 20 or 40 minutes), so check-out times don't measure how long people worked out.</li>
     </ul></details>`;
 
