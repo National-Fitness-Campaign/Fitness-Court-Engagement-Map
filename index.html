@@ -198,6 +198,9 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .an-city { padding: 20px 22px; margin-bottom: 16px; }
 .an-city-head { display: flex; align-items: flex-end; gap: 16px; }
 .an-city-head h2 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.01em; }
+.an-city-clear { margin-left: 12px; align-self: center; border: 1px solid var(--border); background: var(--card); border-radius: 99px; padding: 6px 12px; font: 600 0.78rem 'Inter', sans-serif; color: var(--text-2); cursor: pointer; }
+.an-city-clear:hover { color: var(--blue); border-color: #c8d2e4; }
+.an-city-hint { margin-left: auto; align-self: center; font-size: 0.8rem; color: var(--text-3); }
 .an-city-pick { margin-left: auto; display: flex; flex-direction: column; gap: 5px; font-size: 0.72rem; font-weight: 700; }
 .an-city-pick select { font: inherit; font-size: 0.9rem; font-weight: 600; padding: 8px 12px; border: 1px solid var(--border); border-radius: 9px; min-width: 240px; background: var(--card); color: var(--text); }
 .an-city-empty { margin-top: 12px; font-size: 0.9rem; color: var(--text-2); }
@@ -882,9 +885,8 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
     <div class="card an-city">
       <div class="an-city-head">
         <div><div class="cp-eyebrow" id="an-city-eyebrow">City breakdown</div><h2 id="an-city-title">All cities</h2></div>
-        <label class="an-city-pick">City
-          <select id="an-city-select" onchange="setAnCity(this.value)"></select>
-        </label>
+        <button type="button" class="an-city-clear" id="an-city-clear" onclick="clearAnCity()" style="display:none">✕ All cities</button>
+        <span class="an-city-hint" id="an-city-hint">Search a city at the top to break it down</span>
       </div>
       <div id="an-city-body"></div>
     </div>
@@ -2026,13 +2028,15 @@ function openCityAnalytics() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function setAnCity(key) { state.anCity = key; renderAnalytics(); pushRoute(); }
+function clearAnCity() {
+  state.anCity = ''; state.search = '';
+  document.getElementById('f-search').value = '';
+  renderAll(); pushRoute();
+}
 
 function renderCityBreakdown() {
-  const sel = document.getElementById('an-city-select');
-  const totals = new Map();
-  for (const c of state.courts) totals.set(cityKey(c), (totals.get(cityKey(c)) || 0) + (c.officialScans || 0));
-  const cities = [...totals.entries()].filter(([k]) => /, [A-Z]{2}$/.test(k)).sort((a, b) => b[1] - a[1]);
-  sel.innerHTML = '<option value="">All cities</option>' + cities.map(([k]) => `<option value="${esc(k)}"${k === state.anCity ? ' selected' : ''}>${esc(k)}</option>`).join('');
+  document.getElementById('an-city-clear').style.display = state.anCity ? '' : 'none';
+  document.getElementById('an-city-hint').style.display = state.anCity ? 'none' : '';
   const body = document.getElementById('an-city-body');
   document.getElementById('an-city-title').textContent = state.anCity || 'All cities';
   if (state.anMode === 'engagement') { renderEngagement(body); return; }
@@ -3026,6 +3030,7 @@ function runSearch(q) {
   // filters, and only the Map opens the city panel.
   if (state.view === 'analytics') {
     if (exact.length === 1) state.anCity = exact[0];
+    else if (!needle) state.anCity = '';
     renderAll();
     if (exact.length === 1) pushRoute();
     return;
