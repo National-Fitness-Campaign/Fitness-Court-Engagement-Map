@@ -231,6 +231,25 @@ h2 { font-weight: 700; font-size: 2.1rem; letter-spacing: -0.01em; margin-top: 6
 .mtrend b { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 1.05rem; color: var(--dark); }
 .legend-inline { display: flex; gap: 16px; font-size: 0.8rem; color: var(--ink-2); margin-top: 10px; flex-wrap: wrap; }
 .legend-inline i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.perf-whole { display: grid; grid-template-columns: 1.2fr repeat(4, 1fr); gap: 0; margin-top: 24px; background: var(--light); border-radius: 16px; overflow: hidden; }
+.perf-whole > div { padding: 18px 20px; }
+.perf-whole > div + div { border-left: 1px solid rgba(0,108,163,0.15); }
+.perf-whole .pw-title b { display: block; font-size: 1.2rem; font-weight: 700; color: var(--ink); }
+.perf-whole .pw-title span { font-size: 0.84rem; color: var(--ink-2); }
+.perf-whole .num { font-size: 2.8rem; color: var(--dark); }
+.perf-whole .lbl { font-weight: 700; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); margin-top: 4px; }
+.perf-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 18px; }
+.perf-col { border: 1px solid #d7e9f1; border-radius: 16px; overflow: hidden; border-top: 6px solid var(--c); }
+.pc-head { padding: 16px 20px 6px; }
+.pc-head h3 { font-weight: 700; font-size: 1.3rem; color: var(--ink); }
+.pc-head p { font-size: 0.86rem; color: var(--ink-2); margin-top: 2px; }
+.pc-row { padding: 12px 20px; border-top: 1px solid #e3f0f6; }
+.pc-row .lbl { font-weight: 700; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.pc-row .num { font-size: 2.5rem; color: var(--dark); margin-top: 4px; }
+.pc-soon { margin: 6px 16px 16px; padding: 16px; border-radius: 12px; background: var(--bg); }
+.pc-soon b { display: block; font-size: 1rem; color: var(--ink); }
+.pc-soon span { display: block; font-size: 0.86rem; color: var(--ink-2); margin-top: 4px; line-height: 1.4; }
+@media (max-width: 900px) { .perf-cols { grid-template-columns: 1fr; } .perf-whole { grid-template-columns: 1fr 1fr; } }
 .notes { font-size: 0.86rem; color: var(--ink-2); line-height: 1.55; }
 .notes li { margin: 0 0 6px 18px; }
 .xx-note { font-size: 0.8rem; color: #9a5b00; margin-top: 10px; }
@@ -281,6 +300,33 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
   }
   const total = courtScans + trailPublic + checkins + downloads;
 
+  // Performance model: identical to Analytics > Performance report, using the
+  // assumptions saved there (same browser), else NFC defaults.
+  const A = { courtScanMult: 1, downloadMult: 10, visitsPerYear: 25, kcalCourt: 250, trailMult: 10, kcalTrail: 100, uniqueShare: 92, savingsPerCourt: 70000 };
+  try { Object.assign(A, JSON.parse(localStorage.getItem('nfc-perf-assumptions') || '{}')); } catch {}
+  const U = A.uniqueShare / 100;
+  let dlAll = 0;
+  for (const c of courts) { const r = eng.app.allTime?.[c.id]; if (r) dlAll += r[1]; }
+  const fcUsers = Math.max(dlAll * A.downloadMult, courtScans * U * A.courtScanMult);
+  const groupOf = (line) => (/bonanza|red line/i.test(line || '') ? 'red' : /lone mountain|yellow line/i.test(line || '') ? 'yellow' : 'loops');
+  const gScans = { red: 0, yellow: 0, loops: 0 };
+  for (const st of trail.stations) for (const c of st.codes) gScans[groupOf(st.line)] += c.publicScans;
+  const G = acc?.trailGroups || {};
+  const live = today >= launch;
+  const mk = (label, color, sub, reachN, users, kcalPer, isTrail) => {
+    const uses = users == null ? null : users * A.visitsPerYear;
+    return { label, color, sub, reach: reachN, users, uses, kcal: uses == null ? null : uses * kcalPer, isTrail };
+  };
+  const perfCols = [
+    mk('Fitness Courts', '#006ca3', `${courts.length} outdoor Fitness Courts`, acc?.courts?.population ?? null, fcUsers, A.kcalCourt, false),
+    mk('Red line', '#a52714', `Bonanza Trail${G.red?.miles ? ' · ' + G.red.miles + ' miles' : ''}`, G.red?.population ?? null, live ? gScans.red * U * A.trailMult : null, A.kcalTrail, true),
+    mk('Yellow line', '#d99a06', `Lone Mountain Trail${G.yellow?.miles ? ' · ' + G.yellow.miles + ' miles' : ''}`, G.yellow?.population ?? null, live ? gScans.yellow * U * A.trailMult : null, A.kcalTrail, true),
+  ];
+  const trailUsersAll = live ? (gScans.red + gScans.yellow + gScans.loops) * U * A.trailMult : 0;
+  const whole = { reach: acc?.combined?.population ?? null, users: fcUsers + trailUsersAll };
+  whole.uses = fcUsers * A.visitsPerYear + trailUsersAll * A.visitsPerYear;
+  whole.kcal = fcUsers * A.visitsPerYear * A.kcalCourt + trailUsersAll * A.visitsPerYear * A.kcalTrail;
+
   // Monthly engagements since complete tracking began (Apr 2026), stacked.
   const months = [];
   for (let m = '2026-04'; m <= today.slice(0, 7);) { months.push(m); const [y, mm] = m.split('-').map(Number); m = mm === 12 ? `${y + 1}-01` : `${y}-${String(mm + 1).padStart(2, '0')}`; }
@@ -316,7 +362,7 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
       <div class="cover-stats">
         <div class="cstat"><div class="num">${fmt(reach)}</div><div class="lbl">Residents within a 10 minute walk</div><div class="hint">of a Fitness Court or the Trail Line</div></div>
         <div class="cstat"><div class="num">${big(kcal)}</div><div class="lbl">Calories burned per year</div><div class="hint">NFC estimate for ${nCourts} Fitness Courts</div></div>
-        <div class="cstat"><div class="num">${fmt(total)}</div><div class="lbl">Engagements so far</div><div class="hint">Fitness Courts, Trail Line and the NFC app</div></div>
+        <div class="cstat"><div class="num">${fmt(whole.users)}</div><div class="lbl">Estimated users</div><div class="hint">people using the Fitness Courts${live ? ' and the Trail Line' : ''} to date</div></div>
       </div>
     </div>
   </section>
@@ -330,23 +376,27 @@ const PER_COURT = { savings: 70000, calories: 1300000, fatLost: 375, diabetesPct
   </div></section>
 
   <section class="page"><div class="pad">
-    <div class="eyebrow">Three ways ${esc(P.name)} moves</div>
-    <h2>Fitness Courts, the Trail Line and the NFC app</h2>
-    <p class="lede">Each part of the program reaches residents in its own way. Together they make up ${esc(P.name)}'s engagement.</p>
-    <div class="pillars">
-      <div class="pillar"><div class="pillar-head" style="background:${C.court}"><div class="eyebrow">Physical</div><h3>Fitness Courts</h3><p>${nCourts} outdoor Fitness Courts across ${esc(P.name)}</p></div>
-        <div class="pillar-row"><div class="lbl">Residents within a 10 minute walk</div><div class="num">${fmt(acc?.courts?.population)}</div></div>
-        <div class="pillar-row"><div class="lbl">Calories burned per year</div><div class="num">${big(kcal)}</div><div class="hint">NFC estimate: 1.3M per Fitness Court per year</div></div>
-        <div class="pillar-row"><div class="lbl">Engagements</div><div class="num">${fmt(courtScans)}</div><div class="hint">QR scans on the Fitness Court signs</div></div></div>
-      <div class="pillar"><div class="pillar-head" style="background:${C.trail}"><div class="eyebrow">Physical · pilot</div><h3>Trail Line</h3><p>${miles ? miles + ' miles of signed trail, ' : ''}${trail.stations.length} stations</p></div>
-        <div class="pillar-row"><div class="lbl">Residents within a 10 minute walk</div><div class="num">${fmt(acc?.trail?.population)}</div></div>
-        <div class="pillar-row"><div class="lbl">Calories burned per year</div><div class="num xx">XX</div><div class="hint">Formula in development</div></div>
-        <div class="pillar-row"><div class="lbl">Engagements</div><div class="num">${today < launch ? 'Oct 22' : fmt(trailPublic)}</div><div class="hint">${today < launch ? `Public counting begins ${fmtD(launch)}` : 'QR scans on the Trail Line signs'}</div></div></div>
-      <div class="pillar"><div class="pillar-head" style="background:${C.app}"><div class="eyebrow">Digital</div><h3>NFC app</h3><p>Guided workouts and check-ins at each Fitness Court</p></div>
-        <div class="pillar-row"><div class="lbl">Residents reached</div><div class="num xx">XX</div><div class="hint">Formula in development</div></div>
-        <div class="pillar-row"><div class="lbl">Calories burned per year</div><div class="num xx">XX</div><div class="hint">Formula in development</div></div>
-        <div class="pillar-row"><div class="lbl">Engagements</div><div class="num">${fmt(checkins + downloads)}</div><div class="hint">${fmt(checkins)} workout check-ins and ${fmt(downloads)} new app users</div></div></div>
+    <div class="eyebrow">Program performance</div>
+    <h2>How each part of the program is performing</h2>
+    <p class="lede">The same four measures for every part of ${esc(P.name)}'s program: who can walk to it, how many people use it, how often, and the calories they burn.</p>
+    <div class="perf-whole">
+      <div class="pw-title"><b>Whole project</b><span>Fitness Courts and the Trail Line together</span></div>
+      <div><div class="num">${fmt(whole.reach)}</div><div class="lbl">Residents within a 10 minute walk</div></div>
+      <div><div class="num">${big(whole.users)}</div><div class="lbl">Estimated users</div></div>
+      <div><div class="num">${big(whole.uses)}</div><div class="lbl">Estimated uses a year</div></div>
+      <div><div class="num">${big(whole.kcal)}</div><div class="lbl">Calories burned a year</div></div>
     </div>
+    <div class="perf-cols">${perfCols.map((c) => `
+      <div class="perf-col" style="--c:${c.color}">
+        <div class="pc-head"><h3>${c.label}</h3><p>${esc(c.sub)}</p></div>
+        <div class="pc-row"><div class="lbl">Residents within a 10 minute walk</div><div class="num">${fmt(c.reach)}</div></div>
+        ${c.users == null ? `<div class="pc-soon"><b>Counting begins ${fmtD(launch)}</b><span>Users, uses and calories for the ${esc(c.label.toLowerCase())} start with the public launch.</span></div>` : `
+        <div class="pc-row"><div class="lbl">Estimated users</div><div class="num">${big(c.users)}</div></div>
+        <div class="pc-row"><div class="lbl">Estimated uses a year</div><div class="num">${big(c.uses)}</div></div>
+        <div class="pc-row"><div class="lbl">Calories burned a year</div><div class="num">${big(c.kcal)}</div></div>`}
+      </div>`).join('')}
+    </div>
+    <p class="xx-note" style="color:var(--ink-2)">Estimated users are the people NFC counts directly (new users in the NFC app and people scanning the QR code on each sign) scaled up for everyone who uses the site without the app or a scan. Uses assume ${A.visitsPerYear} visits a person a year. Calories: ${A.kcalCourt} per Fitness Court workout, ${A.kcalTrail} per Trail Line walk.</p>
   </div></section>
 
   <section class="page"><div class="pad">
