@@ -69,17 +69,18 @@ header {
 
 /* ── Layout ─────────────────────────────────────────── */
 .page { padding: 20px 28px 14px; max-width: 1720px; margin: 0 auto; }
-.controls { margin-bottom: 16px; display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px 18px; padding: 12px 18px; }
+.controls { margin-bottom: 16px; display: flex; align-items: flex-end; flex-wrap: nowrap; gap: 14px 18px; padding: 12px 18px; }
 .controls .filterbar { display: contents; }
-.controls .field { order: 1; }
-.controls .kpis { order: 2; margin-left: auto; display: flex; border: none; align-items: flex-end; gap: 0; }
+.controls .field { order: 1; flex: none; }
+.controls .kpis { order: 2; margin-left: auto; display: flex; border: none; align-items: center; gap: 0; min-width: 0; }
 .controls .bots-pill { order: 3; }
-.controls .kpi { display: block; padding: 0 20px; cursor: default; border-left: 1px solid var(--border); }
+.controls .kpi { display: flex; align-items: center; gap: 10px; padding: 0 14px; cursor: default; border-left: 1px solid var(--border); }
 .controls .kpi:first-child { border-left: none; }
 .controls .kpi + .kpi { border-left: 1px solid var(--border); }
-.controls .kpi-icon, .controls .kpi-sub { display: none; }
-.controls .kpi-num { font-size: 1.6rem; line-height: 1.05; color: #1e293b !important; }
-.controls .kpi-label { font-size: 0.66rem; white-space: nowrap; color: #7c8aa0; margin-top: 3px; }
+.controls .kpi-sub { display: none; }
+.controls .kpi-icon { width: 38px; height: 38px; border-radius: 11px; }
+.controls .kpi-num { font-size: 1.75rem; line-height: 1.05; }
+.controls .kpi-label { font-size: 0.66rem; white-space: nowrap; }
 .controls .unmapped-btn { margin: 3px 0 0; padding: 2px 7px; font-size: 0.62rem; }
 .controls .field input[type=text] { min-width: 170px; }
 .search-wrap { position: relative; display: flex; }
@@ -88,13 +89,38 @@ header {
   background: none; color: var(--text-2); cursor: pointer; display: grid; place-items: center; }
 .search-go:hover { background: #eef1f6; color: var(--blue); }
 .controls .field select { min-width: 128px; }
-@media (max-width: 1180px) {
-  /* Not enough width for one row: the stats get their own even row. */
-  .controls .kpis { order: 4; width: 100%; margin-left: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); padding-top: 12px; }
-  .controls .kpi { padding: 0 14px; }
-  .controls .kpi:first-child { padding-left: 0; }
+/* Narrower screens: everything shrinks to stay on one row (never a second row). */
+@media (max-width: 1450px) {
+  .controls { gap: 12px; padding: 12px 14px; }
+  .controls .kpi { padding: 0 8px; gap: 7px; }
+  .controls .kpi-icon { width: 28px; height: 28px; border-radius: 8px; }
+  .controls .kpi-icon svg { width: 14px; height: 14px; }
+  .controls .kpi-num { font-size: 1.35rem; }
+  .controls .kpi-label { white-space: normal; max-width: 74px; line-height: 1.15; font-size: 0.6rem; }
+  .controls .field input[type=text] { min-width: 130px; width: 140px; }
+  .controls .field select { min-width: 104px; }
 }
-@media (max-width: 600px) { .controls .kpis { grid-template-columns: 1fr 1fr; row-gap: 12px; } .controls .kpi:nth-child(3) { border-left: none; padding-left: 0; } }
+@media (max-width: 1260px) {
+  .controls .kpi-icon { width: 24px; height: 24px; border-radius: 7px; }
+  .controls .kpi-icon svg { width: 12px; height: 12px; }
+  .controls .kpi { padding: 0 6px; gap: 5px; }
+  .controls .kpi-num { font-size: 1.15rem; }
+  .controls .kpi-label { max-width: 60px; font-size: 0.56rem; }
+  .controls .seg button { padding-left: 7px; padding-right: 7px; font-size: 0.76rem; }
+  .controls .field input[type=text] { min-width: 100px; width: 100px; }
+  .controls .field select { min-width: 88px; padding-left: 8px; padding-right: 22px; }
+  .controls { gap: 8px; padding: 10px 12px; }
+  .controls .kpi { padding: 0 4px; }
+  .controls #f-range, .controls #f-state { width: 96px; }
+  .controls .kpi-label { max-width: 54px; }
+}
+/* Tablets and phones only: there's no room, so the stats sit under the filters. */
+@media (max-width: 1000px) {
+  .controls { flex-wrap: wrap; }
+  .controls .kpis { order: 4; width: 100%; margin-left: 0; display: grid; grid-template-columns: repeat(4, 1fr); row-gap: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .controls .kpi-label { max-width: none; }
+}
+@media (max-width: 600px) { .controls .kpis { grid-template-columns: 1fr 1fr; } .controls .kpi:nth-child(3) { border-left: none; } }
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); }
 .kpi { display: flex; align-items: center; gap: 12px; padding: 12px 20px; }
 .kpi + .kpi { border-left: 1px solid var(--border); }
