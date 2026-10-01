@@ -2130,6 +2130,7 @@ function renderCityBreakdown() {
   const activeN = [...courts.ranked, ...trail.ranked].filter((r) => r.n > 0).length;
   const share = (n) => (cityTotal ? Math.round((n / cityTotal) * 100) : 0);
   body.innerHTML = `
+    ${all ? '' : `<div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="cp-overview rw-ai-body" id="an-overview"><div class="cp-label">Overview</div>${cityOverview(state.anCity, courts, trail)}</div></div>`}
     <div class="eq-card">
       <div class="eq-head"><h3>QR code scans <span>${esc(RANGE_LABELS[state.range].toLowerCase())}</span></h3><p>Every scan of a Fitness Court or Trail Line QR code${all ? ' across the network' : ' in ' + esc(state.anCity)}.</p></div>
       <div class="eq-row eq-row-raw">
@@ -2146,7 +2147,6 @@ function renderCityBreakdown() {
       <div class="eq-stat"><div class="eq-lbl">QR codes scanned ${esc(RANGE_LABELS[state.range].toLowerCase())}</div><b>${activeN} <small class="rw-of2">of ${codesN}</small></b>
         <div class="eq-sub">${codesN - activeN ? `${codesN - activeN} code${codesN - activeN === 1 ? '' : 's'} with no scans in this range` : 'every code has scans'}</div></div>
     </div>
-    ${all ? '' : `<div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="cp-overview rw-ai-body" id="an-overview"><div class="cp-label">Overview</div>${cityOverview(state.anCity, courts, trail)}</div></div>`}
     <div class="acb-grid">${side('court', 'Fitness Courts', NEON.court, courts)}${side('trail', 'Trail Lines', NEON.trail, trail)}</div>
     <div class="acb-row2">
       <div class="acb-chart"><h4>Daily scans · ${esc(RANGE_LABELS[state.range])}</h4><canvas id="chart-city" height="90"></canvas></div>
@@ -2719,6 +2719,7 @@ function renderEngagement(body) {
 
   const eqTile = (color, n, label, sub) => `<div class="eq-tile" style="--c:${color}"><span class="eq-dot"></span><b>${n.toLocaleString()}</b><div class="eq-lbl">${label}</div><div class="eq-sub">${sub}</div></div>`;
   body.innerHTML = `
+    <div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="rw-ai-body"><div class="cp-label">Overview · ${perYear ? 'all time' : rangeLc}</div><p>${lines.join(' ')}</p></div></div>
     <div class="eq-card">
       <div class="eq-head"><h3>Total engagements <span>${perYear ? 'all time' : rangeLc}</span></h3><p>Every way someone used a Fitness Court, the Trail Line or the NFC app, added up.</p></div>
       <div class="eq-row">
@@ -2740,7 +2741,6 @@ function renderEngagement(body) {
         <div class="eq-sub">NFC estimate for the Fitness Courts (1.3M per Fitness Court per year) · Trail Line and app: XX until the formula is set</div></div>
     </div>
     ${engMapCard(F)}
-    <div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="rw-ai-body"><div class="cp-label">Overview · ${perYear ? 'all time' : rangeLc}</div><p>${lines.join(' ')}</p></div></div>
     <div class="eng-sec"><h3>The three pillars</h3><span>Each one shows who it reaches, what it burns and how people use it</span></div>
     <div class="eng-pillars">${courtP}${trailP}${digitalP}</div>
     <div class="acb-row2">
