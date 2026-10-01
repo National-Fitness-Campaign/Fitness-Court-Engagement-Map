@@ -113,18 +113,28 @@ const samplesAlong = (f, stepM = 150) => {
   pts.push(f.geometry.coordinates.at(-1));
   return pts;
 };
+// Trail Line groups for the Performance report: red line (Bonanza), yellow
+// line (Lone Mountain), and the green park loops (plus connectors).
+const groupOf = (f) => (/bonanza/i.test(f.properties?.name || '') ? 'red' : /lone mountain/i.test(f.properties?.name || '') ? 'yellow' : 'loops');
+const GROUP_LABEL = { red: 'Red line · Bonanza Trail', yellow: 'Yellow line · Lone Mountain Trail', loops: 'Park loops' };
+const groupShapes = { red: [], yellow: [], loops: [] };
 let courtShapes, trailShapes;
 if (METHOD === 'isochrone') {
   courtShapes = await mapLimit(courts, 4, (c) => isochrone(c.lon, c.lat));
-  const trailPts = lines.flatMap((f) => samplesAlong(f));
+  const tagged = lines.flatMap((f) => samplesAlong(f).map((pt) => ({ pt, g: groupOf(f) })));
+  const trailPts = tagged.map((x) => x.pt);
   trailShapes = await mapLimit(trailPts, 4, ([lon, lat]) => isochrone(lon, lat));
+  trailShapes.forEach((sh, i) => groupShapes[tagged[i].g].push(sh));
   fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
   fs.writeFileSync(cacheFile, JSON.stringify(isoCache));
   console.log(`isochrones: ${courtShapes.length} courts, ${trailPts.length} trail points (${WALK_MIN} min walk)`);
 } else {
   courtShapes = courts.map((c) => turf.buffer(turf.point([c.lon, c.lat]), COURT_RADIUS_M, { units: 'meters' }));
   trailShapes = lines.map((f) => turf.buffer(f, TRAIL_BUFFER_M, { units: 'meters' }));
+  trailShapes.forEach((sh, i) => groupShapes[groupOf(lines[i])].push(sh));
 }
+const groupAreas = Object.fromEntries(Object.entries(groupShapes).map(([g, list]) => [g, list.length ? clip(unionAll(list), boundary) : null]));
+const groupMiles = Object.fromEntries(Object.keys(groupShapes).map((g) => [g, Math.round(lines.filter((f) => groupOf(f) === g).reduce((t, f) => t + turf.length(f, { units: 'miles' }), 0) * 10) / 10]));
 const courtArea = clip(unionAll(courtShapes), boundary);
 const trailArea = lines.length ? clip(unionAll(trailShapes), boundary) : null;
 const combinedArea = unionAll([courtArea, trailArea].filter(Boolean));
@@ -185,6 +195,7 @@ const result = {
   courts: { ...reach(courtArea), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of a Fitness Court` : `Residents in 2020 Census blocks within ${COURT_RADIUS_M.toLocaleString()} m of a Fitness Court`, walkMinutes: WALK_MIN, areaMethod: METHOD },
   trail: { ...reach(trailArea), trailMiles: Math.round(trailMiles * 10) / 10, bufferMeters: TRAIL_BUFFER_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of the Trail Line` : `Residents in 2020 Census blocks within ${TRAIL_BUFFER_M.toLocaleString()} m of the Trail Line`, walkMinutes: WALK_MIN, areaMethod: METHOD },
   combined: { ...reach(combinedArea), method: 'Union of both areas, so nobody is counted twice' },
+  trailGroups: Object.fromEntries(Object.entries(groupAreas).map(([g, a]) => [g, { label: GROUP_LABEL[g], ...reach(a), miles: groupMiles[g] }])),
   clippedToCityLimits: Boolean(boundary),
 };
 

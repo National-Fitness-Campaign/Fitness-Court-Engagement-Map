@@ -2,7 +2,7 @@
  "las-vegas": {
   "pilot": "las-vegas",
   "city": "Las Vegas, NV",
-  "computedAt": "2026-09-30T22:43:41.783Z",
+  "computedAt": "2026-10-01T16:30:25.788Z",
   "courts": {
    "population": 15406,
    "blocks": 121,
@@ -25,6 +25,26 @@
    "population": 24177,
    "blocks": 179,
    "method": "Union of both areas, so nobody is counted twice"
+  },
+  "trailGroups": {
+   "red": {
+    "label": "Red line · Bonanza Trail",
+    "population": 5798,
+    "blocks": 58,
+    "miles": 1.6
+   },
+   "yellow": {
+    "label": "Yellow line · Lone Mountain Trail",
+    "population": 6844,
+    "blocks": 48,
+    "miles": 0.7
+   },
+   "loops": {
+    "label": "Park loops",
+    "population": 15444,
+    "blocks": 111,
+    "miles": 9.1
+   }
   },
   "clippedToCityLimits": true
  }

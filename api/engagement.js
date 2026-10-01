@@ -57,6 +57,12 @@ function build() {
       source: app.source,
       byCode,
       national: app.national.map(([month, newUsers, checkins]) => ({ month, newUsers, checkins })),
+      // All years, per QR court: [checkins, downloads, avg workout minutes].
+      allTime: Object.fromEntries(app.map.map(([qr, appCourt]) => {
+        const r = (app.allTime || []).find((x) => x[0] === appCourt);
+        return [qr, r ? [r[1], r[2], r[3]] : [0, 0, null]];
+      })),
+      network: app.network || null,
     },
     pilots: Object.entries(PILOTS).map(([slug, p]) => ({
       slug, city: `${p.name}, ${p.state}`, launchDate: p.launchDate, installStart: p.installStart, installWindow: p.installWindow,

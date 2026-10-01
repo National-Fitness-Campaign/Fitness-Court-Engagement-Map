@@ -364,7 +364,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 
 /* Analytics */
 /* Analytics: Raw QR scans | Engagement */
-.an-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px; margin-bottom: 16px; }
+.an-mode { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; padding: 6px; margin-bottom: 16px; }
 .an-mode button { border: none; background: none; font: 800 1.08rem 'Inter', sans-serif; letter-spacing: -0.01em; padding: 10px 18px; border-radius: 10px;
   color: var(--text-2); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .an-mode button small { font-weight: 500; font-size: 0.76rem; color: var(--text-3); letter-spacing: 0; }
@@ -500,6 +500,45 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 @media (max-width: 700px) { .eq-row, .eq-pair { grid-template-columns: 1fr; } }
 
 
+
+/* ── Performance report ─────────────────────────────────────────────────── */
+.pf-bar { display: flex; align-items: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+.pf-note { font-size: 0.82rem; color: #7c8aa0; margin-right: auto; }
+.pf-table-wrap { margin-top: 14px; border: 1px solid var(--border); border-radius: 16px; overflow-x: auto; background: #fff; }
+.pf-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.pf-table thead th { text-align: right; padding: 14px 16px 10px; font-size: 0.86rem; font-weight: 800; color: #334155; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: bottom; }
+.pf-table thead th i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--c); margin-right: 7px; }
+.pf-table thead th small { display: block; font-size: 0.7rem; font-weight: 500; color: #94a3b8; margin-top: 2px; }
+.pf-table thead th:first-child { width: 34%; }
+.pf-table tbody th { text-align: left; padding: 11px 16px; font-weight: 400; border-bottom: 1px solid #f0f3f8; }
+.pf-table tbody th b { display: block; color: #334155; font-size: 0.88rem; }
+.pf-table tbody th span { display: block; font-size: 0.74rem; color: #94a3b8; margin-top: 2px; line-height: 1.35; }
+.pf-table td { text-align: right; padding: 11px 16px; font-size: 1.15rem; font-weight: 800; color: #1e293b; border-bottom: 1px solid #f0f3f8; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pf-table td:nth-child(2) { background: #f8fafc; }
+.pf-table tr.pf-key td { font-size: 1.45rem; color: #1d4ed8; }
+.pf-table tr.pf-sec td { text-align: left; background: #f6f8fb !important; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #475569; padding: 8px 16px; }
+.pf-table tr.pf-sec td span { font-weight: 500; letter-spacing: 0; text-transform: none; color: #94a3b8; margin-left: 6px; }
+.pf-na { color: #cbd5e1; font-weight: 600; font-size: 0.9rem; }
+.pf-flag { margin-top: 10px; font-size: 0.8rem; color: #9a5b00; background: #fff7e6; border: 1px solid #fde2a8; border-radius: 10px; padding: 8px 12px; }
+.pf-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.pf-card { border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; background: #fff; }
+.pf-card h4 { font-size: 0.92rem; font-weight: 800; color: #334155; display: flex; align-items: center; }
+.pf-card p { font-size: 0.8rem; color: #7c8aa0; margin-top: 4px; }
+.pf-reset { margin-left: auto; border: 1px solid var(--border); background: #fff; border-radius: 8px; font: 600 0.74rem 'Inter', sans-serif; padding: 4px 10px; cursor: pointer; color: #475569; }
+.pf-ins { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin-top: 12px; }
+.pf-in { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #475569; }
+.pf-in span { flex: 1; }
+.pf-in input { width: 84px; font: 700 0.9rem 'Inter', sans-serif; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; text-align: right; color: #1e293b; }
+.pf-facts { margin-top: 10px; display: grid; gap: 8px; font-size: 0.82rem; color: #475569; line-height: 1.45; }
+.pf-facts li { margin-left: 18px; }
+.pf-facts b { color: #334155; }
+@media (max-width: 1000px) { .pf-grid2, .pf-ins { grid-template-columns: 1fr; } }
+@media print {
+  header, .controls, .an-mode, #an-raw-extra, .pf-bar .seg, .pf-bar .hbtn, .pf-reset, .refreshed, .map-wrap { display: none !important; }
+  body { background: #fff; }
+  .an-city { border: none; box-shadow: none; }
+  .pf-in input { border: none; }
+}
 /* ── Engagement: big type, color-washed cards, softer text ─────────────── */
 .eng-mode { --soft: #475569; --softer: #7c8aa0; color: var(--soft); }
 .eng-mode .an-city-head h2 { color: #334155; }
@@ -887,6 +926,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
     <div class="card an-mode" role="tablist" aria-label="Analytics mode">
       <button type="button" role="tab" data-mode="raw" onclick="setAnMode('raw')">Raw QR code scans<small>Every scan, by code, city and day</small></button>
       <button type="button" role="tab" data-mode="engagement" onclick="setAnMode('engagement')">Engagement<small>Fitness Court · Trail Line · Digital</small></button>
+      <button type="button" role="tab" data-mode="performance" onclick="setAnMode('performance')">Performance report<small>Shareable numbers · reach, users, calories</small></button>
     </div>
     <div class="card an-city">
       <div class="an-city-head">
@@ -2075,6 +2115,7 @@ function renderCityBreakdown() {
   const body = document.getElementById('an-city-body');
   document.getElementById('an-city-title').textContent = scopeTitle();
   if (state.anMode === 'engagement') { renderEngagement(body); return; }
+  if (state.anMode === 'performance') { renderPerformance(body); return; }
   const all = !state.anCity;
   const inCity = analyticsCodes();
   const courts = sideStats(inCity.filter((c) => c.kind !== 'trail'));
@@ -2576,6 +2617,150 @@ async function drawEngMap(F) {
   }
 }
 
+/* ── Performance report: the shareable numbers ─────────────────────────────
+   One method for every part of the project:
+     1. Reach: residents within a 10 minute walk (Census + Mapbox isochrones).
+     2. Counted: QR scans, app check-ins, app downloads (measured, no model).
+     3. Estimated: people we see × a multiplier for people we don't, then
+        × visits per year and × calories per visit (NFC's model, extended to
+        QR scans). Every assumption is editable here and printed with the report. */
+const PERF_DEFAULTS = { courtScanMult: 1, downloadMult: 10, visitsPerYear: 25, kcalCourt: 250, trailMult: 10, kcalTrail: 100, uniqueShare: 92, savingsPerCourt: 70000 };
+let perfA = { ...PERF_DEFAULTS };
+try { Object.assign(perfA, JSON.parse(localStorage.getItem('nfc-perf-assumptions') || '{}')); } catch {}
+state.perfPeriod = state.perfPeriod || 'year';
+function setPerf(k, v) {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n < 0) return;
+  perfA[k] = n;
+  try { localStorage.setItem('nfc-perf-assumptions', JSON.stringify(perfA)); } catch {}
+  renderAnalytics();
+}
+function resetPerf() { perfA = { ...PERF_DEFAULTS }; try { localStorage.removeItem('nfc-perf-assumptions'); } catch {} renderAnalytics(); }
+function setPerfPeriod(p) { state.perfPeriod = p; renderAnalytics(); }
+
+function renderPerformance(body) {
+  const E = engagementData;
+  if (!E) { body.innerHTML = '<div class="an-city-empty">Loading…</div>'; loadEngagement().then(() => { if (state.anMode === 'performance') renderAnalytics(); }).catch(() => {}); return; }
+  const today = laToday(), year = today.slice(0, 4);
+  const allYears = state.perfPeriod === 'all';
+  const bounds = allYears ? null : [`${year}-01-01`, today];
+  const codes = analyticsCodes();
+  const courtCodes = codes.filter((c) => c.kind !== 'trail' && c.locationStatus !== 'mobile');
+  const trailCodes = codes.filter((c) => c.kind === 'trail');
+  const pilot = state.anCity && (E.pilots || []).find((p) => p.city === state.anCity);
+  const acc = state.anCity ? E.accessibility[state.anCity] : null;
+
+  // Trail codes → red / yellow / park loops, from each code's station line.
+  let groupOfCode = null;
+  if (pilot && trailCodes.length) {
+    const cached = pilotCache.get(pilot.slug);
+    if (!cached) { pilotData(pilot.slug).then(() => { if (state.anMode === 'performance') renderAnalytics(); }); }
+    else if (!cached.__resolved) { cached.then((d) => { cached.__resolved = d; if (state.anMode === 'performance') renderAnalytics(); }); }
+    const d = cached && cached.__resolved;
+    if (d) {
+      groupOfCode = new Map();
+      for (const st of d.stations) {
+        const g = /bonanza|red line/i.test(st.line || '') ? 'red' : /lone mountain|yellow line/i.test(st.line || '') ? 'yellow' : 'loops';
+        for (const c of st.codes) groupOfCode.set(String(c.id), g);
+      }
+    }
+  }
+  const launch = pilot?.launchDate || '2000-01-01';
+  const publicScans = (c) => { const a = bounds ? (bounds[0] > launch ? bounds[0] : launch) : launch; return a <= today ? countFor(c, [a, today]) : 0; };
+
+  // Counted
+  const sumApp = (list) => {
+    let ci = 0, dl = 0, minW = 0, minN = 0;
+    for (const c of list) {
+      if (allYears) { const r = E.app.allTime?.[c.id]; if (r) { ci += r[0]; dl += r[1]; if (r[2]) { minW += r[2] * r[0]; minN += r[0]; } } }
+      else { const e = E.app.byCode[c.id]; if (e) for (const [m, [x, y]] of Object.entries(e.m)) if (m.startsWith(year)) { ci += x; dl += y; } const r = E.app.allTime?.[c.id]; if (r && r[2]) { minW += r[2] * r[0]; minN += r[0]; } }
+    }
+    return { ci, dl, mins: minN ? minW / minN : null };
+  };
+  const app = sumApp(courtCodes);
+  const courtQR = courtCodes.reduce((t, c) => t + countFor(c, bounds), 0);
+  const U = perfA.uniqueShare / 100;
+  const col = (key, label, color, o) => ({ key, label, color, ...o });
+  const trailCol = (g, label, color, reachN) => {
+    const list = groupOfCode ? trailCodes.filter((c) => (groupOfCode.get(String(c.id)) || 'loops') === g) : [];
+    const qr = list.reduce((t, c) => t + publicScans(c), 0);
+    const users = qr * U * perfA.trailMult;
+    const uses = users * perfA.visitsPerYear;
+    return col(g, label, color, { reach: reachN, qr, ci: null, dl: null, scanners: qr * U, users, uses, kcal: uses * perfA.kcalTrail, savings: null, codes: list.length });
+  };
+  // Never below what we counted: the larger of the app rule and the QR count.
+  const fcFromApp = app.dl * perfA.downloadMult, fcFromQR = courtQR * U * perfA.courtScanMult;
+  const fcUsers = Math.max(fcFromApp, fcFromQR);
+  const fcUses = fcUsers * perfA.visitsPerYear;
+  const fc = col('court', 'Fitness Courts', NEON.court, { reach: acc?.courts?.population ?? null, qr: courtQR, ci: app.ci, dl: app.dl, scanners: courtQR * U, users: fcUsers, uses: fcUses, kcal: fcUses * perfA.kcalCourt, savings: courtCodes.length * perfA.savingsPerCourt, codes: courtCodes.length });
+  const cols = [fc];
+  if (trailCodes.length && pilot) {
+    const G = acc?.trailGroups || {};
+    cols.push(trailCol('red', 'Red line', '#a52714', G.red?.population ?? null));
+    cols.push(trailCol('yellow', 'Yellow line', '#d99a06', G.yellow?.population ?? null));
+    cols.push(trailCol('loops', 'Park loops', '#097138', G.loops?.population ?? null));
+  }
+  const sum = (k) => (cols.some((c) => c[k] != null) ? cols.reduce((t, c) => t + (c[k] || 0), 0) : null);
+  const overall = col('overall', state.anCity ? 'Whole project' : 'All cities', '#334155', {
+    reach: acc?.combined?.population ?? null, qr: sum('qr'), ci: app.ci, dl: app.dl, scanners: sum('scanners'), users: sum('users'), uses: sum('uses'), kcal: sum('kcal'), savings: fc.savings, codes: codes.length,
+  });
+  const all = [overall, ...cols];
+  const f0 = (n) => (n == null ? '<span class="pf-na">n/a</span>' : Math.round(n).toLocaleString());
+  const fb = (n) => (n == null ? '<span class="pf-na">n/a</span>' : fmtBig(n));
+  const money = (n) => (n == null ? '<span class="pf-na">n/a</span>' : '$' + (n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : Math.round(n / 1e3) + 'K'));
+  const pre = pilot && today < pilot.launchDate;
+  const row = (label, how, fn, cls = '') => `<tr class="${cls}"><th><b>${label}</b><span>${how}</span></th>${all.map((c) => `<td>${fn(c)}</td>`).join('')}</tr>`;
+  const periodLbl = allYears ? 'all years' : `${year} so far`;
+  const inp = (k, label, suffix = '') => `<label class="pf-in"><span>${label}</span><input type="number" min="0" step="any" value="${perfA[k]}" onchange="setPerf('${k}', this.value)">${suffix}</label>`;
+
+  body.innerHTML = `
+    <div class="pf-bar">
+      <div class="seg pf-period"><button class="${allYears ? '' : 'on'}" onclick="setPerfPeriod('year')">${year} so far</button><button class="${allYears ? 'on' : ''}" onclick="setPerfPeriod('all')">All years</button></div>
+      <span class="pf-note">Shareable figures for ${state.anCity ? esc(state.anCity) : 'the network'}. Estimates use the assumptions below.</span>
+      <button class="hbtn" onclick="window.print()">Download PDF</button>
+    </div>
+    <div class="pf-table-wrap"><table class="pf-table">
+      <thead><tr><th></th>${all.map((c) => `<th style="--c:${c.color}"><i></i>${c.label}<small>${c.key === 'overall' ? `${c.codes} QR codes` : c.key === 'court' ? `${c.codes} Fitness Courts` : `${c.codes} sign codes`}</small></th>`).join('')}</tr></thead>
+      <tbody>
+        <tr class="pf-sec"><td colspan="${all.length + 1}">1 · Reach <span>who can get there</span></td></tr>
+        ${row('Residents within a 10 minute walk', '2020 Census, real walking routes (Mapbox), inside city limits. Whole project counts each person once.', (c) => f0(c.reach))}
+        <tr class="pf-sec"><td colspan="${all.length + 1}">2 · Counted <span>measured directly, ${periodLbl}</span></td></tr>
+        ${row('QR scans', `Scans of the sign codes${pre ? '. Trail Line counts from ' + new Date(pilot.launchDate + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : ''}. Complete from Apr 7, 2026.`, (c) => f0(c.qr))}
+        ${row('Unique QR scanners', `QR scans × ${perfA.uniqueShare}% (share of scans from distinct devices, measured network wide)`, (c) => f0(c.scanners))}
+        ${row('App check-ins', 'Workouts logged in the NFC app at these Fitness Courts', (c) => f0(c.ci))}
+        ${row('App downloads', 'People whose first ever app check-in was at one of these Fitness Courts', (c) => f0(c.dl))}
+        <tr class="pf-sec"><td colspan="${all.length + 1}">3 · Estimated <span>people we see × the people we don't</span></td></tr>
+        ${row('Estimated users', `Fitness Courts: the larger of app downloads × ${perfA.downloadMult} (${Math.round(fcFromApp).toLocaleString()}) or unique QR scanners × ${perfA.courtScanMult} (${Math.round(fcFromQR).toLocaleString()}). Trail Line: unique scanners × ${perfA.trailMult}.`, (c) => fb(c.users), 'pf-key')}
+        ${row('Estimated annual uses', `Estimated users × ${perfA.visitsPerYear} visits a year`, (c) => fb(c.uses))}
+        ${row('Estimated calories burned', `Uses × ${perfA.kcalCourt} kcal (Fitness Court, 14 min) or × ${perfA.kcalTrail} kcal (Trail Line walk)`, (c) => fb(c.kcal), 'pf-key')}
+        ${row('Healthcare savings / year', `$${perfA.savingsPerCourt.toLocaleString()} per Fitness Court (NFC benchmark)`, (c) => money(c.savings))}
+      </tbody></table></div>
+    ${pre ? `<div class="pf-flag">Trail Line columns fill in from ${new Date(pilot.launchDate + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })}, when public counting starts. ${F_TEST(trailCodes, pilot)} test scans so far are left out.</div>` : ''}
+    <div class="pf-grid2">
+      <div class="pf-card pf-assume"><h4>Assumptions <button class="pf-reset" onclick="resetPerf()">Reset</button></h4>
+        <p>Change any of these to see every estimate update. They print with the report.</p>
+        <div class="pf-ins">
+          ${inp('downloadMult', 'Fitness Court users per app download', '×')}
+          ${inp('courtScanMult', 'Fitness Court users per unique scanner', '×')}
+          ${inp('trailMult', 'Trail Line users per unique scanner', '×')}
+          ${inp('visitsPerYear', 'Visits per user per year')}
+          ${inp('kcalCourt', 'Calories per Fitness Court use')}
+          ${inp('kcalTrail', 'Calories per Trail Line walk')}
+          ${inp('uniqueShare', 'Scans from distinct devices', '%')}
+          ${inp('savingsPerCourt', 'Healthcare savings per Fitness Court', '$')}
+        </div></div>
+      <div class="pf-card"><h4>What the data says about these assumptions</h4><ul class="pf-facts">
+        <li><b>${E.app.network ? Math.round((E.app.network.qrDistinctDevices / E.app.network.qrHumanScansSinceApr7) * 100) : 92}% of QR scans come from distinct devices</b> (${E.app.network ? E.app.network.qrHumanScansSinceApr7.toLocaleString() : ''} human scans, ${E.app.network ? E.app.network.qrRepeatDevices.toLocaleString() : ''} devices back on another day), so one scan is about one person.</li>
+        <li><b>Logged app workouts average ${E.app.network?.avgWorkoutMin ?? 30} minutes</b>${app.mins ? ` (${app.mins.toFixed(0)} min at these Fitness Courts)` : ''}, about ${Math.round(((E.app.network?.avgWorkoutMin ?? 30) / 7) * 120)} calories by NFC's 7 minute = 120 calorie rule. The 250 calorie default assumes 14 minutes, so it is conservative.</li>
+        <li><b>${E.app.network ? Math.round((E.app.network.accountsWithCheckin / E.app.network.accounts) * 100) : 10}% of app accounts have ever checked in</b> (${E.app.network ? E.app.network.accountsWithCheckin.toLocaleString() : ''} of ${E.app.network ? E.app.network.accounts.toLocaleString() : ''}), in line with NFC's rule that app users are about 10% of Fitness Court users.</li>
+        <li><b>Trail Line multiplier and calories are placeholders</b> until the formula workshop: ${perfA.trailMult}× mirrors the Fitness Court rule, ${perfA.kcalTrail} kcal is about a one mile walk.</li>
+      </ul></div>
+    </div>`;
+}
+function F_TEST(trailCodes, pilot) {
+  return trailCodes.reduce((t, c) => t + countFor(c, ['2000-01-01', shiftDate(pilot.launchDate, -1)]), 0).toLocaleString();
+}
+
 // Numbers roll up from zero on render (skips anything that isn't a plain count).
 function countUp(root) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -2596,7 +2781,7 @@ function renderEngagement(body) {
   if (!engagementData) {
     body.innerHTML = '<div class="an-city-empty">Loading engagement data…</div>';
     loadEngagement()
-      .then(() => { if (state.view === 'analytics' && state.anMode === 'engagement') renderAnalytics(); })
+      .then(() => { if (state.view === 'analytics' && state.anMode !== 'raw') renderAnalytics(); })
       .catch((e) => { body.innerHTML = `<div class="an-city-empty">Couldn't load engagement data: ${esc(e.message)}</div>`; });
     return;
   }
@@ -2839,12 +3024,12 @@ function loadTimeOfDay(ids, bounds) {
 
 function renderAnalytics() {
   destroyCharts();
-  const eng = state.anMode === 'engagement';
+  const eng = state.anMode !== 'raw';
   document.querySelectorAll('.an-mode button').forEach((b) => {
     b.classList.toggle('on', b.dataset.mode === state.anMode);
     b.setAttribute('aria-selected', b.dataset.mode === state.anMode);
   });
-  document.getElementById('an-city-eyebrow').textContent = eng ? 'Engagement · showing' : 'QR code scans · showing';
+  document.getElementById('an-city-eyebrow').textContent = { raw: 'QR code scans · showing', engagement: 'Engagement · showing', performance: 'Performance report · showing' }[state.anMode];
   document.getElementById('an-raw-extra').style.display = eng ? 'none' : '';
   document.querySelector('.an-city').classList.add('eng-mode');
   renderCityBreakdown();
