@@ -74,7 +74,7 @@ function build() {
 
 export default function handler(req, res) {
   try {
-    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate, s-maxage=3600, stale-while-revalidate=86400');
     res.status(200).json(build());
   } catch (err) {
     sendError(res, err);

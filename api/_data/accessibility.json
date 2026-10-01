@@ -2,10 +2,19 @@
  "las-vegas": {
   "pilot": "las-vegas",
   "city": "Las Vegas, NV",
-  "computedAt": "2026-10-01T16:30:25.788Z",
+  "computedAt": "2026-10-01T16:43:44.711Z",
   "courts": {
    "population": 15406,
    "blocks": 121,
+   "byCode": {
+    "11033889": 5269,
+    "11033908": 1622,
+    "11101128": 2192,
+    "11101162": 1874,
+    "11102180": 1272,
+    "11102199": 3177,
+    "11102213": 5856
+   },
    "sites": 7,
    "radiusMeters": 805,
    "method": "Residents in 2020 Census blocks inside a 10 minute walk (street network) of a Fitness Court",

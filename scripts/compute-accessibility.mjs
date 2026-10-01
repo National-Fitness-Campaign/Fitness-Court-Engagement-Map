@@ -192,7 +192,7 @@ const result = {
   pilot: PILOT,
   city: `${pilot.pilot.name}, ${pilot.pilot.state}`,
   computedAt: new Date().toISOString(),
-  courts: { ...reach(courtArea), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of a Fitness Court` : `Residents in 2020 Census blocks within ${COURT_RADIUS_M.toLocaleString()} m of a Fitness Court`, walkMinutes: WALK_MIN, areaMethod: METHOD },
+  courts: { ...reach(courtArea), byCode: Object.fromEntries(courts.map((c, i) => [c.id, reach(clip(courtShapes[i], boundary)).population])), sites: courts.length, radiusMeters: COURT_RADIUS_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of a Fitness Court` : `Residents in 2020 Census blocks within ${COURT_RADIUS_M.toLocaleString()} m of a Fitness Court`, walkMinutes: WALK_MIN, areaMethod: METHOD },
   trail: { ...reach(trailArea), trailMiles: Math.round(trailMiles * 10) / 10, bufferMeters: TRAIL_BUFFER_M, method: METHOD === 'isochrone' ? `Residents in 2020 Census blocks inside a ${WALK_MIN} minute walk (street network) of the Trail Line` : `Residents in 2020 Census blocks within ${TRAIL_BUFFER_M.toLocaleString()} m of the Trail Line`, walkMinutes: WALK_MIN, areaMethod: METHOD },
   combined: { ...reach(combinedArea), method: 'Union of both areas, so nobody is counted twice' },
   trailGroups: Object.fromEntries(Object.entries(groupAreas).map(([g, a]) => [g, { label: GROUP_LABEL[g], ...reach(a), miles: groupMiles[g] }])),
