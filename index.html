@@ -157,6 +157,22 @@ header {
 .seg button .sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
 
 /* City panel (opens over the map) */
+.sp-city { font-size: 0.78rem; color: var(--text-3); margin-top: 2px; }
+.sp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.sp-stat { background: #f6f8fb; border-radius: 10px; padding: 10px 12px; }
+.sp-stat b { display: block; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: #1e293b; }
+.sp-stat b small { font-size: 0.72rem; }
+.sp-stat span { font-size: 0.7rem; color: var(--text-3); }
+.sp-block { margin-top: 14px; }
+.sp-block .cp-spark, .sp-block svg { width: 100%; height: 40px; display: block; margin-top: 4px; }
+.sp-note { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text-3); font-size: 0.72rem; }
+.sp-tod { margin-top: 6px; }
+.sp-bars { display: flex; align-items: flex-end; gap: 2px; height: 54px; }
+.sp-bars i { flex: 1; border-radius: 2px 2px 0 0; min-height: 2px; }
+.sp-axis { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--text-3); margin: 3px 0 6px; }
+.sp-facts { margin-top: 14px; display: grid; gap: 4px; font-size: 0.8rem; color: var(--text-2); }
+.sp-facts a { color: var(--blue); }
+.sp-warn { color: #991b1b; }
 .citypanel { top: 18px; right: 18px; bottom: 18px; width: 440px; max-width: calc(100% - 36px); overflow-y: auto; padding: 18px 18px 20px; z-index: 950; }
 .cp-mini { top: 18px; right: 18px; width: 440px; max-width: calc(100% - 36px); z-index: 950; display: flex; align-items: center; gap: 14px;
   padding: 12px 12px 12px 18px; cursor: pointer; transition: box-shadow 0.15s ease; }
@@ -978,6 +994,7 @@ const state = {
   allRankings: false,
   kind: 'all',           // 'all' | 'court' | 'trail'
   cityPanel: null,       // "City, ST" when the city panel is open
+  sitePanel: null,       // QR code id when one location's panel is open
   cityHidden: false,     // panel tucked away into a tab (still selected)
   anCity: '',            // Analytics city breakdown ('' = all cities)
   anMode: 'raw',         // Analytics: 'raw' QR scans | 'engagement'
@@ -1453,20 +1470,90 @@ function courtOverview(c) {
   else if (last && Date.parse(today) - Date.parse(last) > 28 * 864e5) out.push(`Last scan ${new Date(last + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}, over four weeks ago. Worth checking the sign and the code.`);
   return out.join(' ');
 }
-let courtFocus = null;
+// Clicking any location opens its own side panel: an overview of just that
+// site (trend, busiest day and hour, app activity), like the city panel.
 map.on('popupopen', (ev) => {
-  const id = [...openMarkers.entries()].find(([, m]) => m.getPopup && m.getPopup() === ev.popup)?.[0];
-  const c = id != null && state.courts.find((x) => x.id === id);
-  const box = document.getElementById('cp-overview');
-  if (!c || !box || cityKey(c) !== state.cityPanel) return;
-  courtFocus = c.id;
-  box.innerHTML = `<div class="cp-label">Overview · ${esc(displayName(c))} · <a href="#" onclick="map.closePopup(); return false">back to city</a></div><p>${courtOverview(c)}</p>`;
+  let id = [...openMarkers.entries()].find(([, m]) => m.getPopup && m.getPopup() === ev.popup)?.[0];
+  if (id == null) {
+    const ll = ev.popup.getLatLng();
+    id = state.courts.find((c) => c.lat != null && Math.abs(c.lat - ll.lat) < 1e-6 && Math.abs(c.lon - ll.lng) < 1e-6)?.id;
+  }
+  if (id != null) openSitePanel(id);
 });
-map.on('popupclose', () => {
-  if (courtFocus == null) return;
-  courtFocus = null;
-  if (state.cityPanel) renderCityPanel();
-});
+function openSitePanel(id) {
+  state.sitePanel = id;
+  state.cityHidden = false;
+  renderCityPanel();
+  // App check-ins / downloads come with the engagement data; fill in when it lands.
+  if (!engagementData) loadEngagement().then(() => { if (state.sitePanel === id) renderCityPanel(); }).catch(() => {});
+}
+function closeSitePanel() {
+  state.sitePanel = null;
+  map.closePopup();
+  renderCityPanel();
+}
+const siteTodCache = new Map();
+function renderSitePanel(el) {
+  const c = state.courts.find((x) => x.id === state.sitePanel);
+  if (!c) { state.sitePanel = null; return false; }
+  const bounds = rangeBounds(), today = laToday();
+  const n = countFor(c, bounds), all = countFor(c, null);
+  const tw = countFor(c, [shiftDate(today, -6), today]), lw = countFor(c, [shiftDate(today, -13), shiftDate(today, -7)]);
+  const spark = []; for (let i = 27; i >= 0; i--) { const d = shiftDate(today, -i); spark.push(countFor(c, [d, d])); }
+  const days = state.daily.get(String(c.id));
+  const last = days ? [...days.entries()].filter(([, v]) => v.human + (state.includeBots ? v.bot : 0) > 0).map(([d]) => d).sort().at(-1) : null;
+  const color = c.kind === 'trail' ? TL_MAGENTA : 'var(--blue)';
+  const city = cityKey(c);
+  const cityTotalAll = state.courts.filter((x) => cityKey(x) === city).reduce((t, x) => t + countFor(x, null), 0);
+  const typeLbl = c.kind === 'trail' ? 'Trail Line sign' : 'Fitness Court';
+  const src = { salesforce: 'Location from Salesforce', designlab: 'Location from the Design Lab', override: 'Location placed by hand from NFC planning maps', uniqode: 'Location from Uniqode' }[c.locationSource] || 'No verified location';
+  const app = c.kind !== 'trail' && engagementData?.app?.byCode?.[c.id];
+  let ci = 0, dl = 0;
+  if (app) for (const [, [x, y]] of Object.entries(app.m)) { ci += x; dl += y; }
+  const fmtD = (x) => new Date(x + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const stat = (num, label) => `<div class="sp-stat"><b>${num}</b><span>${label}</span></div>`;
+  el.innerHTML = `
+    <div class="cp-head">
+      <div><div class="cp-eyebrow">${typeLbl}${c.configuration && c.configuration !== 'Fitness Court' ? ' · ' + esc(c.configuration) : ''}</div><div class="cp-title">${esc(displayName(c))}</div>
+        <div class="sp-city">${esc(city)}${c.address ? ' · ' + esc(c.address) : ''}</div></div>
+      <button class="cp-close" onclick="closeSitePanel()" aria-label="Close this location" title="Close">✕</button>
+    </div>
+    <div class="cp-overview" id="sp-overview"><div class="cp-label">Overview · this ${c.kind === 'trail' ? 'sign' : 'Fitness Court'}</div><p>${courtOverview(c)}</p></div>
+    <div class="sp-stats">
+      ${bounds ? stat(n.toLocaleString(), `QR scans · ${esc(RANGE_LABELS[state.range].toLowerCase())}`)
+        : stat(`${cityTotalAll ? Math.round((all / cityTotalAll) * 100) : 0}%`, `of ${esc(city.split(',')[0])}'s QR scans`)}
+      ${stat(tw.toLocaleString() + ` <small class="${tw > lw ? 'ch-up' : tw < lw ? 'ch-down' : 'ch-flat'}">${tw === lw ? '=' : tw > lw ? '▲' : '▼'} ${Math.abs(tw - lw)}</small>`, `last 7 days (week before ${lw})`)}
+      ${stat(all.toLocaleString(), 'QR scans all time')}
+      ${stat(last ? fmtD(last) : 'None yet', 'last scan')}
+    </div>
+    <div class="sp-block"><div class="cp-label">Daily QR scans · last 28 days</div>${sparkSVG(spark, c.kind === 'trail' ? TL_MAGENTA : '#2563eb')}</div>
+    <div class="sp-block"><div class="cp-label">Time of day <span class="sp-note">Pacific · live scans since Apr 7</span></div><div id="sp-tod" class="sp-tod"><span class="sp-note">Loading…</span></div></div>
+    ${app ? `<div class="sp-block"><div class="cp-label">NFC app at this Fitness Court <span class="sp-note">Jan to Sep 2026</span></div>
+      <div class="sp-stats sp-stats-2">${stat(ci.toLocaleString(), 'app check-ins')}${stat(dl.toLocaleString(), 'app downloads')}</div></div>` : ''}
+    <div class="sp-facts">
+      <div>${c.locationSource ? '✓' : '⚠'} ${src}</div>
+      ${neverScanned(c) ? '<div class="sp-warn">⚠ Live two weeks or more with no scans: check the sign and the code.</div>' : ''}
+      ${c.url ? `<div><a href="${esc(c.url)}" target="_blank" rel="noopener">Open this QR code's link ↗</a></div>` : ''}
+    </div>
+    <button type="button" class="cp-more" onclick="openCityPanel('${esc(city)}')">See the ${esc(city)} breakdown →</button>`;
+  // Time of day for just this code.
+  const key = String(c.id) + (state.includeBots ? '' : ':h');
+  if (!siteTodCache.has(key)) siteTodCache.set(key, fetch(`/api/hourly?ids=${c.id}&bots=${state.includeBots ? 1 : 0}`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  siteTodCache.get(key).then((d) => {
+    const box = document.getElementById('sp-tod');
+    if (!box || state.sitePanel !== c.id) return;
+    if (!d) { box.innerHTML = '<span class="sp-note">Unavailable right now.</span>'; return; }
+    const hours = Array.from({ length: 24 }, (_, h) => d.grid.reduce((t, row) => t + row[h], 0));
+    const tot = hours.reduce((a, b) => a + b, 0);
+    if (!tot) { box.innerHTML = '<span class="sp-note">No timed scans yet.</span>'; return; }
+    const max = Math.max(...hours), peak = hours.indexOf(max);
+    const hl = (h) => (h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h - 12}p`);
+    box.innerHTML = `<div class="sp-bars">${hours.map((v, h) => `<i title="${hl(h)}: ${v}" style="height:${Math.max(2, Math.round((v / max) * 100))}%;background:${h === peak ? TL_MAGENTA : '#2563eb'}"></i>`).join('')}</div>
+      <div class="sp-axis"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span></div>
+      <div class="sp-note">Busiest hour <b>${hl(peak)} to ${hl((peak + 1) % 24)}</b> · ${Math.round((max / tot) * 100)}% of scans</div>`;
+  });
+  return true;
+}
 
 function renderLegend() {
   const el = document.getElementById('legend');
@@ -1560,6 +1647,7 @@ function codeCountLabel(list) {
 }
 
 function openCityPanel(key) {
+  state.sitePanel = null;
   state.cityPanel = key;
   state.cityHidden = false;
   if (state.view !== 'map') setView('map');
@@ -1574,6 +1662,7 @@ function openCityPanel(key) {
   }
 }
 function closeCityPanel() {
+  state.sitePanel = null;
   state.cityPanel = null;
   state.cityHidden = false;
   renderCityPanel();
@@ -1704,6 +1793,11 @@ function renderCityPanel() {
   const el = document.getElementById('citypanel');
   const callout = document.querySelector('.callout');
   const mini = document.getElementById('cp-mini');
+  if (state.sitePanel != null) {
+    el.parentElement.classList.add('cp-open');
+    mini.style.display = 'none';
+    if (renderSitePanel(el)) { el.style.display = 'block'; if (callout) callout.style.display = 'none'; return; }
+  }
   const open = !!state.cityPanel && !state.cityHidden;
   const collapsed = !!state.cityPanel && state.cityHidden;
   el.parentElement.classList.toggle('cp-open', !!state.cityPanel);
@@ -2940,7 +3034,7 @@ function runSearch(q) {
 // Logo = Home: back to the map, every filter cleared, whole country in view.
 function goHome() {
   state.search = ''; state.stateFilter = ''; state.range = 'all'; state.customFrom = state.customTo = null;
-  state.cityPanel = null; state.cityHidden = false; state.anCity = ''; state.anMode = 'raw'; state.allRankings = false;
+  state.cityPanel = null; state.sitePanel = null; state.cityHidden = false; state.anCity = ''; state.anMode = 'raw'; state.allRankings = false;
   document.getElementById('f-search').value = '';
   document.getElementById('f-range').value = 'all';
   document.getElementById('custom-range').style.display = 'none';
