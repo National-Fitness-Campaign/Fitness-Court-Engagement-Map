@@ -72,14 +72,14 @@ header {
 .controls { margin-bottom: 16px; display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px 18px; padding: 12px 18px; }
 .controls .filterbar { display: contents; }
 .controls .field { order: 1; }
-.controls .kpis { order: 2; flex: 1; display: flex; justify-content: space-around; border-top: none; border-left: 1px solid var(--border); padding-left: 8px; align-self: stretch; align-items: center; }
+.controls .kpis { order: 2; margin-left: auto; display: flex; border: none; align-items: flex-end; gap: 0; }
 .controls .bots-pill { order: 3; }
-.controls .kpi { padding: 0 14px; gap: 12px; cursor: default; }
-.controls .kpi + .kpi { border-left: none; }
-.controls .kpi-sub { display: none; }
-.controls .kpi-icon { width: 38px; height: 38px; border-radius: 11px; }
-.controls .kpi-num { font-size: 1.75rem; line-height: 1.05; }
-.controls .kpi-label { font-size: 0.68rem; white-space: nowrap; }
+.controls .kpi { display: block; padding: 0 20px; cursor: default; border-left: 1px solid var(--border); }
+.controls .kpi:first-child { border-left: none; }
+.controls .kpi + .kpi { border-left: 1px solid var(--border); }
+.controls .kpi-icon, .controls .kpi-sub { display: none; }
+.controls .kpi-num { font-size: 1.6rem; line-height: 1.05; color: #1e293b !important; }
+.controls .kpi-label { font-size: 0.66rem; white-space: nowrap; color: #7c8aa0; margin-top: 3px; }
 .controls .unmapped-btn { margin: 3px 0 0; padding: 2px 7px; font-size: 0.62rem; }
 .controls .field input[type=text] { min-width: 170px; }
 .search-wrap { position: relative; display: flex; }
@@ -88,11 +88,13 @@ header {
   background: none; color: var(--text-2); cursor: pointer; display: grid; place-items: center; }
 .search-go:hover { background: #eef1f6; color: var(--blue); }
 .controls .field select { min-width: 128px; }
-@media (max-width: 1250px) {
-  /* Not enough width for one row: stats drop to their own line under the filters. */
-  .controls .kpis { order: 4; width: 100%; border-left: none; border-top: 1px solid var(--border); padding: 10px 0 0; justify-content: space-between; }
-  .controls .kpi { padding: 0 8px 0 0; }
+@media (max-width: 1180px) {
+  /* Not enough width for one row: the stats get their own even row. */
+  .controls .kpis { order: 4; width: 100%; margin-left: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); padding-top: 12px; }
+  .controls .kpi { padding: 0 14px; }
+  .controls .kpi:first-child { padding-left: 0; }
 }
+@media (max-width: 600px) { .controls .kpis { grid-template-columns: 1fr 1fr; row-gap: 12px; } .controls .kpi:nth-child(3) { border-left: none; padding-left: 0; } }
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); }
 .kpi { display: flex; align-items: center; gap: 12px; padding: 12px 20px; }
 .kpi + .kpi { border-left: 1px solid var(--border); }
@@ -175,6 +177,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .acb-chart { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
 .acb-chart h4, .acb-table h4 { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; }
 .acb-row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+.acb-row2 > * { min-width: 0; }
 .acb-dow { display: grid; gap: 7px; }
 .acb-dow div { display: grid; grid-template-columns: 34px 1fr 36px; gap: 8px; align-items: center; font-size: 0.78rem; }
 .acb-dow .track { height: 9px; border-radius: 5px; background: #eef1f6; overflow: hidden; }
