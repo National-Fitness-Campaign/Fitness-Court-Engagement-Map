@@ -2196,7 +2196,7 @@ function renderCityBreakdown() {
     return `<tr onclick="setView('map'); focusCourt(${Number(r.c.id)})">
       <td><b>${esc(displayName(r.c))}</b></td><td>${r.c.kind === 'trail' ? '<span class="type-badge trail">Trail Line</span>' : '<span class="type-badge court">Fitness Court</span>'}</td>
       <td class="n"><b>${r.n.toLocaleString()}</b></td>${bounds ? `<td class="n">${(prev || 0).toLocaleString()}</td><td class="n">${chip(r.n, prev)}</td>` : ''}
-      <td class="n">${cityTotal ? Math.round((r.n / cityTotal) * 100) : 0}%</td><td class="n">${(r.c.officialScans || 0).toLocaleString()}</td>
+      <td class="n">${cityTotal ? Math.round((r.n / cityTotal) * 100) : 0}%</td>${bounds ? `<td class="n">${(r.c.officialScans || 0).toLocaleString()}</td>` : ''}
       <td>${last ? new Date(last + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : 'None yet'}</td></tr>`;
   }).join('');
 
@@ -2232,7 +2232,7 @@ function renderCityBreakdown() {
     <div class="acb-chart rw-tod"><h4>Time of day · ${esc(RANGE_LABELS[state.range])} <span class="rw-tod-note">Pacific time · live scans since Apr 7, 2026</span></h4>
       <div class="rw-tod-grid"><div><canvas id="chart-tod" height="150"></canvas></div><div id="tod-heat" class="tod-heat"><div class="an-city-empty">Loading…</div></div></div></div>
     ${all ? '' : `<div class="acb-table"><h4>Every code</h4><table>
-      <thead><tr><th>Name</th><th>Type</th><th class="n">${esc(RANGE_LABELS[state.range])}</th>${bounds ? '<th class="n">Prior period</th><th class="n">Change</th>' : ''}<th class="n">Share</th><th class="n">All time</th><th>Last scan</th></tr></thead>
+      <thead><tr><th>Name</th><th>Type</th><th class="n">${esc(RANGE_LABELS[state.range])}</th>${bounds ? '<th class="n">Prior period</th><th class="n">Change</th>' : ''}<th class="n">Share</th>${bounds ? '<th class="n">All time</th>' : ''}<th>Last scan</th></tr></thead>
       <tbody>${rows}</tbody></table></div>`}`;
 
   // Stacked daily chart: courts vs trail lines.
@@ -2507,6 +2507,8 @@ function engagementFigures(city) {
     const e = E.app.byCode[c.id];
     if (!e) continue;
     matched++;
+    // All time = every year in the app, not just the monthly snapshot (2026).
+    if (!bounds && E.app.allTime?.[c.id]) { checkins += E.app.allTime[c.id][0]; newUsers += E.app.allTime[c.id][1]; continue; }
     for (const [mo, [ci, nu]] of Object.entries(e.m)) {
       const f = bounds ? monthShare(mo, from, to) : 1;
       if (f > 0 && f < 1) prorated = true;
@@ -2718,11 +2720,16 @@ function renderPerformance(body) {
   const cols = [fc];
   if (trailCodes.length && pilot) {
     const G = acc?.trailGroups || {};
-    cols.push(trailCol('red', 'Red line', '#a52714', G.red?.population ?? null));
-    cols.push(trailCol('yellow', 'Yellow line', '#d99a06', G.yellow?.population ?? null));
-    cols.push(trailCol('loops', 'Park loops', '#097138', G.loops?.population ?? null));
+    const red = trailCol('red', 'Red line', '#a52714', G.red?.population ?? null);
+    const yellow = trailCol('yellow', 'Yellow line', '#d99a06', G.yellow?.population ?? null);
+    const loops = trailCol('loops', '', '', null);
+    const tlAll = col('trail', 'Trail Line (all)', NEON.trail, { reach: acc?.trail?.population ?? null, codes: trailCodes.length });
+    for (const k of ['qr', 'scanners', 'users', 'uses', 'kcal']) tlAll[k] = red[k] + yellow[k] + loops[k];
+    tlAll.ci = null; tlAll.dl = null; tlAll.savings = null;
+    cols.push(tlAll, red, yellow);
   }
-  const sum = (k) => (cols.some((c) => c[k] != null) ? cols.reduce((t, c) => t + (c[k] || 0), 0) : null);
+  const top = cols.filter((c) => c.key === 'court' || c.key === 'trail');
+  const sum = (k) => (top.some((c) => c[k] != null) ? top.reduce((t, c) => t + (c[k] || 0), 0) : null);
   const overall = col('overall', state.anCity ? 'Whole project' : 'All cities', '#334155', {
     reach: acc?.combined?.population ?? null, qr: sum('qr'), ci: app.ci, dl: app.dl, scanners: sum('scanners'), users: sum('users'), uses: sum('uses'), kcal: sum('kcal'), savings: fc.savings, codes: codes.length,
   });
@@ -2773,7 +2780,7 @@ function renderPerformance(body) {
         </div></div>
       <div class="pf-card"><h4>What the data says about these assumptions</h4><ul class="pf-facts">
         <li><b>${E.app.network ? Math.round((E.app.network.qrDistinctDevices / E.app.network.qrHumanScansSinceApr7) * 100) : 92}% of QR scans come from distinct devices</b> (${E.app.network ? E.app.network.qrHumanScansSinceApr7.toLocaleString() : ''} human scans, ${E.app.network ? E.app.network.qrRepeatDevices.toLocaleString() : ''} devices back on another day), so one scan is about one person.</li>
-        <li><b>Logged app workouts average ${E.app.network?.avgWorkoutMin ?? 30} minutes</b>${app.mins ? ` (${app.mins.toFixed(0)} min at these Fitness Courts)` : ''}, about ${Math.round(((E.app.network?.avgWorkoutMin ?? 30) / 7) * 120)} calories by NFC's 7 minute = 120 calorie rule. The 250 calorie default assumes 14 minutes, so it is conservative.</li>
+        <li><b>Workout length can't be measured yet.</b> Most app sessions end at exactly 20 or 40 minutes because the app checks people out automatically, so the 250 calorie (14 minute) default stays.</li>
         <li><b>${E.app.network ? Math.round((E.app.network.accountsWithCheckin / E.app.network.accounts) * 100) : 10}% of app accounts have ever checked in</b> (${E.app.network ? E.app.network.accountsWithCheckin.toLocaleString() : ''} of ${E.app.network ? E.app.network.accounts.toLocaleString() : ''}), in line with NFC's rule that app users are about 10% of Fitness Court users.</li>
         <li><b>Trail Line multiplier and calories are placeholders</b> until the formula workshop: ${perfA.trailMult}× mirrors the Fitness Court rule, ${perfA.kcalTrail} kcal is about a one mile walk.</li>
       </ul></div>
@@ -2823,8 +2830,9 @@ function renderEngagement(body) {
   const rows = courtCodes.map((c) => {
     const e = E.app.byCode[c.id];
     let ci = 0, dl = 0;
-    if (e) for (const [mo, [x, y]] of Object.entries(e.m)) { const f = bounds ? monthShare(mo, from, to) : 1; ci += x * f; dl += y * f; }
     const at = E.app.allTime?.[c.id];
+    if (e && !bounds && at) { ci = at[0]; dl = at[1]; }
+    else if (e) for (const [mo, [x, y]] of Object.entries(e.m)) { const f = bounds ? monthShare(mo, from, to) : 1; ci += x * f; dl += y * f; }
     return { c, matched: !!e, ci: Math.round(ci), dl: Math.round(dl), act: Math.round(ci) + Math.round(dl), mins: at ? at[2] : null, ciAll: at ? at[0] : 0 };
   }).sort((x, y) => y.act - x.act);
   const ci = F.digital.checkins, dl = F.digital.newUsers, act = ci + dl;
@@ -2847,8 +2855,7 @@ function renderEngagement(body) {
 
   // Overview
   const lines = [];
-  lines.push(`<b>${act.toLocaleString()} app check-ins and downloads</b> at ${place}'s ${courtCodes.length} Fitness Court${courtCodes.length === 1 ? '' : 's'} ${bounds ? rangeLc : 'since January'}: ${ci.toLocaleString()} logged workouts and ${dl.toLocaleString()} new app users.`);
-  if (avgMin) lines.push(`App workouts last <b>${Math.round(avgMin)} minutes</b> on average, about ${kcalPerWorkout} calories each.`);
+  lines.push(`<b>${act.toLocaleString()} app check-ins and downloads</b> at ${place}'s ${courtCodes.length} Fitness Court${courtCodes.length === 1 ? '' : 's'} ${bounds ? rangeLc : 'since the app launched'}: ${ci.toLocaleString()} logged workouts and ${dl.toLocaleString()} new app users.`);
   if (rows[0]?.act) lines.push(`<b>${esc(displayName(rows[0].c))}</b> leads with ${rows[0].act.toLocaleString()}${all ? ` (${esc(cityKey(rows[0].c))})` : ''}.`);
   if (F.total.access != null) lines.push(`<b>${F.total.access.toLocaleString()} residents</b> live within a 10 minute walk of a Fitness Court or the Trail Line.`);
   if (lastFull.length >= 2) {
@@ -2872,7 +2879,7 @@ function renderEngagement(body) {
 
   const reachByCode = acc?.courts?.byCode || {};
   const courtReach = courtCodes.map((c) => ({ c, n: reachByCode[c.id] ?? null })).sort((x, y) => (y.n || 0) - (x.n || 0));
-  const lineReach = acc?.trailGroups ? [['Red line · Bonanza Trail', '#a52714', acc.trailGroups.red?.population], ['Yellow line · Lone Mountain Trail', '#d99a06', acc.trailGroups.yellow?.population], ['Park loops', '#097138', acc.trailGroups.loops?.population]].filter((r) => r[2] != null) : [];
+  const lineReach = acc?.trail ? [['Trail Line · whole line', NEON.trail, acc.trail.population], ...(acc.trailGroups ? [['Red line · Bonanza Trail', '#a52714', acc.trailGroups.red?.population], ['Yellow line · Lone Mountain Trail', '#d99a06', acc.trailGroups.yellow?.population]] : [])].filter((r) => r[2] != null) : [];
   const bar = (name, n, max, color, sub, onclick) => `
     <div class="acb-bar"${onclick ? ` onclick="${onclick}"` : ' style="cursor:default"'}>
       <span class="nm">${name}</span><span class="n">${n == null ? '<span class="ch-flat">·</span>' : n.toLocaleString()}</span>
@@ -2899,14 +2906,30 @@ function renderEngagement(body) {
 
   body.innerHTML = `
     <div class="rw-ai"><div class="rw-ai-icon">✦</div><div class="rw-ai-body"><div class="cp-label">Overview · ${rangeLc}</div><p>${lines.join(' ')}</p></div></div>
+    <div class="eq-card">
+      <div class="eq-head"><h3>App activity <span>${rangeLc}</span></h3><p>Everything people did in the NFC app at ${all ? 'NFC' : place + "'s"} Fitness Courts.</p></div>
+      <div class="eq-row eq-row-raw">
+        <div class="eq-tile" style="--c:${APP}"><b>${ci.toLocaleString()}</b><div class="eq-lbl">App check-ins</div><div class="eq-sub">workouts logged in the NFC app</div></div>
+        <div class="eq-op">+</div>
+        <div class="eq-tile" style="--c:${DL}"><b>${dl.toLocaleString()}</b><div class="eq-lbl">App downloads</div><div class="eq-sub">people whose first ever check-in was here</div></div>
+        <div class="eq-op">=</div>
+        <div class="eq-total"><b>${act.toLocaleString()}</b><div class="eq-lbl">App activity</div><div class="eq-sub">${bounds ? rangeLc : 'since the app launched'}</div></div>
+      </div>
+    </div>
+    <div class="eq-pair">
+      <div class="eq-stat"><div class="eq-lbl">People within a 10 minute walk</div>${F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`}
+        <div class="eq-sub">${F.total.access != null ? `of a Fitness Court (${F.court.access.toLocaleString()}) or the Trail Line (${(F.trail.access || 0).toLocaleString()}), each person counted once` : (all ? 'Search a city to see it.' : 'Not computed for this city yet.')}</div></div>
+      <div class="eq-stat"><div class="eq-lbl">Fitness Courts in the NFC app</div><b>${F.matched} <small class="rw-of2">of ${courtCodes.length}</small></b>
+        <div class="eq-sub">${courtCodes.length - F.matched ? `${courtCodes.length - F.matched} not found in the app yet` : 'every Fitness Court is in the app'}</div></div>
+    </div>
     ${sec('dl', DL, dlIcon, 'App downloads', 'People whose first ever NFC app check-in was at this Fitness Court. The app does not record where it was downloaded, so this is how a download is tied to a place.',
       `<b>${dl.toLocaleString()}</b>`, rangeLc,
       `<div class="dg-lh">Every Fitness Court</div><div class="acb-bars">${listOrEmpty(byDl.map((r) => bar(nm(r.c), r.matched ? r.dl : null, dlMax, DL, r.matched ? '' : 'not in the app yet', go(r.c))).join(''))}</div>`,
-      `<div class="dg-lh">By month</div><div class="dg-chart"><canvas id="chart-dl"></canvas></div>`)}
-    ${sec('ci', APP, ciIcon, 'App check-ins', `Workouts logged in the NFC app at the Fitness Court.${avgMin ? ` They last <b>${Math.round(avgMin)} minutes</b> on average, about ${kcalPerWorkout} calories each.` : ''}`,
+      `<div class="dg-lh">By month · ${esc(E.app.monthsFrom.slice(0, 4))} (monthly app data starts Jan ${esc(E.app.monthsFrom.slice(0, 4))})</div><div class="dg-chart"><canvas id="chart-dl"></canvas></div>`)}
+    ${sec('ci', APP, ciIcon, 'App check-ins', 'Workouts logged in the NFC app at the Fitness Court.',
       `<b>${ci.toLocaleString()}</b>`, rangeLc,
-      `<div class="dg-lh">Every Fitness Court</div><div class="acb-bars">${listOrEmpty(byCi.map((r) => bar(nm(r.c), r.matched ? r.ci : null, ciMax, APP, r.matched ? (r.mins ? `${Math.round(r.mins)} min average workout` : '') : 'not in the app yet', go(r.c))).join(''))}</div>`,
-      `<div class="dg-lh">By month</div><div class="dg-chart"><canvas id="chart-ci"></canvas></div>`)}
+      `<div class="dg-lh">Every Fitness Court</div><div class="acb-bars">${listOrEmpty(byCi.map((r) => bar(nm(r.c), r.matched ? r.ci : null, ciMax, APP, r.matched ? '' : 'not in the app yet', go(r.c))).join(''))}</div>`,
+      `<div class="dg-lh">By month · ${esc(E.app.monthsFrom.slice(0, 4))} (monthly app data starts Jan ${esc(E.app.monthsFrom.slice(0, 4))})</div><div class="dg-chart"><canvas id="chart-ci"></canvas></div>`)}
     ${sec('acc', '#0d9488', pin, 'Accessibility', 'Residents who can walk to the location in 10 minutes along real streets (Mapbox walking routes, 2020 Census, inside city limits).',
       F.total.access == null ? '<b class="xx">XX</b>' : `<b>${F.total.access.toLocaleString()}</b>`, 'whole project, each person once',
       acc ? `<div class="dg-lh">Every Fitness Court</div><div class="acb-bars">${courtReach.map((r) => bar(nm(r.c), r.n, rMax, NEON.court, '', go(r.c))).join('')}</div>
@@ -2915,15 +2938,15 @@ function renderEngagement(body) {
         : `<div class="an-city-empty">${all ? 'Search a city to see who lives within a 10 minute walk of each location.' : 'Not computed for this city yet.'}</div>`,
       acc ? engMapCard(F) : '')}
     ${all ? '' : `<div class="acb-table"><h4>Every Fitness Court <span class="rw-tod-note">${rangeLc}, click a row to see it on the map</span></h4><table>
-      <thead><tr><th>Name</th><th class="n">App downloads</th><th class="n">App check-ins</th><th class="n">Avg workout</th><th class="n">Residents within 10 min walk</th></tr></thead>
+      <thead><tr><th>Name</th><th class="n">App downloads</th><th class="n">App check-ins</th><th class="n">Residents within 10 min walk</th></tr></thead>
       <tbody>${rows.map((r) => `<tr onclick="${go(r.c)}"><td><b>${esc(displayName(r.c))}</b>${r.matched ? '' : ' <span class="ch-flat">not in the app yet</span>'}</td>
         <td class="n">${r.matched ? r.dl.toLocaleString() : '·'}</td><td class="n">${r.matched ? r.ci.toLocaleString() : '·'}</td>
-        <td class="n">${r.mins ? Math.round(r.mins) + ' min' : '<span class="ch-flat">·</span>'}</td><td class="n">${reachByCode[r.c.id] != null ? reachByCode[r.c.id].toLocaleString() : '<span class="ch-flat">·</span>'}</td></tr>`).join('')}</tbody></table></div>`}
+        <td class="n">${reachByCode[r.c.id] != null ? reachByCode[r.c.id].toLocaleString() : '<span class="ch-flat">·</span>'}</td></tr>`).join('')}</tbody></table></div>`}
     <details class="eng-notes"><summary>How these are counted</summary><ul>
       <li><b>App downloads</b>: people whose first ever check-in was at that Fitness Court. <b>App check-ins</b>: workouts logged in the NFC app there.</li>
       <li>A Fitness Court counts when its listing in the app sits within ${E.app.matchRadiusMeters} m of its QR sign. App data: ${esc(E.app.monthsFrom)} to ${esc(E.app.monthsThrough)}, snapshot ${esc(E.app.takenAt)}; ranges that cut a month are prorated.</li>
       <li><b>Accessibility</b>: 2020 Census block population inside a real 10 minute walking isochrone (Mapbox) from each Fitness Court and from points every 150 m along the Trail Line, clipped to city limits.</li>
-      <li><b>Average workout</b>: check-in to check-out, sessions between 2 minutes and 3 hours, all years.</li>
+      <li><b>Workout length</b> isn't shown: the app checks most people out automatically (sessions end at exactly 20 or 40 minutes), so check-out times don't measure how long people worked out.</li>
     </ul></details>`;
 
   if (acc) drawEngMap(F);
