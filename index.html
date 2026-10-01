@@ -199,6 +199,10 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .an-city-head { display: flex; align-items: flex-end; gap: 16px; }
 .an-city-head h2 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.01em; }
 .an-scope { font-size: 0.8rem; color: var(--text-3); margin-top: 4px; }
+.an-actions { margin-left: auto; display: flex; gap: 8px; align-self: center; }
+.an-actions .hbtn { font-size: 0.82rem; padding: 8px 13px; }
+.an-ext { border-color: #f6d58a; background: #fffaf0; }
+.pl-toggle { margin-left: auto; font-size: 0.8rem; padding: 7px 12px; }
 .an-city-clear { margin-left: 12px; align-self: center; border: 1px solid var(--border); background: var(--card); border-radius: 99px; padding: 6px 12px; font: 600 0.78rem 'Inter', sans-serif; color: var(--text-2); cursor: pointer; }
 .an-city-clear:hover { color: var(--blue); border-color: #c8d2e4; }
 .an-city-hint { margin-left: auto; align-self: center; font-size: 0.8rem; color: var(--text-3); }
@@ -394,6 +398,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
 .eng-pillar { border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px 16px; background: var(--card); position: relative; overflow: hidden; min-width: 0; }
 .eng-pillar::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--pc); }
 .ep-top { display: flex; align-items: center; gap: 10px; }
+.eng-pillar.is-trail .ep-icon { background: #fff; border: 1px solid #f3d3e5; }
 .ep-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #fff; background: var(--pc); flex: none; }
 .ep-name { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.01em; }
 .ep-sub { font-size: 0.74rem; color: var(--text-3); }
@@ -887,6 +892,7 @@ a.tab { text-decoration: none; display: inline-flex; align-items: center; }
       <div class="an-city-head">
         <div><div class="cp-eyebrow" id="an-city-eyebrow">Showing</div><h2 id="an-city-title">All cities</h2>
           <div class="an-scope" id="an-scope"></div></div>
+        <div class="an-actions" id="an-actions"></div>
       </div>
       <div id="an-city-body"></div>
     </div>
@@ -2060,6 +2066,12 @@ function clearAnCity() {
 
 function renderCityBreakdown() {
   document.getElementById('an-scope').textContent = scopeLine();
+  // City reports (today: Trail Line pilot cities).
+  const rp = state.anCity && engagementData?.pilots?.find((p) => p.city === state.anCity);
+  document.getElementById('an-actions').innerHTML = rp ? `
+    <a class="hbtn" href="/report?pilot=${encodeURIComponent(rp.slug)}" target="_blank" rel="noopener" title="Raw numbers, for NFC only">Internal report ↗</a>
+    <a class="hbtn an-ext" href="/report-external?pilot=${encodeURIComponent(rp.slug)}" target="_blank" rel="noopener" title="Draft of the city-facing report">External report · draft ↗</a>` : '';
+  if (state.anCity && !engagementData) loadEngagement().then(() => { if (state.view === 'analytics') renderCityBreakdown(); }).catch(() => {});
   const body = document.getElementById('an-city-body');
   document.getElementById('an-city-title').textContent = scopeTitle();
   if (state.anMode === 'engagement') { renderEngagement(body); return; }
@@ -2077,16 +2089,17 @@ function renderCityBreakdown() {
   };
   const RICON = {
     court: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>',
-    trail: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4 0 4-6 8-6s4 6 8 6M8 4l-2 6M16 4l2 6"/></svg>',
+    trail: '<svg width="22" height="18" viewBox="0 0 22 18" aria-label="Trail Line"><rect x="0" y="0" width="12" height="3.2" rx="1.6" fill="#1fa855"/><rect x="0" y="4.9" width="15.5" height="3.2" rx="1.6" fill="#f2c417"/><rect x="0" y="9.8" width="19" height="3.2" rx="1.6" fill="#c3268a"/><rect x="0" y="14.7" width="22" height="3.2" rx="1.6" fill="#1ea7e1"/></svg>',
   };
   const wk = (a, b) => (a === b ? '<span class="ch-flat">flat</span>' : `<span class="${a > b ? 'ch-up' : 'ch-down'}">${a > b ? '▲' : '▼'} ${Math.abs(a - b).toLocaleString()}</span>`);
   const side = (key, title, color, st) => {
+    const tlc = key === 'trail' ? ' is-trail' : '';
     const head = `<div class="ep-top"><div class="ep-icon">${RICON[key]}</div><div><div class="ep-name">${title}</div><div class="ep-sub">${st.ranked.length} code${st.ranked.length === 1 ? '' : 's'} · ${esc(RANGE_LABELS[state.range].toLowerCase())}</div></div>
       <div class="rw-spark" title="Daily scans, last 28 days">${sparkSVG(st.spark, color)}</div></div>`;
-    if (!st.ranked.length) return `<div class="eng-pillar empty" style="--pc:${color}">${head}<div class="ep-foot" style="margin-top:14px">None ${all ? 'yet' : 'in this city'}.</div></div>`;
+    if (!st.ranked.length) return `<div class="eng-pillar empty${tlc}" style="--pc:${color}">${head}<div class="ep-foot" style="margin-top:14px">None ${all ? 'yet' : 'in this city'}.</div></div>`;
     const max = Math.max(1, ...st.ranked.map((r) => r.n));
     const active = st.ranked.filter((r) => r.n > 0).length;
-    return `<div class="eng-pillar" style="--pc:${color}">${head}
+    return `<div class="eng-pillar${tlc}" style="--pc:${color}">${head}
       <div class="ep-big"><b>${st.total.toLocaleString()}</b><span>QR scans</span></div>
       <div class="ep-foot">${bounds ? `${chip(st.total, st.prev) || 'n/a'} vs prior period (${(st.prev || 0).toLocaleString()})` : `${active} of ${st.ranked.length} codes scanned`}</div>
       <div class="ep-grid">
@@ -2242,7 +2255,7 @@ function renderPilotSection() {
   el.style.display = '';
   el.innerHTML = `<div class="an-pilot-head"><div><div class="cp-eyebrow">Trail Line pilot</div><h2>${esc(pilot.city)}</h2></div>
       <span class="pl-status" id="pl-status"></span>
-      <a class="hbtn" href="/report?pilot=${encodeURIComponent(pilot.slug)}" target="_blank" rel="noopener" title="Internal only: raw numbers">Internal report ↗</a></div>
+      <button type="button" class="hbtn pl-toggle" onclick="togglePilot()" aria-expanded="${!state.plCollapsed}">${state.plCollapsed ? 'Expand ▾' : 'Collapse ▴'}</button></div>
     <div class="an-city-empty" id="pl-loading">Loading the pilot…</div>
     <div id="pl-body" style="display:none"></div>`;
   pilotData(pilot.slug).then((d) => {
@@ -2253,7 +2266,7 @@ function renderPilotSection() {
 }
 function drawPilot(d, pilot, body) {
   document.getElementById('pl-loading').style.display = 'none';
-  body.style.display = '';
+  body.style.display = state.plCollapsed ? 'none' : '';
   const g = d.digest || {};
   const today = laToday();
   const fmtD = (x) => (x ? new Date(x + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : 'none yet');
@@ -2367,6 +2380,15 @@ function drawPilot(d, pilot, body) {
   });
 }
 const plMarkers = new Map();
+function togglePilot() {
+  state.plCollapsed = !state.plCollapsed;
+  try { localStorage.setItem('nfc-pl-collapsed', state.plCollapsed ? '1' : '0'); } catch {}
+  const body = document.getElementById('pl-body'), btn = document.querySelector('.pl-toggle');
+  if (body) body.style.display = state.plCollapsed ? 'none' : '';
+  if (btn) { btn.textContent = state.plCollapsed ? 'Expand ▾' : 'Collapse ▴'; btn.setAttribute('aria-expanded', !state.plCollapsed); }
+  if (!state.plCollapsed && pilotMap) setTimeout(() => pilotMap.invalidateSize(), 30);
+}
+try { state.plCollapsed = localStorage.getItem('nfc-pl-collapsed') === '1'; } catch {}
 function plSelect(id) {
   const mk = plMarkers.get(id);
   if (!mk || !pilotMap) return;
@@ -2655,7 +2677,7 @@ function renderEngagement(body) {
   // ── Pillar cards ──────────────────────────────────────────────────────
   const ICON = {
     court: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>',
-    trail: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4 0 4-6 8-6s4 6 8 6M8 4l-2 6M16 4l2 6"/></svg>',
+    trail: '<svg width="22" height="18" viewBox="0 0 22 18" aria-label="Trail Line"><rect x="0" y="0" width="12" height="3.2" rx="1.6" fill="#1fa855"/><rect x="0" y="4.9" width="15.5" height="3.2" rx="1.6" fill="#f2c417"/><rect x="0" y="9.8" width="19" height="3.2" rx="1.6" fill="#c3268a"/><rect x="0" y="14.7" width="22" height="3.2" rx="1.6" fill="#1ea7e1"/></svg>',
     digital: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18h2"/></svg>',
   };
   const cell = (label, n, tip) => `<div class="ep-cell"><span>${label}${tip ? info(tip) : ''}</span>${n == null ? '<b class="xx">XX</b>' : `<b>${fmtBig(n)}</b>`}</div>`;
@@ -2669,7 +2691,7 @@ function renderEngagement(body) {
       </div>`).join('')}</div>`;
   };
   const pillar = (key, name, color, what, big, formula, cells, series, list) => `
-    <div class="eng-pillar" style="--pc:${color}">
+    <div class="eng-pillar${key === 'trail' ? ' is-trail' : ''}" style="--pc:${color}">
       <div class="ep-top"><div class="ep-icon">${ICON[key]}</div><div><div class="ep-name">${name}</div><div class="ep-sub">${what}</div></div>
         <div class="rw-spark" title="Engagements per month">${spark(series, color)}</div></div>
       <div class="ep-big">${big == null ? '<b class="xx">XX</b>' : `<b>${big.toLocaleString()}</b>`}<span>engagements · ${rangeLc}</span></div>
